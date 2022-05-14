@@ -3,4 +3,15 @@
   <groupId>java-mutation-framework</groupId>
   <artifactId>java-mutation-framework</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  
+  <dependencies>
+  	<dependency>
+	    <groupId>org.eclipse.jdt</groupId>
+	    <artifactId>org.eclipse.jdt.core</artifactId>
+	    <version>3.29.0</version>
+  	</dependency>
+  </dependencies>
+  
+  
+  
 </project>
