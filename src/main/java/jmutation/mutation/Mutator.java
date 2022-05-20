@@ -1,7 +1,7 @@
 package jmutation.mutation;
 
 import jmutation.execution.Coverage;
-import jmutation.parser.Project;
+import jmutation.model.Project;
 
 /**
  * 

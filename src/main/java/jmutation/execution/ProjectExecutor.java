@@ -1,6 +1,7 @@
 package jmutation.execution;
 
-import jmutation.parser.Project;
+import jmutation.model.Project;
+import jmutation.model.TestCase;
 
 /**
  * 

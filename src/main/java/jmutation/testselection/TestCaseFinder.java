@@ -2,7 +2,7 @@ package jmutation.testselection;
 
 import java.util.List;
 
-import jmutation.execution.TestCase;
+import jmutation.model.TestCase;
 
 /**
  * 

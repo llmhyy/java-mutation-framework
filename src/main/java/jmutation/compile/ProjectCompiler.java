@@ -1,6 +1,6 @@
 package jmutation.compile;
 
-import jmutation.parser.Project;
+import jmutation.model.Project;
 
 /**
  * 

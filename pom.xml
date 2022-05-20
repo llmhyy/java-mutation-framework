@@ -10,8 +10,12 @@
 	    <artifactId>org.eclipse.jdt.core</artifactId>
 	    <version>3.29.0</version>
   	</dependency>
+    <dependency>
+      <groupId>com.beust</groupId>
+      <artifactId>jcommander</artifactId>
+      <version>1.82</version>
+    </dependency>
   </dependencies>
-  
   
   
 </project>
