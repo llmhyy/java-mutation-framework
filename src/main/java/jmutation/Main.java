@@ -4,11 +4,10 @@ import java.util.List;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import jmutation.compile.ProjectCompiler;
 import jmutation.execution.ExecutionResult;
 import jmutation.execution.ProjectExecutor;
-import jmutation.model.TestCase;
 import jmutation.model.ProjectConfig;
+import jmutation.model.TestCase;
 import jmutation.mutation.Mutator;
 import jmutation.model.Project;
 import jmutation.parser.ProjectParser;
@@ -42,7 +41,7 @@ public class Main {
 			ExecutionResult result = new ProjectExecutor().run(test, proj);
 			
 			Project mutatedProject = new Mutator().mutate(result.getCoverage(), proj);
-			new ProjectCompiler().compile(mutatedProject);
+//			new ProjectCompiler().compile(mutatedProject);
 			
 			ExecutionResult mutatedResult = new ProjectExecutor().run(test, mutatedProject);
 			

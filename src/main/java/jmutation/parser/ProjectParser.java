@@ -1,11 +1,9 @@
 package jmutation.parser;
 
-import jmutation.model.TestCase;
 import jmutation.model.Project;
 import jmutation.model.ProjectConfig;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Given a maven or gradle project path, we parse it into a project
@@ -23,6 +21,7 @@ public class ProjectParser {
 	public Project parse() {
 		if (project == null) {
 			File projectDir = new File(projectConfig.getProjectPath());
+			// traverse project differently depending on project type ?
 			this.project = new Project(projectDir);
 		}
 		return this.project;

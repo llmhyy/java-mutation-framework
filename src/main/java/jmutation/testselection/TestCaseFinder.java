@@ -1,8 +1,8 @@
 package jmutation.testselection;
 
-import java.util.List;
-
 import jmutation.model.TestCase;
+
+import java.util.List;
 
 /**
  * 
