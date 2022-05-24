@@ -31,7 +31,13 @@ public class ProjectCompiler {
 		return result;
 	}
 
+	/**
+	 * Returns a list of methods from the String representation of a file.
+	 * @param codeContent file content as String
+	 * @return List of methods
+	 */
 	public static List<TestCase> getAllMethod(String codeContent) {
+		// code taken from regminer
 		List<TestCase> methods = new ArrayList<>();
 		JdtMethodRetriever retriever = new JdtMethodRetriever();
 		CompilationUnit unit = parseCompliationUnit(codeContent);
@@ -45,10 +51,9 @@ public class ProjectCompiler {
 			List<ASTNode> parameters = node.parameters();
 			// SingleVariableDeclaration
 			StringJoiner sj = new StringJoiner(",", simpleName + "(", ")");
-			for (ASTNode param : parameters) {
-				sj.add(param.toString());
-			}
+			parameters.stream().forEach(param -> sj.add(param.toString()));
 			String signature = sj.toString();
+
 			int startLine = unit.getLineNumber(node.getStartPosition()) - 1;
 			int endLine = unit.getLineNumber(node.getStartPosition() + node.getLength()) - 1;
 			methods.add(new TestCase(signature, startLine, endLine, simpleName, node));

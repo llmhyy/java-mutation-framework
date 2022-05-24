@@ -2,7 +2,6 @@ package jmutation.model;
 
 import jmutation.compile.ProjectCompiler;
 
-import javax.sound.midi.SysexMessage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,8 +45,10 @@ public class Project {
                     String fileContent = Files.readString(f.toPath());
                     if (isTestSuite(fileContent)) {
                         // get walk code and retrieve all methods
-                        System.out.println(fileContent);
                         testCases.addAll(ProjectCompiler.getAllMethod(fileContent));
+//                        System.out.print(f.getAbsolutePath());
+//                        System.out.print(" => ");
+//                        System.out.println(testCases);
                     }
                 } catch (IOException e) {
                     System.out.print("Unable to open file at ");

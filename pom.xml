@@ -4,6 +4,7 @@
   <artifactId>java-mutation-framework</artifactId>
   <version>0.0.1-SNAPSHOT</version>
     <build>
+        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -17,17 +18,23 @@
     </build>
 
     <dependencies>
-  	<dependency>
-	    <groupId>org.eclipse.jdt</groupId>
-	    <artifactId>org.eclipse.jdt.core</artifactId>
-	    <version>3.29.0</version>
-  	</dependency>
-    <dependency>
-      <groupId>com.beust</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>1.82</version>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>org.eclipse.jdt.core</artifactId>
+            <version>3.29.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.beust</groupId>
+          <artifactId>jcommander</artifactId>
+          <version>1.82</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
   
   
 </project>
