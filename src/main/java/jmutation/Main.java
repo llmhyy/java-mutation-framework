@@ -36,20 +36,21 @@ public class Main {
 		Project proj = parser.parse();
 
 		List<TestCase> testList = proj.getTestCases();
-		
+
 		for(TestCase test: testList) {
-			ExecutionResult result = new ProjectExecutor().run(test, proj);
-			
+			ExecutionResult result = new ProjectExecutor(proj).exec(test);
+			System.out.println(result);
+
 			Project mutatedProject = new Mutator().mutate(result.getCoverage(), proj);
 //			new ProjectCompiler().compile(mutatedProject);
-			
-			ExecutionResult mutatedResult = new ProjectExecutor().run(test, mutatedProject);
-			
+
+			ExecutionResult mutatedResult = new ProjectExecutor(mutatedProject).exec(test);
+
 			System.out.println(mutatedResult);
-			
+
 		}
-		
-		
+
+
 	}
-	
+
 }

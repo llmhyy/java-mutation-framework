@@ -13,6 +13,6 @@ import jmutation.model.Project;
 public class Mutator {
 	public Project mutate(Coverage coverage, Project project) {
 		
-		return null;
+		return project;
 	}
 }

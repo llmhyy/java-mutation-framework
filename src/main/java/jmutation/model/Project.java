@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * a representation of a project
- * 
+ *
  * @author Yun Lin
  *
  */
@@ -23,4 +23,11 @@ public class Project {
         return this.testCases;
     }
 
+    public File getRoot() {
+        return this.root;
+    }
+
+    public String singleTestCommand(TestCase testCase) {
+        return String.format("mvn test -Dtest=%s", testCase.qualifiedName());
+    }
 }

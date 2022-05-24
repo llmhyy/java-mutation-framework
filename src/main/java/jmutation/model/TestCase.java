@@ -25,6 +25,10 @@ public class TestCase {
         this.mtd = mtd;
     }
 
+    public String qualifiedName() {
+        return String.format("%s#%s", this.testClass, this.simpleName);
+    }
+
     @Override
     public String toString() {
         return Stream.of(String.format("%s#%s", this.testClass, this.signature), Integer.toString(this.startLine), Integer.toString(this.stopLine)).collect(Collectors.joining(","));
