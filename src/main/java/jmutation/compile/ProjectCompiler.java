@@ -43,21 +43,38 @@ public class ProjectCompiler {
 		CompilationUnit unit = parseCompliationUnit(codeContent);
 		unit.accept(retriever);
 		List<MethodDeclaration> methodNodes = retriever.getMethods();
+		String className = retriever.getClassName();
 		for (MethodDeclaration node : methodNodes) {
 			if (!(node.getParent().getParent() instanceof CompilationUnit) ){
 				continue;
 			}
+			if (isIgnoredMethod(node) || !isTestMethod(node)) {
+				// skip nodes with @Ignore annotation
+				// skip nodes without @Test annotation
+				continue;
+			}
+
 			String simpleName = node.getName().toString();
-			List<ASTNode> parameters = node.parameters();
-			// SingleVariableDeclaration
 			StringJoiner sj = new StringJoiner(",", simpleName + "(", ")");
-			parameters.stream().forEach(param -> sj.add(param.toString()));
+			node.parameters().stream().forEach(param -> sj.add(param.toString()));
 			String signature = sj.toString();
 
 			int startLine = unit.getLineNumber(node.getStartPosition()) - 1;
 			int endLine = unit.getLineNumber(node.getStartPosition() + node.getLength()) - 1;
-			methods.add(new TestCase(signature, startLine, endLine, simpleName, node));
+			methods.add(new TestCase(signature, startLine, endLine, simpleName, className, node));
 		}
 		return methods;
+	}
+
+	private static boolean isIgnoredMethod(MethodDeclaration node) {
+		return matchAnnotation(node, "@Ignore");
+	}
+
+	private static boolean isTestMethod(MethodDeclaration node) {
+		return matchAnnotation(node, "@Test");
+	}
+
+	private static boolean matchAnnotation(MethodDeclaration node, String annotation) {
+		return node.modifiers().stream().filter(mod -> mod instanceof Annotation).anyMatch(an -> an.toString().equals(annotation));
 	}
 }
