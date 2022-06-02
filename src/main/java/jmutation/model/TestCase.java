@@ -1,7 +1,6 @@
 package jmutation.model;
 
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import java.util.Objects;
 import java.util.stream.Collectors;

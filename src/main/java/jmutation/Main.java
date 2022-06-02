@@ -6,10 +6,10 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import jmutation.execution.ExecutionResult;
 import jmutation.execution.ProjectExecutor;
+import jmutation.model.Project;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
 import jmutation.mutation.Mutator;
-import jmutation.model.Project;
 import jmutation.parser.ProjectParser;
 
 public class Main {

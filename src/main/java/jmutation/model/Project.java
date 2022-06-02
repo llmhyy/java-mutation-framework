@@ -9,7 +9,7 @@ import java.util.List;
  * @author Yun Lin
  *
  */
-public class Project {
+public abstract class Project {
 
     private final File root;
     private List<TestCase> testCases;
@@ -27,7 +27,8 @@ public class Project {
         return this.root;
     }
 
-    public String singleTestCommand(TestCase testCase) {
-        return String.format("mvn test -Dtest=%s", testCase.qualifiedName());
-    }
+    public abstract String singleTestCommand(TestCase testCase);
+
+    public abstract ProjectType projectType();
+    public abstract String compileCommand();
 }
