@@ -31,4 +31,10 @@ public abstract class Project {
 
     public abstract ProjectType projectType();
     public abstract String compileCommand();
+
+    public abstract File getCompiledTestFolder();
+
+    public abstract  File getCompiledClassFolder();
+
+    public abstract File getCompiledFolder();
 }

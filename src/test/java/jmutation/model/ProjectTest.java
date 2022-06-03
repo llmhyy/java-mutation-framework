@@ -1,6 +1,6 @@
 package jmutation.model;
 
-import jmutation.parser.ProjectParser;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -8,12 +8,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ProjectTest {
 
-    @org.junit.jupiter.api.Test
+    @Test
     void getTestCases() {
         String projectPath = "./sample/exampleFL1/FLtest1";
-        ProjectConfig config = new ProjectConfig(projectPath);
-        ProjectParser parser = new ProjectParser(config);
-        Project proj = parser.parse();
+        String dropInsDir = "./lib";
+        ProjectConfig config = new ProjectConfig(projectPath, dropInsDir);
+        Project proj = config.getProject();
 
         List<TestCase> testList = proj.getTestCases();
 

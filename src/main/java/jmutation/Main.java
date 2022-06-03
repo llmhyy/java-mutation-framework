@@ -4,20 +4,22 @@ import java.util.List;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import jmutation.execution.ExecutionResult;
+import jmutation.model.*;
 import jmutation.execution.ProjectExecutor;
-import jmutation.model.Project;
-import jmutation.model.ProjectConfig;
-import jmutation.model.TestCase;
 import jmutation.mutation.Mutator;
-import jmutation.parser.ProjectParser;
 
 public class Main {
 	@Parameter(names = "-projectPath", description = "Path to project directory", required = true)
 	private String projectPath;
 
+	@Parameter(names = "-dropInsDir", description = "Path to instrumentation dependencies", required = true)
+	private String dropInsDir;
+
 	@Parameter(names = "-project", description = "Maven or Gradle")
 	private String projectType;
+
+	@Parameter(names = "-microbatConfig", description = "Path to JSON settings for Microbat")
+	private String microbatConfigPath;
 
 	/**
 	 * Given a project, we
@@ -31,20 +33,21 @@ public class Main {
 		Main params = new Main();
 		JCommander.newBuilder().addObject(params).build().parse(args);
 
-		ProjectConfig config = new ProjectConfig(params.projectPath);
-		ProjectParser parser = new ProjectParser(config);
-		Project proj = parser.parse();
-
+		ProjectConfig config = new ProjectConfig(params.projectPath, params.dropInsDir);
+		Project proj = config.getProject();
 		List<TestCase> testList = proj.getTestCases();
 
+		MicrobatConfig microbatConfig = MicrobatConfig.parse(params.microbatConfigPath);
+
 		for(TestCase test: testList) {
-			ExecutionResult result = new ProjectExecutor(proj).exec(test);
+			ExecutionResult result = new ProjectExecutor(microbatConfig, config).exec(test);
 			System.out.println(result);
 
 			Project mutatedProject = new Mutator().mutate(result.getCoverage(), proj);
 //			new ProjectCompiler().compile(mutatedProject);
+			ProjectConfig mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
-			ExecutionResult mutatedResult = new ProjectExecutor(mutatedProject).exec(test);
+			ExecutionResult mutatedResult = new ProjectExecutor(microbatConfig, mutatedProjConfig).exec(test);
 
 			System.out.println(mutatedResult);
 

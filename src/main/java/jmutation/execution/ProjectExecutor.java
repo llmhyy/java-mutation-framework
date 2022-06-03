@@ -1,13 +1,22 @@
 package jmutation.execution;
 
-import jmutation.model.Project;
+import jmutation.model.ExecutionResult;
+import jmutation.model.MicrobatConfig;
+import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProjectExecutor extends Executor {
-    private final Project project;
-    public ProjectExecutor(Project proj) {
-        super(proj.getRoot());
-        this.project = proj;
+    private final ProjectConfig projectConfig;
+    private final MicrobatConfig microbatConfig;
+    private boolean compiled = false;
+    public ProjectExecutor(MicrobatConfig microbatConfig, ProjectConfig proj) {
+        super(proj.getProjectRoot());
+        this.projectConfig = proj;
+        this.microbatConfig = microbatConfig;
     }
 
     /**
@@ -15,14 +24,52 @@ public class ProjectExecutor extends Executor {
      * @return stdout as String
      */
     public String compile() {
-        String cmd = project.compileCommand();
-        return exec(cmd);
+        return exec(projectConfig.getCompileCommand());
     }
 
     public ExecutionResult exec(TestCase testCase) {
-        String out = compile();
+        if (!compiled) {
+            ExecutionResult out = new ExecutionResult(compile());
+            if (!out.isSuccessful()) {
+                return out;
+            }
+        }
+
         // include microbat details to instrument run
-        InstrumentationBuilder ib = new InstrumentationBuilder();
-        return new ExecutionResult(out);
+        InstrumentationCommandBuilder ib = new InstrumentationCommandBuilder(microbatConfig, projectConfig.getDropInsDir());
+        ib.setTestCase(testCase); // set class and method name
+        ib.addClassPath(projectConfig.getCompiledTestFolder()); // add target/test-classes
+        ib.addClassPath(projectConfig.getCompiledClassFolder()); // add target/classes
+
+        findJars().stream().forEach(file -> { // add jar files
+            ib.addClassPath(file);
+            ib.addExternalLibPath(file);
+        });
+
+        return instrumentationExec(ib);
+    }
+
+    public List<File> findJars() {
+        return walk(projectConfig.getCompiledFolder());
+    }
+
+    private static List<File> walk(File start) {
+            File[] list = start.listFiles();
+            List<File> jarFiles = new ArrayList<>();
+
+            for (File f : list) {
+                if (f.isDirectory()) {
+                    jarFiles.addAll(walk(f));
+                } else {
+                    if (f.getName().contains(".jar")) {
+                        jarFiles.add(f);
+                    }
+                }
+            }
+            return jarFiles;
+    }
+
+    private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
+        return new ExecutionResult("");
     }
 }

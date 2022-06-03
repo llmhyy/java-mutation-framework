@@ -1,9 +1,6 @@
 package jmutation.parser;
 
-import jmutation.model.MavenProject;
-import jmutation.model.Project;
-import jmutation.model.ProjectConfig;
-import jmutation.model.TestCase;
+import jmutation.model.*;
 import jmutation.model.ast.JdtMethodRetriever;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
@@ -22,25 +19,35 @@ import java.util.StringJoiner;
  * @author Yun Lin
  */
 public class ProjectParser {
-    private final ProjectConfig projectConfig;
-    private Project project;
     private final File root;
+    private Project project;
+    private ProjectType projectType = ProjectType.MAVEN;
 
-    public ProjectParser(ProjectConfig projectConfig) {
-        this.projectConfig = projectConfig;
-        root = new File(projectConfig.getProjectPath());
+    public ProjectParser(File root) {
+        // TODO: Determine project type (gradle or maven or none from project structure)
+        // Currently assume project type is maven
+        if (!root.exists()) {
+            throw new RuntimeException("Project does not exist");
+        }
+        this.root = root;
     }
 
     public Project parse() {
         if (project == null) {
             // traverse project differently depending on project type ?
             // assume Maven project by default for now
-            this.project = new MavenProject(root, walk(root));
+            switch (projectType) {
+                case MAVEN:
+                    this.project = new MavenProject(root, walk(root));
+                    break;
+                default:
+                    throw new RuntimeException("Unrecognized Project Type");
+            }
         }
         return this.project;
     }
 
-    private List<TestCase> walk(File start) {
+    private static List<TestCase> walk(File start) {
         File[] list = start.listFiles();
         List<TestCase> testCases = new ArrayList<>();
 
@@ -48,24 +55,26 @@ public class ProjectParser {
             if (f.isDirectory()) {
                 testCases.addAll(walk(f));
             } else {
-                // 1. use detection regminer detection logic
-                try {
-                    String fileContent = Files.readString(f.toPath());
-                    if (isTestSuite(fileContent)) {
-                        // get walk code and retrieve all methods
-                        // 2. use regminer jdt ast Visitor code from regminer to identify testcases
-                        testCases.addAll(getAllMethod(fileContent));
+                if (f.getName().contains(".java")) {
+                    // 1. use detection regminer detection logic
+                    try {
+                        String fileContent = Files.readString(f.toPath());
+                        if (isTestSuite(fileContent)) {
+                            // get walk code and retrieve all methods
+                            // 2. use regminer jdt ast Visitor code from regminer to identify testcases
+                            testCases.addAll(getAllMethod(fileContent));
+                        }
+                    } catch (IOException e) {
+                        System.out.print("Unable to open file at ");
+                        System.out.println(f.getAbsolutePath());
                     }
-                } catch (IOException e) {
-                    System.out.print("Unable to open file at ");
-                    System.out.println(f.getAbsolutePath());
                 }
             }
         }
         return testCases;
     }
 
-    private boolean isTestSuite(String code) {
+    private static boolean isTestSuite(String code) {
         return code.contains("junit") || code.contains("@Test");
     }
 

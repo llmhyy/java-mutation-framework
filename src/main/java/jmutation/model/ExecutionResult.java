@@ -1,4 +1,6 @@
-package jmutation.execution;
+package jmutation.model;
+
+import jmutation.execution.Coverage;
 
 public class ExecutionResult {
 	private Coverage coverage;
@@ -15,6 +17,8 @@ public class ExecutionResult {
 	public void setCoverage(Coverage coverage) {
 		this.coverage = coverage;
 	}
+
+	public boolean isSuccessful() { return consoleOut.contains("FAIL");}
 
 	@Override
 	public String toString() {
