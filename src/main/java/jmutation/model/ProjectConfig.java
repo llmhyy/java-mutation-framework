@@ -9,7 +9,7 @@ public class ProjectConfig {
     private final File dropInsDir;
 
     /**
-     * Dataclass for various project settings, and a wrapper over the Project clas
+     * Dataclass for various project settings, and a wrapper over the Project class
      * @param projectPath
      * @param dropInsDir
      */

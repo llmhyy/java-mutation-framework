@@ -7,11 +7,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class InstrumentationCommandBuilder {
     private static final List<String> SYSTEM_JARS = List.of("junit", "org.hamcrest.core", "testrunner", "bcel-6.0", "javassist", "instrumentator");
 
-    private static final String AGENT_OPTION_SEPARATOR = "=";
+    private static final String AGENT_OPTION_SEPARATOR = "="; // handle in MicrobatConfig?
     private static final String AGENT_PARAMS_SEPARATOR = ",";
     private static final String AGENT_PARAMS_MULTI_VALUE_SEPARATOR = File.pathSeparator;
 
@@ -33,16 +35,23 @@ public class InstrumentationCommandBuilder {
         this.testMethod = Optional.of(testCase.simpleName);
     }
 
-    public String generateClasspaths () {
-        // TODO:
-        return "";
+    private MicrobatConfig setupMicrobatConfig() {
+        // TODO: add all classpath and lib collections to the immutable MicrobatConfig Class.
+        return null;
     }
 
     public String generateCommand() {
-        return "";
+        MicrobatConfig agentParams = setupMicrobatConfig();
+        agentParams = agentParams.setClassPaths(this.classPaths);
+        // TODO: Generate all the parameters to pass to microbat (dumpFile path, recorder type)
+        // TODO: retrieving the trace from file
+            // TODO: Copy the Trace, TraceNode classes (Breakpoint, Location)
+            // TODO: Copy the FileReader
+        return agentParams.toString();
     }
 
     private void generateSystemJars(String dropInsDir) {
+        assert SYSTEM_JARS.stream().allMatch(jar -> (new File(dropInsDir, jar + ".jar")).exists());
         SYSTEM_JARS.stream().forEach(jar -> addClassPath(new File(dropInsDir, jar + ".jar")));
     }
 

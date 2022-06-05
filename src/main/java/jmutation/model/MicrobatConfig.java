@@ -1,7 +1,7 @@
 package jmutation.model;
 
-import org.eclipse.core.internal.preferences.ImmutableMap;
-
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +43,24 @@ public class MicrobatConfig {
         this.argMap = argMap;
     }
 
+    private MicrobatConfig updateEntry(String key, List<String> values) {
+        if (!validKeys.contains(key)) {
+            throw new RuntimeException("Updating invalid agent parameter");
+        }
+        Map<String, List<String>> newArgMap = new HashMap(argMap);
+        newArgMap.put(key, values);
+        return new MicrobatConfig(newArgMap);
+    }
+
+    public MicrobatConfig setClassPaths(List<String> classPaths) {
+        return updateEntry(OPT_CLASS_PATH, classPaths);
+    }
+
     public static MicrobatConfig parse(String pathToConfigFile) {
+        File configFile = new File(pathToConfigFile);
+        if (!configFile.exists()) {
+            throw new RuntimeException("Microbat config file not found!");
+        }
         // TODO: parse config from txt file
         return new MicrobatConfig(null);
     }
