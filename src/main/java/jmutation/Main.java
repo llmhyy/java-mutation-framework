@@ -15,11 +15,15 @@ public class Main {
 	@Parameter(names = "-dropInsDir", description = "Path to instrumentation dependencies", required = true)
 	private String dropInsDir;
 
+	@Parameter(names = "-javaPath", description = "Path to Java Home", required = true)
+	private String javaHomePath;
+
 	@Parameter(names = "-project", description = "Maven or Gradle")
 	private String projectType;
 
 	@Parameter(names = "-microbatConfig", description = "Path to JSON settings for Microbat")
 	private String microbatConfigPath;
+
 
 	/**
 	 * Given a project, we

@@ -27,11 +27,28 @@
             <groupId>org.eclipse.jdt</groupId>
             <artifactId>org.eclipse.jdt.core</artifactId>
             <version>3.29.0</version>
+            <exclusions>
+			    <exclusion>
+			        <groupId>org.osgi.service</groupId>
+			        <artifactId>org.osgi.service.prefs</artifactId>
+			    </exclusion>
+			</exclusions>
         </dependency>
         <dependency>
           <groupId>com.beust</groupId>
           <artifactId>jcommander</artifactId>
           <version>1.82</version>
+        </dependency>
+        <dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20220320</version>
+		</dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>RELEASE</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

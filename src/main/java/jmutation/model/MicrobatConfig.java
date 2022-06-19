@@ -1,10 +1,14 @@
 package jmutation.model;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MicrobatConfig {
     public static final String OPT_CLASS_PATH = "class_path";
@@ -31,7 +35,7 @@ public class MicrobatConfig {
     public static final String OPT_TRACE_RECORDER = "trace_recorder";
     public static final String OPT_RUN_ID = "run_id";
 
-    private static final Set validKeys = Set.of(OPT_CLASS_PATH, OPT_WORKING_DIR, OPT_LOG, OPT_PRECHECK, OPT_ENTRY_POINT,
+    private static final Set<String> validKeys = Set.of(OPT_CLASS_PATH, OPT_WORKING_DIR, OPT_LOG, OPT_PRECHECK, OPT_ENTRY_POINT,
             OPT_INCLUDES, OPT_EXCLUDES, OPT_VARIABLE_LAYER, OPT_STEP_LIMIT, OPT_EXPECTED_STEP, OPT_INCLUDES_FILE,
             OPT_EXCLUDES_FILE, OPT_OVER_LONG_METHODS, OPT_REQUIRE_METHOD_SPLITTING, OPT_AVOID_TO_STRING_OF_PROXY_OBJ,
             OPT_LAUNCH_CLASS, OPT_JAVA_HOME, OPT_DUMP_FILE, OPT_TCP_PORT, OPT_CODE_RANGE, OPT_TRACE_RECORDER,
@@ -39,7 +43,7 @@ public class MicrobatConfig {
 
     private final Map<String, List<String>> argMap;
 
-    private MicrobatConfig(Map<String, List<String>> argMap) {
+    MicrobatConfig(Map<String, List<String>> argMap) {
         this.argMap = argMap;
     }
 
@@ -47,7 +51,7 @@ public class MicrobatConfig {
         if (!validKeys.contains(key)) {
             throw new RuntimeException("Updating invalid agent parameter");
         }
-        Map<String, List<String>> newArgMap = new HashMap(argMap);
+        Map<String, List<String>> newArgMap = new HashMap<>(argMap);
         newArgMap.put(key, values);
         return new MicrobatConfig(newArgMap);
     }
@@ -59,15 +63,75 @@ public class MicrobatConfig {
     public static MicrobatConfig parse(String pathToConfigFile) {
         File configFile = new File(pathToConfigFile);
         if (!configFile.exists()) {
-            throw new RuntimeException("Microbat config file not found!");
+            throw new RuntimeException("Microbat config file " + configFile.getAbsolutePath() + " not found!");
         }
-        // TODO: parse config from txt file
-        return new MicrobatConfig(null);
+
+        List<String> lines;
+        try {
+            lines = Files.readAllLines(Paths.get(pathToConfigFile),
+                    Charset.defaultCharset());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not Files.readAllLines from Microbat config file at " + configFile.getAbsolutePath());
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            sb.append(line);
+        }
+        String jsonStringConfig = sb.toString();
+        JSONObject jsonConfig = new JSONObject(jsonStringConfig);
+        Iterator<String> jsonConfigIterator = jsonConfig.keys();
+        Map<String, List<String>> emptyConfigMap = new HashMap<>();
+
+        MicrobatConfig newMicrobatConfig = new MicrobatConfig(emptyConfigMap);
+
+        while (jsonConfigIterator.hasNext()) {
+            String key = jsonConfigIterator.next();
+            JSONArray valuesArray = jsonConfig.getJSONArray(key);
+            List<String> valuesList = new ArrayList<>();
+            for (int i = 0; i < valuesArray.length(); i++) {
+                String value = valuesArray.getString(i);
+                valuesList.add(value);
+            }
+            newMicrobatConfig = newMicrobatConfig.updateEntry(key, valuesList);
+        }
+
+        return newMicrobatConfig;
     }
 
     public static MicrobatConfig defaultConfig() {
         // TODO: add minimal working config
         Map<String, List<String>> argMap = Map.of();
         return new MicrobatConfig(argMap);
+    }
+
+    @Override
+    public boolean equals(Object that) {
+        if (this == that) {
+            return true;
+        }
+
+        if (!(that instanceof MicrobatConfig)) {
+            return false;
+        }
+
+        MicrobatConfig otherMicrobatConfig = (MicrobatConfig) that;
+        Map<String, List<String>> otherArgMap = otherMicrobatConfig.argMap;
+        if (argMap.size() != otherArgMap.size()) {
+            return false;
+        }
+
+        for (Map.Entry<String, List<String>> keyValuePair: argMap.entrySet()) {
+            String key = keyValuePair.getKey();
+            if (!otherArgMap.containsKey(key)) {
+                return false;
+            }
+            List<String> values = keyValuePair.getValue();
+            List<String> otherValues = otherArgMap.get(key);
+            if (!values.equals(otherValues)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
