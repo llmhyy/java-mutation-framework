@@ -55,6 +55,10 @@ public class ProjectExecutor extends Executor {
 
     private static List<File> walk(File start) {
             File[] list = start.listFiles();
+            if (list == null) {
+                return new ArrayList<>();
+            }
+
             List<File> jarFiles = new ArrayList<>();
 
             for (File f : list) {
@@ -70,6 +74,10 @@ public class ProjectExecutor extends Executor {
     }
 
     private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
-        return new ExecutionResult("");
+        String commandStr = instrumentationCommandBuilder.generateCommand();
+        System.out.println(commandStr);
+        String executionResultStr = exec(commandStr);
+        // TODO: Read trace file and form coverage.
+        return new ExecutionResult(executionResultStr);
     }
 }

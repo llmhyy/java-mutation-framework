@@ -103,7 +103,13 @@ public class ProjectParser {
         CompilationUnit unit = parseCompliationUnit(codeContent);
         unit.accept(retriever);
         List<MethodDeclaration> methodNodes = retriever.getMethods();
-        String className = retriever.getClassName();
+        PackageDeclaration packageDeclaration = unit.getPackage();
+        String className;
+        if (packageDeclaration == null) {
+            className = retriever.getClassName();
+        } else {
+            className = unit.getPackage().getName() + "." + retriever.getClassName();
+        }
         for (MethodDeclaration node : methodNodes) {
             if (!(node.getParent().getParent() instanceof CompilationUnit) ){
                 continue;

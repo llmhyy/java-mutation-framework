@@ -22,7 +22,7 @@ public class MavenProject extends Project {
 
     @Override
     public String compileCommand() {
-        String mavenCmd = Executor.isWindows() ? "mvn.exe" : "mvn";
+        String mavenCmd = Executor.isWindows() ? "mvn" : "mvn.exe";
         return String.format(COMPILE_ALL_FMT, mavenCmd);
     }
 

@@ -15,9 +15,6 @@ public class Main {
 	@Parameter(names = "-dropInsDir", description = "Path to instrumentation dependencies", required = true)
 	private String dropInsDir;
 
-	@Parameter(names = "-javaPath", description = "Path to Java Home", required = true)
-	private String javaHomePath;
-
 	@Parameter(names = "-project", description = "Maven or Gradle")
 	private String projectType;
 
@@ -37,7 +34,7 @@ public class Main {
 		Main params = new Main();
 		JCommander.newBuilder().addObject(params).build().parse(args);
 
-		ProjectConfig config = new ProjectConfig(params.projectPath, params.dropInsDir);
+		ProjectConfig config = new ProjectConfig(params.projectPath, params.dropInsDir); // Contains class paths
 		Project proj = config.getProject();
 		List<TestCase> testList = proj.getTestCases();
 
@@ -45,6 +42,7 @@ public class Main {
 
 		for(TestCase test: testList) {
 			ExecutionResult result = new ProjectExecutor(microbatConfig, config).exec(test);
+			System.out.println("================ Result ===============");
 			System.out.println(result);
 
 			Project mutatedProject = new Mutator().mutate(result.getCoverage(), proj);

@@ -43,13 +43,16 @@ public class MicrobatConfig {
 
     private final Map<String, List<String>> argMap;
 
+    private static final String AGENT_OPTION_SEPARATOR = "=";
+    private static final String AGENT_PARAMS_SEPARATOR = ",";
+    private static final String AGENT_PARAMS_MULTI_VALUE_SEPARATOR = File.pathSeparator;
     MicrobatConfig(Map<String, List<String>> argMap) {
         this.argMap = argMap;
     }
 
     private MicrobatConfig updateEntry(String key, List<String> values) {
         if (!validKeys.contains(key)) {
-            throw new RuntimeException("Updating invalid agent parameter");
+            throw new RuntimeException("Updating invalid agent parameter " + key);
         }
         Map<String, List<String>> newArgMap = new HashMap<>(argMap);
         newArgMap.put(key, values);
@@ -58,6 +61,26 @@ public class MicrobatConfig {
 
     public MicrobatConfig setClassPaths(List<String> classPaths) {
         return updateEntry(OPT_CLASS_PATH, classPaths);
+    }
+    public MicrobatConfig setDumpFilePath(String dumpFilePath) {
+        return updateEntry(OPT_DUMP_FILE, Arrays.asList(dumpFilePath));
+    }
+    public MicrobatConfig setTraceRecorder(String traceRecorder) {
+        return updateEntry(OPT_TRACE_RECORDER, Arrays.asList(traceRecorder));
+    }
+
+    public String getJavaHome() {
+        return argMap.get(OPT_JAVA_HOME).get(0);
+    }
+
+    public String getClassPathStr() {
+        List<String> classPaths;
+        if (argMap.containsKey(OPT_CLASS_PATH)) {
+            classPaths = argMap.get(OPT_CLASS_PATH);
+        } else {
+            classPaths = new ArrayList<>();
+        }
+        return String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, classPaths);
     }
 
     public static MicrobatConfig parse(String pathToConfigFile) {
@@ -133,5 +156,21 @@ public class MicrobatConfig {
             }
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        List<String> options = new ArrayList<>();
+        for (Map.Entry<String, List<String>> keyValuePair: argMap.entrySet()) {
+            StringBuilder optionBuilder = new StringBuilder();
+            String key = keyValuePair.getKey();
+            optionBuilder.append(key);
+            List<String> values = keyValuePair.getValue();
+            optionBuilder.append(AGENT_OPTION_SEPARATOR);
+            String combinedValues = String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, values);
+            optionBuilder.append(combinedValues);
+            options.add(optionBuilder.toString());
+        }
+        return String.join(AGENT_PARAMS_SEPARATOR, options);
     }
 }
