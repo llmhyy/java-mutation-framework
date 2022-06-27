@@ -1,4 +1,4 @@
-package jmutation.execution;
+package jmutation.compile.execution;
 
 import jmutation.model.MicrobatConfig;
 import jmutation.model.TestCase;
@@ -56,8 +56,6 @@ public class InstrumentationCommandBuilder {
         commandStrBuilder.append(" -cp " + updatedMicrobatConfig.getClassPathStr());
         if (!testClass.isEmpty() && !testMethod.isEmpty()) {
             commandStrBuilder.append(" microbat.evaluation.junit.MicroBatTestRunner " + testClass.get() + " " + testMethod.get());
-        } else if (!testClass.isEmpty()) {
-            commandStrBuilder.append(" " + testClass.get());
         }
         return commandStrBuilder.toString();
     }
@@ -73,5 +71,9 @@ public class InstrumentationCommandBuilder {
 
     public void addExternalLibPath(File file) {
         this.externalLibPaths.add(file.getAbsolutePath());
+    }
+
+    public String getTraceFilePath() {
+        return microbatConfig.getDumpFilePath();
     }
 }

@@ -69,6 +69,10 @@ public class MicrobatConfig {
         return updateEntry(OPT_TRACE_RECORDER, Arrays.asList(traceRecorder));
     }
 
+    public String getDumpFilePath() {
+        return argMap.get(OPT_DUMP_FILE).get(0);
+    }
+
     public String getJavaHome() {
         return argMap.get(OPT_JAVA_HOME).get(0);
     }

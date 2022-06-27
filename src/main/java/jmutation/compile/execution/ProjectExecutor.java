@@ -1,11 +1,14 @@
-package jmutation.execution;
+package jmutation.compile.execution;
 
 import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
+import jmutation.model.trace.Trace;
+import jmutation.trace.FileReader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,9 +78,18 @@ public class ProjectExecutor extends Executor {
 
     private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
         String commandStr = instrumentationCommandBuilder.generateCommand();
-        System.out.println(commandStr);
         String executionResultStr = exec(commandStr);
-        // TODO: Read trace file and form coverage.
-        return new ExecutionResult(executionResultStr);
+        String traceFilePath = instrumentationCommandBuilder.getTraceFilePath();
+        FileReader traceFileReader;
+        try {
+            traceFileReader = new FileReader(traceFilePath);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException("File " + traceFilePath + " not found");
+        }
+        List<Trace> trace = traceFileReader.read();
+        Coverage coverage = new Coverage(trace);
+        ExecutionResult executionResult = new ExecutionResult(executionResultStr);
+        executionResult.setCoverage(coverage);
+        return executionResult;
     }
 }
