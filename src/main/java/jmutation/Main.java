@@ -5,7 +5,7 @@ import java.util.List;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import jmutation.model.*;
-import jmutation.compile.execution.ProjectExecutor;
+import jmutation.execution.ProjectExecutor;
 import jmutation.mutation.Mutator;
 
 public class Main {

@@ -1,4 +1,4 @@
-package jmutation.compile.execution;
+package jmutation.execution;
 
 import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;

@@ -1,6 +1,6 @@
 package jmutation.mutation;
 
-import jmutation.compile.execution.Coverage;
+import jmutation.execution.Coverage;
 import jmutation.model.Project;
 
 /**

@@ -1,6 +1,10 @@
 package jmutation.trace;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,12 +19,26 @@ import jmutation.util.FileUtils;
 import jmutation.util.ByteConverterUtil;
 
 public class TraceInputStream extends DataInputStream {
+
+    private static final String HEADER = "TracingResult";
     private String traceExecFolder;
     TraceInputStream(File traceFile) throws FileNotFoundException {
         super(new FileInputStream(traceFile));
+        traceExecFolder = traceFile.getParent();
     }
 
     public List<Trace> readTrace() throws IOException {
+        String header = readString();
+        String programMsg;
+        int expectedSteps = 0;
+        int collectedSteps = 0;
+        if (HEADER.equals(header)) {
+            programMsg = readString();
+            expectedSteps = readInt();
+            collectedSteps = readInt();
+        } else {
+            programMsg = header; // for compatible reason with old version. TO BE REMOVED.
+        }
         int traceNo = readVarInt();
         if (traceNo == 0) {
             return null;

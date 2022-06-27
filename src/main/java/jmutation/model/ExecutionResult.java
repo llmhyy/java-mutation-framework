@@ -1,6 +1,6 @@
 package jmutation.model;
 
-import jmutation.compile.execution.Coverage;
+import jmutation.execution.Coverage;
 
 public class ExecutionResult {
 	private Coverage coverage;

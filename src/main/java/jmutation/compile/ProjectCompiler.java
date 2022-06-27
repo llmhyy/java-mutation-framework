@@ -1,6 +1,6 @@
 package jmutation.compile;
 
-import jmutation.compile.execution.Executor;
+import jmutation.execution.Executor;
 import jmutation.model.Project;
 
 /**
