@@ -9,6 +9,7 @@ import jmutation.trace.FileReader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +38,16 @@ public class ProjectExecutor extends Executor {
                 return out;
             }
         }
-
+    	String dumpFilePath = microbatConfig.getDumpFilePath();
+        try {
+	        File microbatDumpFile = new File(dumpFilePath);
+	        boolean dumpFileCreated = microbatDumpFile.createNewFile();
+	        if (dumpFileCreated) {
+	        	System.out.println("New dump file created at " + dumpFilePath);
+	        }
+        } catch (IOException e) {
+        	throw new RuntimeException("Could not create dump file at " + dumpFilePath);
+        }
         // include microbat details to instrument run
         InstrumentationCommandBuilder ib = new InstrumentationCommandBuilder(microbatConfig, projectConfig.getDropInsDir());
         ib.setTestCase(testCase); // set class and method name
