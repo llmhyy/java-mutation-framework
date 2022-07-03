@@ -175,6 +175,11 @@ public class MicrobatConfig {
             List<String> values = keyValuePair.getValue();
             optionBuilder.append(AGENT_OPTION_SEPARATOR);
             String combinedValues = String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, values);
+            
+            if(key.equals("java_home")) {
+            	combinedValues = "\"" + combinedValues + "\"";
+            }
+            
             optionBuilder.append(combinedValues);
             options.add(optionBuilder.toString());
         }
