@@ -11,7 +11,7 @@ public class FileReaderTest {
     public void readTrace_validTrace_formsCorrectTrace() throws FileNotFoundException {
         String traceFilePath = "./src/test/files/jmutation/trace/traceFile.exec";
         FileReader fileReader = new FileReader(traceFilePath);
-        List<Trace> traceList = fileReader.read();
+        Trace traceList = fileReader.read();
         System.out.println(traceList);
     }
 }
