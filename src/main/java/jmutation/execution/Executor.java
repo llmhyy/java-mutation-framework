@@ -74,6 +74,7 @@ public class Executor {
 			} else {
 				pb.command("bash", "-c", cmd);
 			}
+			System.out.println(cmd);
 			process = pb.start();
 			if (timeout > 0) {
 				boolean completed = process.waitFor(timeout, TimeUnit.MINUTES);
@@ -84,6 +85,7 @@ public class Executor {
 			bufferReader = new BufferedReader(inputStr);
 			String line;
 			while ((line = bufferReader.readLine()) != null) {
+				System.out.println(line);
 				builder.append("\n").append(line);
 			}
 		} catch (IOException | InterruptedException ex) {
