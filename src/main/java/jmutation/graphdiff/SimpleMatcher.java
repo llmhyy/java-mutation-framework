@@ -3,7 +3,7 @@ package jmutation.graphdiff;
 import java.util.ArrayList;
 import java.util.List;
 
-import jmutation.model.value.GraphNode;
+import microbat.model.value.GraphNode;
 
 public class SimpleMatcher implements Matcher{
 	private List<GraphNode> visitedPool = new ArrayList<>();

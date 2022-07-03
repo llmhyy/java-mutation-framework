@@ -69,6 +69,9 @@ public class MicrobatConfig {
         return updateEntry(OPT_TRACE_RECORDER, Arrays.asList(traceRecorder));
     }
 
+    public MicrobatConfig setLaunchClass(String launchClass) {
+        return updateEntry(OPT_LAUNCH_CLASS, Arrays.asList(launchClass));
+    }
     public String getDumpFilePath() {
         return argMap.get(OPT_DUMP_FILE).get(0);
     }

@@ -1,14 +1,12 @@
 package jmutation.execution;
 
-import jmutation.model.trace.Trace;
-
-import java.util.List;
+import microbat.model.trace.Trace;
 
 public class Coverage {
-    List<Trace> traceList;
+    Trace trace;
 
-    public Coverage(List<Trace> traceList) {
-        this.traceList = traceList;
+    public Coverage(Trace trace) {
+        this.trace = trace;
     }
 
 }

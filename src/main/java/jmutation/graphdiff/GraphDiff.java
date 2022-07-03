@@ -1,6 +1,6 @@
 package jmutation.graphdiff;
 
-import jmutation.model.value.GraphNode;
+import microbat.model.value.GraphNode;
 
 public class GraphDiff {
 	public static final String ADD = "add";

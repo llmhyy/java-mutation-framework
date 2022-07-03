@@ -3,7 +3,7 @@ package jmutation.graphdiff;
 import java.util.ArrayList;
 import java.util.List;
 
-import jmutation.model.value.GraphNode;
+import microbat.model.value.GraphNode;
 
 public class HierarchyGraphDiffer {
 	private Matcher matcher = new SimpleMatcher();

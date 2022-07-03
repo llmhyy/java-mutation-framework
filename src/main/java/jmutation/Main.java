@@ -41,6 +41,7 @@ public class Main {
 		MicrobatConfig microbatConfig = params.microbatConfigPath == null ? MicrobatConfig.defaultConfig() : MicrobatConfig.parse(params.microbatConfigPath);
 
 		for(TestCase test: testList) {
+			System.out.println(test);
 			ExecutionResult result = new ProjectExecutor(microbatConfig, config).exec(test);
 			System.out.println(result);
 

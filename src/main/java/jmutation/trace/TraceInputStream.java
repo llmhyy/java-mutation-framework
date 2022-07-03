@@ -8,15 +8,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import jmutation.model.breakpoint.BreakPoint;
-import jmutation.model.trace.Trace;
-import jmutation.model.trace.TraceNode;
-import jmutation.model.ClassLocation;
-import jmutation.model.ControlScope;
-import jmutation.model.SourceScope;
-import jmutation.model.value.VarValue;
-import jmutation.util.FileUtils;
-import jmutation.util.ByteConverterUtil;
+import microbat.model.breakpoint.BreakPoint;
+import microbat.model.trace.Trace;
+import microbat.model.trace.TraceNode;
+import microbat.model.ClassLocation;
+import microbat.model.ControlScope;
+import microbat.model.SourceScope;
+import microbat.model.value.VarValue;
+import microbat.util.FileUtils;
+import microbat.util.ByteConverterUtil;
 
 public class TraceInputStream extends DataInputStream {
 
@@ -27,7 +27,7 @@ public class TraceInputStream extends DataInputStream {
         traceExecFolder = traceFile.getParent();
     }
 
-    public List<Trace> readTrace() throws IOException {
+    public Trace readTrace() throws IOException {
         String header = readString();
         String programMsg;
         int expectedSteps = 0;
@@ -44,25 +44,27 @@ public class TraceInputStream extends DataInputStream {
             return null;
         }
 
-        List<Trace> traceList = new ArrayList<Trace>();
         for(int i=0; i<traceNo; i++) {
             Trace trace = new Trace(null);
             readString(); // projectName
             readString(); // projectVersion
             readString(); // launchClass
             readString(); // launchMethod
-            trace.setMain(readBoolean());
+            boolean isMainTrace = readBoolean();
+            trace.setMain(isMainTrace);
             trace.setThreadName(readString());
             trace.setThreadId(Long.parseLong(readString()));
             trace.setIncludedLibraryClasses(readFilterInfo());
             trace.setExcludedLibraryClasses(readFilterInfo());
             List<BreakPoint> locationList = readLocations();
             trace.setExecutionList(readSteps(trace, locationList));
-
-            traceList.add(trace);
+            if (!isMainTrace) {
+                continue;
+            }
+            return trace;
         }
 
-        return traceList;
+        return null;
     }
 
     private List<String> readFilterInfo() throws IOException {

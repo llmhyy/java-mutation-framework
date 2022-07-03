@@ -1,9 +1,8 @@
 package jmutation.trace;
 
-import jmutation.model.trace.Trace;
+import microbat.model.trace.Trace;
 
 import java.io.*;
-import java.util.List;
 
 public class FileReader {
     TraceInputStream fileStream;
@@ -15,7 +14,7 @@ public class FileReader {
         this(new File(traceFilePath));
     }
 
-    public List<Trace> read() {
+    public Trace read() {
         try {
             return fileStream.readTrace();
         } catch (IOException e) {

@@ -1,6 +1,6 @@
 package jmutation.trace;
 
-import jmutation.model.trace.Trace;
+import microbat.model.trace.Trace;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;

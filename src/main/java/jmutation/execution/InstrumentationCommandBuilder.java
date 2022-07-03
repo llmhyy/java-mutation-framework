@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.io.FilenameUtils;
+
 public class InstrumentationCommandBuilder {
     private static final List<String> SYSTEM_JARS = List.of("junit", "org.hamcrest.core", "testrunner", "bcel-6.0", "javassist", "instrumentator");
 
@@ -47,6 +49,7 @@ public class InstrumentationCommandBuilder {
         // Project paths are added to classPaths by project executor.
         generateSystemJars(dropInsDir);
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(classPaths);
+        updatedMicrobatConfig = updatedMicrobatConfig.setLaunchClass(testClass.get());
         StringBuilder commandStrBuilder = new StringBuilder();
         commandStrBuilder.append(updatedMicrobatConfig.getJavaHome() + File.separator + "bin" + File.separator + "java");
         File instrumentatorFile = new File("lib/instrumentator.jar");
@@ -54,9 +57,7 @@ public class InstrumentationCommandBuilder {
         commandStrBuilder.append(" -Xmx10G -XX:+UseG1GC -ea -noverify -javaagent:" + instrumentatorFilePath + "=");
         commandStrBuilder.append(updatedMicrobatConfig);
         commandStrBuilder.append(" -cp " + updatedMicrobatConfig.getClassPathStr());
-        if (!testClass.isEmpty() && !testMethod.isEmpty()) {
-            commandStrBuilder.append(" microbat.evaluation.junit.MicroBatTestRunner " + testClass.get() + " " + testMethod.get());
-        }
+        commandStrBuilder.append(" microbat.evaluation.junit.MicroBatTestRunner " + testClass.get() + " " + testMethod.get());
         return commandStrBuilder.toString();
     }
 
@@ -66,11 +67,11 @@ public class InstrumentationCommandBuilder {
     }
 
     public void addClassPath(File classPath) {
-        this.classPaths.add(classPath.getAbsolutePath());
+        this.classPaths.add(FilenameUtils.normalize(classPath.getAbsolutePath()));
     }
 
     public void addExternalLibPath(File file) {
-        this.externalLibPaths.add(file.getAbsolutePath());
+        this.externalLibPaths.add(FilenameUtils.normalize(file.getAbsolutePath()));
     }
 
     public String getTraceFilePath() {

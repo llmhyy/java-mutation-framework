@@ -2,7 +2,7 @@ package jmutation.graphdiff;
 
 import java.util.List;
 
-import jmutation.model.value.GraphNode;
+import microbat.model.value.GraphNode;
 
 /**
  * This class is to indicate how to match two child lists of two matched parent. 
