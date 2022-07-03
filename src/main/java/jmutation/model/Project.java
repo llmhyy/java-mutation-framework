@@ -37,4 +37,9 @@ public abstract class Project {
     public abstract  File getCompiledClassFolder();
 
     public abstract File getCompiledFolder();
+
+	public Project cloneToOtherPath() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
