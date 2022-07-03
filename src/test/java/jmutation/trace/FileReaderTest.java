@@ -1,10 +1,10 @@
 package jmutation.trace;
 
-import microbat.model.trace.Trace;
+import java.io.FileNotFoundException;
+
 import org.junit.jupiter.api.Test;
 
-import java.io.FileNotFoundException;
-import java.util.List;
+import microbat.model.trace.Trace;
 
 public class FileReaderTest {
     @Test
