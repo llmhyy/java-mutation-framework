@@ -38,7 +38,7 @@ public class Main {
 		Project proj = config.getProject();
 		List<TestCase> testList = proj.getTestCases();
 
-		MicrobatConfig microbatConfig = params.microbatConfigPath == null ? MicrobatConfig.defaultConfig() : MicrobatConfig.parse(params.microbatConfigPath);
+		MicrobatConfig microbatConfig = params.microbatConfigPath == null ? MicrobatConfig.defaultConfig(params.projectPath) : MicrobatConfig.parse(params.microbatConfigPath);
 
 		for(TestCase test: testList) {
 			System.out.println(test);

@@ -129,9 +129,18 @@ public class MicrobatConfig {
         return newMicrobatConfig;
     }
 
-    public static MicrobatConfig defaultConfig() {
+    public static MicrobatConfig defaultConfig(String projectPath) {
         // TODO: add minimal working config
-        Map<String, List<String>> argMap = Map.of();
+        Map<String, List<String>> argMap = new HashMap<>();
+        argMap.put(OPT_DUMP_FILE, List.of(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
+        argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));
+        argMap.put(OPT_STEP_LIMIT, List.of("200000"));
+        argMap.put(OPT_TRACE_RECORDER, List.of("FILE"));
+        argMap.put(OPT_VARIABLE_LAYER, List.of("5"));
+        argMap.put(OPT_LOG, List.of("printProgress", "error"));
+        argMap.put(OPT_PRECHECK, List.of("false"));
+        argMap.put(OPT_RUN_ID, List.of("1763794d-c0c2-4704-a483-20725cb39fd3"));
+        argMap.put(OPT_WORKING_DIR, List.of(projectPath));
         return new MicrobatConfig(argMap);
     }
 
