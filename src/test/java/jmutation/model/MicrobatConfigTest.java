@@ -10,7 +10,8 @@ public class MicrobatConfigTest {
     @Test
     void parse_validConfigFile_correctMicrobatConfig() {
         String validConfigFilePath = "src/test/files/jmutation/model/validMicrobatConfigTest.json";
-        MicrobatConfig actualConfig = MicrobatConfig.parse(validConfigFilePath);
+        String projectPath = "./project";
+        MicrobatConfig actualConfig = MicrobatConfig.parse(validConfigFilePath, projectPath);
         Map<String, List<String>> expectedConfigMap = new HashMap<>();
         expectedConfigMap.put("java_home", Arrays.asList("C:/java"));
         expectedConfigMap.put("entry_point", Arrays.asList("C:/path/to/entry/point/0", "C:/path/to/entry/point/1"));

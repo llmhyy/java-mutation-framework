@@ -17,7 +17,7 @@ class ProjectExecutorTest {
         String dropInsDir = "./lib";
         ProjectConfig config = new ProjectConfig(projectPath, dropInsDir);
 
-        ProjectExecutor pe = new ProjectExecutor(MicrobatConfig.defaultConfig(), config);
+        ProjectExecutor pe = new ProjectExecutor(MicrobatConfig.defaultConfig(projectPath), config);
         List<String> jarNames = pe.findJars().stream().map(file -> file.getName()).collect(Collectors.toList());
         List<String> expectedJars = List.of("commons-math-2.2-SNAPSHOT.jar");
         assertIterableEquals(expectedJars, jarNames);
@@ -25,7 +25,7 @@ class ProjectExecutorTest {
         projectPath = "./sample/spoon";
         dropInsDir = "./lib";
         config = new ProjectConfig(projectPath, dropInsDir);
-        pe = new ProjectExecutor(MicrobatConfig.defaultConfig(), config);
+        pe = new ProjectExecutor(MicrobatConfig.defaultConfig(projectPath), config);
         jarNames = pe.findJars().stream().map(file -> file.getName()).collect(Collectors.toList());
         expectedJars = List.of("slf4j-api-1.7.32.jar", "checker-qual-3.12.0.jar", "commons-io-2.11.0.jar",
                 "plexus-utils-3.3.0.jar", "jsap-2.1.jar", "lidalia-lang-1.0.0.jar", "org.eclipse.jdt.core-3.27.0.jar",
