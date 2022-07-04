@@ -1,13 +1,10 @@
 {
   "precheck": ["false"],
   "run_id": ["1763794d-c0c2-4704-a483-20725cb39fd3"],
-  "java_home": ["C:\\Tools\\Java\\jdk1.8.0_202"],
   "log": ["printProgress", "error"],
   "working_dir" : ["C:\\Users\\bchenghi\\Desktop\\NUS\\FYP\\repos1\\java-mutation-framework\\sample\\math_70"],
   "varLayer": ["5"],
   "trace_recorder": ["FILE"],
   "stepLimit": ["200000"],
-  "require_method_split": ["false"],
-  "launch_class": ["test.Main"],
-  "dump_file_path": ["C:\\Users\\bchenghi\\AppData\\Local\\Temp\\dumpFile.exec"]
+  "require_method_split": ["false"]
 }
