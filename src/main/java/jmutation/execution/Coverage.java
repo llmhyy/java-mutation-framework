@@ -1,5 +1,6 @@
 package jmutation.execution;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jmutation.mutation.MutationRange;
@@ -13,7 +14,7 @@ public class Coverage {
 
     public Coverage(Trace trace) {
         this.trace = trace;
-        
+        ranges = new ArrayList<>();
         /**
          * TODO
          * a very simple implementation to be enhanced

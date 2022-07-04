@@ -34,11 +34,12 @@ public class Main {
 		Main params = new Main();
 		JCommander.newBuilder().addObject(params).build().parse(args);
 
-		ProjectConfig config = new ProjectConfig(params.projectPath, params.dropInsDir); // Contains class paths
+		String projectPath = params.projectPath;
+		ProjectConfig config = new ProjectConfig(projectPath, params.dropInsDir); // Contains class paths
 		Project proj = config.getProject();
 		List<TestCase> testList = proj.getTestCases();
 
-		MicrobatConfig microbatConfig = params.microbatConfigPath == null ? MicrobatConfig.defaultConfig(params.projectPath) : MicrobatConfig.parse(params.microbatConfigPath);
+		MicrobatConfig microbatConfig = params.microbatConfigPath == null ? MicrobatConfig.defaultConfig(projectPath) : MicrobatConfig.parse(params.microbatConfigPath, projectPath);
 
 		for(TestCase test: testList) {
 			System.out.println(test);

@@ -90,7 +90,7 @@ public class MicrobatConfig {
         return String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, classPaths);
     }
 
-    public static MicrobatConfig parse(String pathToConfigFile) {
+    public static MicrobatConfig parse(String pathToConfigFile, String projectPath) {
         File configFile = new File(pathToConfigFile);
         if (!configFile.exists()) {
             throw new RuntimeException("Microbat config file " + configFile.getAbsolutePath() + " not found!");
@@ -111,9 +111,8 @@ public class MicrobatConfig {
         String jsonStringConfig = sb.toString();
         JSONObject jsonConfig = new JSONObject(jsonStringConfig);
         Iterator<String> jsonConfigIterator = jsonConfig.keys();
-        Map<String, List<String>> emptyConfigMap = new HashMap<>();
 
-        MicrobatConfig newMicrobatConfig = new MicrobatConfig(emptyConfigMap);
+        MicrobatConfig newMicrobatConfig = defaultConfig(projectPath);
 
         while (jsonConfigIterator.hasNext()) {
             String key = jsonConfigIterator.next();
@@ -130,7 +129,6 @@ public class MicrobatConfig {
     }
 
     public static MicrobatConfig defaultConfig(String projectPath) {
-        // TODO: add minimal working config
         Map<String, List<String>> argMap = new HashMap<>();
         argMap.put(OPT_DUMP_FILE, List.of(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
         argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));

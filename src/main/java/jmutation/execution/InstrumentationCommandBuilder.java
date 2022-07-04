@@ -49,7 +49,11 @@ public class InstrumentationCommandBuilder {
         // Project paths are added to classPaths by project executor.
         generateSystemJars(dropInsDir);
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(classPaths);
-        updatedMicrobatConfig = updatedMicrobatConfig.setLaunchClass(testClass.get());
+        if (testClass.isEmpty()) {
+            microbatConfig.setLaunchClass("");
+        } else {
+            updatedMicrobatConfig = updatedMicrobatConfig.setLaunchClass(testClass.get());
+        }
         StringBuilder commandStrBuilder = new StringBuilder();
         commandStrBuilder.append("\"" + updatedMicrobatConfig.getJavaHome() + "\"" + File.separator + "bin" + File.separator + "java");
         File instrumentatorFile = new File("lib/instrumentator.jar");
@@ -57,6 +61,9 @@ public class InstrumentationCommandBuilder {
         commandStrBuilder.append(" -Xmx10G -XX:+UseG1GC -ea -noverify -javaagent:" + instrumentatorFilePath + "=");
         commandStrBuilder.append(updatedMicrobatConfig);
         commandStrBuilder.append(" -cp " + updatedMicrobatConfig.getClassPathStr());
+        if (testClass.isEmpty() && testMethod.isEmpty()) {
+            return commandStrBuilder.toString();
+        }
         commandStrBuilder.append(" microbat.evaluation.junit.MicroBatTestRunner " + testClass.get() + " " + testMethod.get());
         return commandStrBuilder.toString();
     }
