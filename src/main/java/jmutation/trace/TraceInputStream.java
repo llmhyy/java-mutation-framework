@@ -1,12 +1,10 @@
 package jmutation.trace;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import microbat.model.breakpoint.BreakPoint;
 import microbat.model.trace.Trace;
@@ -20,13 +18,55 @@ import microbat.util.ByteConverterUtil;
 
 public class TraceInputStream extends DataInputStream {
 
-    private static final String HEADER = "TracingResult";
+    private static final String HEADER = "Precheck";
     private String traceExecFolder;
     TraceInputStream(File traceFile) throws FileNotFoundException {
         super(new FileInputStream(traceFile));
         traceExecFolder = traceFile.getParent();
     }
-
+    public Set<ClassLocation> readClassLocations() {
+        FileInputStream stream = null;
+        try {
+            String header = readString();
+            if (!HEADER.equals(header)) {
+                throw new RuntimeException("Invalid Precheck file result!");
+            }
+            readString();
+            readVarInt();
+            readBoolean();
+            readVarInt();
+            int exceedingMethodsSize = readVarInt();
+            for (int i = 0; i < exceedingMethodsSize; i++) {
+                readString();
+            }
+            int locationsSize = readVarInt();
+            Set<ClassLocation> visitedLocs = new HashSet<>(locationsSize);
+            for (int i = 0; i < locationsSize; i++) {
+                String className = readString();
+                String methodSignature = readString();
+                int lineNumber = readInt();
+                ClassLocation loc = new ClassLocation(className, methodSignature, lineNumber);
+                visitedLocs.add(loc);
+            }
+            int loadedClassesSize = readVarInt();
+            List<String> loadedClasses = new ArrayList<>(loadedClassesSize);
+            for (int i = 0; i < loadedClassesSize; i++) {
+                loadedClasses.add(readString());
+            }
+            return visitedLocs;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                if (stream != null) {
+                    stream.close();
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+    }
     public Trace readTrace() throws IOException {
         String header = readString();
         String programMsg;

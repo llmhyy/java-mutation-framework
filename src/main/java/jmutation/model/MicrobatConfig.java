@@ -136,7 +136,7 @@ public class MicrobatConfig {
         argMap.put(OPT_TRACE_RECORDER, List.of("FILE"));
         argMap.put(OPT_VARIABLE_LAYER, List.of("5"));
         argMap.put(OPT_LOG, List.of("printProgress", "error"));
-        argMap.put(OPT_PRECHECK, List.of("false"));
+        argMap.put(OPT_PRECHECK, List.of("true"));
         argMap.put(OPT_RUN_ID, List.of("1763794d-c0c2-4704-a483-20725cb39fd3"));
         argMap.put(OPT_WORKING_DIR, List.of(projectPath));
         return new MicrobatConfig(argMap);

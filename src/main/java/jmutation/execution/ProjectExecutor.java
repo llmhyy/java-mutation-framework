@@ -4,6 +4,7 @@ import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
+import microbat.model.ClassLocation;
 import microbat.model.trace.Trace;
 import jmutation.trace.FileReader;
 
@@ -12,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ProjectExecutor extends Executor {
     private final ProjectConfig projectConfig;
@@ -88,7 +90,6 @@ public class ProjectExecutor extends Executor {
 
     private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
         String commandStr = instrumentationCommandBuilder.generateCommand();
-        System.out.println(commandStr);
         String executionResultStr = exec(commandStr);
         String traceFilePath = instrumentationCommandBuilder.getTraceFilePath();
         FileReader traceFileReader;
@@ -97,8 +98,8 @@ public class ProjectExecutor extends Executor {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("File " + traceFilePath + " not found");
         }
-        Trace trace = traceFileReader.read();
-        Coverage coverage = new Coverage(trace);
+        Set<ClassLocation> classLocations = traceFileReader.read();
+        Coverage coverage = new Coverage(classLocations);
         ExecutionResult executionResult = new ExecutionResult(executionResultStr);
         executionResult.setCoverage(coverage);
         return executionResult;

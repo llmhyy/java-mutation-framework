@@ -1,8 +1,10 @@
 package jmutation.trace;
 
+import microbat.model.ClassLocation;
 import microbat.model.trace.Trace;
 
 import java.io.*;
+import java.util.Set;
 
 public class FileReader {
     TraceInputStream fileStream;
@@ -14,11 +16,7 @@ public class FileReader {
         this(new File(traceFilePath));
     }
 
-    public Trace read() {
-        try {
-            return fileStream.readTrace();
-        } catch (IOException e) {
-            throw new RuntimeException("Issue reading trace from trace stream");
-        }
+    public Set<ClassLocation> read() {
+        return fileStream.readClassLocations();
     }
 }

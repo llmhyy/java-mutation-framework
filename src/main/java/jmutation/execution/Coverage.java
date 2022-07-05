@@ -1,28 +1,29 @@
 package jmutation.execution;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import jmutation.mutation.MutationRange;
-import microbat.model.trace.Trace;
-import microbat.model.trace.TraceNode;
+import microbat.model.ClassLocation;
 
 public class Coverage {
-    private Trace trace;
+    private Set<ClassLocation> classLocationSet;
     
     private List<MutationRange> ranges;
 
-    public Coverage(Trace trace) {
-        this.trace = trace;
+    public Coverage(Set<ClassLocation> classLocationSet) {
+        this.classLocationSet = classLocationSet;
+		Iterator<ClassLocation> classLocationIterator = classLocationSet.iterator();
         ranges = new ArrayList<>();
         /**
          * TODO
          * a very simple implementation to be enhanced
          */
-        for(int i=0; i<trace.getExecutionList().size(); i++) {
-        	TraceNode step = trace.getTraceNode(i+1);
-        	
-        	MutationRange range = new MutationRange(step.getClassCanonicalName(), step.getLineNumber(), step.getLineNumber()+1);
+		while(classLocationIterator.hasNext()) {
+        	ClassLocation classLocation = classLocationIterator.next();
+        	MutationRange range = new MutationRange(classLocation.getClassCanonicalName(), classLocation.getLineNumber(), classLocation.getLineNumber()+1);
         	ranges.add(range);
         	break;
         }
