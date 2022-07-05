@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
+import jmutation.mutation.commands.MutationCommand;
+import jmutation.mutation.parser.MutationParser;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -35,9 +37,10 @@ public class Mutator {
 				fileContent = Files.readString(new File(fileLocation).toPath());
 				
 				CompilationUnit unit = ProjectParser.parseCompliationUnit(fileContent);
-				
+				unit.types();
 				ASTNode node = parseRangeToNode(unit, range);
-				
+				MutationCommand mutationCommand = MutationParser.createMutationCommand(node);
+				ASTNode mutatedNode = mutationCommand.executeMutation();
 				/**
 				 * TODO: 
 				 * 
@@ -49,7 +52,7 @@ public class Mutator {
 				// step 1: define mutation operator based on AST node
 				// step 2: apply mutation on the AST node
 				// step 3: rewrite the AST node back to Java doc
-				
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -64,8 +67,13 @@ public class Mutator {
 		return null;
 	}
 
+	/**
+	 * Gets an AST node for the portion of code to be mutated
+	 * @param unit
+	 * @param range
+	 * @return
+	 */
 	private ASTNode parseRangeToNode(CompilationUnit unit, MutationRange range) {
-		
 		MinimumASTNodeRetriever retriever = new MinimumASTNodeRetriever(unit, range);
 		unit.accept(retriever);
 
