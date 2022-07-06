@@ -1,6 +1,8 @@
 package jmutation.model;
 
+import org.apache.commons.io.FileUtils;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -38,8 +40,6 @@ public abstract class Project {
 
     public abstract File getCompiledFolder();
 
-	public Project cloneToOtherPath() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract Project cloneToOtherPath();
+
 }

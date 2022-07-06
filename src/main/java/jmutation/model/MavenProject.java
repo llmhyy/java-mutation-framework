@@ -1,8 +1,10 @@
 package jmutation.model;
 
 import jmutation.execution.Executor;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class MavenProject extends Project {
@@ -43,5 +45,19 @@ public class MavenProject extends Project {
 
     public File getCompiledFolder() {
         return new File(getRoot(), COMPILATION_FOLDER);
+    }
+
+    @Override
+    public Project cloneToOtherPath() {
+        String tmpdir = System.getProperty("java.io.tmpdir");
+        File dest = new File(tmpdir + "/mutation");
+        try {
+            FileUtils.copyDirectory(getRoot(), dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to clone project to " + dest.getAbsolutePath());
+        } finally {
+            return new MavenProject(dest, getTestCases());
+        }
     }
 }

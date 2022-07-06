@@ -12,8 +12,8 @@ public class MinimumASTNodeRetriever extends ASTVisitor{
 	private CompilationUnit unit;
 	private ASTNode node;
 	
-	public MinimumASTNodeRetriever(CompilationUnit unit2, MutationRange range) {
-		this.unit = unit2;
+	public MinimumASTNodeRetriever(CompilationUnit unit, MutationRange range) {
+		this.unit = unit;
 		this.startLine = range.getStartLine();
 		this.endLine = range.getEndLine();
 	}

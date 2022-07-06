@@ -31,40 +31,35 @@ public class Mutator {
 		for(MutationRange range: ranges) {
 			String className = range.getClassName();
 			
-			String fileLocation = retrieveFileFromClassName(className, newProject);
-			String fileContent = null;
-			try {
-				fileContent = Files.readString(new File(fileLocation).toPath());
-				
-				CompilationUnit unit = ProjectParser.parseCompliationUnit(fileContent);
-				unit.types();
-				ASTNode node = parseRangeToNode(unit, range);
-				MutationCommand mutationCommand = MutationParser.createMutationCommand(node);
-				ASTNode mutatedNode = mutationCommand.executeMutation();
-				/**
-				 * TODO: 
-				 * 
-				 * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
-				 * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
-				 * to rewrite the AST
-				 */
-				
-				// step 1: define mutation operator based on AST node
-				// step 2: apply mutation on the AST node
-				// step 3: rewrite the AST node back to Java doc
+			String fileContent = retrieveFileFromClassName(className, newProject);
+			System.out.println("File Content \n" + fileContent);
 
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
+			CompilationUnit unit = ProjectParser.parseCompliationUnit(fileContent);
+			unit.types();
+			ASTNode node = parseRangeToNode(unit, range);
+			MutationCommand mutationCommand = MutationParser.createMutationCommand(node);
+			ASTNode mutatedNode = mutationCommand.executeMutation();
+			/**
+			 * TODO:
+			 *
+			 * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
+			 * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
+			 * to rewrite the AST
+			 */
+
+			// step 1: define mutation operator based on AST node
+			// step 2: apply mutation on the AST node
+			// step 3: rewrite the AST node back to Java doc
+
+
 		}
 		
 		return newProject;
 	}
 
 	private String retrieveFileFromClassName(String className, Project newProject) {
-		// TODO Auto-generated method stub
-		return null;
+		File root = newProject.getRoot();
+		return ProjectParser.getFileContentsOfClass(className, root);
 	}
 
 	/**
