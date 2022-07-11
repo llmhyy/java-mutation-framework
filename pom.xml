@@ -39,6 +39,11 @@
 			</exclusions>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.core.filebuffers</artifactId>
+            <version>3.7.200</version>
+        </dependency>
+        <dependency>
           <groupId>com.beust</groupId>
           <artifactId>jcommander</artifactId>
           <version>1.82</version>

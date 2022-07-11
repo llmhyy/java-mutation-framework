@@ -14,9 +14,10 @@ public class ProjectParserTest {
         String pathToTestProj = "./src/test/files/jmutation/parser";
         File root = new File(pathToTestProj);
         String classCanonicalName = "org.test.Test$3";
-        String actualContents = ProjectParser.getFileContentsOfClass(classCanonicalName, root);
-        File actualFile = new File(pathToTestProj + "/src/main/java/org/test/Test.java");
-        String expectedContents = Files.readString(actualFile.toPath());
+        File actualFile = ProjectParser.getFileOfClass(classCanonicalName, root);
+        String actualContents = Files.readString(actualFile.toPath());
+        File expectedFile = new File(pathToTestProj + "/src/main/java/org/test/Test.java");
+        String expectedContents = Files.readString(expectedFile.toPath());
         assertEquals(expectedContents, actualContents);
     }
 }

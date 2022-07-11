@@ -3,7 +3,6 @@ package jmutation.mutation.commands;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 public abstract class MutationCommand {
     ASTNode node;

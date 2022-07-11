@@ -141,7 +141,7 @@ public class ProjectParser {
         return node.modifiers().stream().filter(mod -> mod instanceof Annotation).anyMatch(an -> an.toString().equals(annotation));
     }
 
-    public static String getFileContentsOfClass(String classCanonicalName, File start) {
+    public static File getFileOfClass(String classCanonicalName, File start) {
         String[] packagePartsArr = classCanonicalName.split("[.]", -1);
         Set<String> packageParts = new HashSet<>(Arrays.asList(packagePartsArr));
         String packageName = "";
@@ -153,23 +153,26 @@ public class ProjectParser {
             packageName += ".";
         }
         String className = packagePartsArr[packagePartsArr.length - 1].split("[$]", 2)[0];
-        return getFileContentsOfClassHelper(packageParts, packageName, className, start);
+        return getFileOfClassHelper(packageParts, packageName, className, start);
     }
 
-    private static String getFileContentsOfClassHelper(Set<String> packageParts, String packageName, String className, File start) {
+    private static File getFileOfClassHelper(Set<String> packageParts, String packageName, String className, File start) {
         File[] list = start.listFiles();
         if (list == null) {
             return null;
         }
         for (File f : list) {
-            if (f.isDirectory() && (f.getName().equals("src") || f.getName().equals("main") || f.getName().equals("java") || packageParts.contains(f.getName()))) {
-                return getFileContentsOfClassHelper(packageParts, packageName, className, f);
+            if (f.isDirectory() && (f.getName().equals("src") || f.getName().equals("main") || f.getName().equals("java") || f.getName().equals("test") || packageParts.contains(f.getName()))) {
+                File file = getFileOfClassHelper(packageParts, packageName, className, f);
+                if (file != null) {
+                    return file;
+                }
             } else {
                 if (f.getName().contains(".java")) {
                     try {
                         String fileContent = Files.readString(f.toPath());
                         if (fileContent.contains("package " + packageName) && fileContent.contains("class " + className)) {
-                            return fileContent;
+                            return f;
                         }
                     } catch (IOException e) {
                         System.out.print("Unable to open file at ");

@@ -1,8 +1,6 @@
 package jmutation.mutation;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.*;
 
 public class MinimumASTNodeRetriever extends ASTVisitor{
 
@@ -18,10 +16,22 @@ public class MinimumASTNodeRetriever extends ASTVisitor{
 		this.endLine = range.getEndLine();
 	}
 
-	public void preVisit(ASTNode node) {
+	@Override
+	public boolean visit(InfixExpression node) {
+		setNodeAndLines(node);
+		return super.visit(node);
+	}
+
+	@Override
+	public boolean visit(WhileStatement node) {
+		setNodeAndLines(node);
+		return super.visit(node);
+	}
+
+	public void setNodeAndLines(ASTNode node) {
 		int sLine = unit.getLineNumber(node.getStartPosition());
-		int eLine = unit.getLineNumber(node.getStartPosition() + node.getLength());
-		
+		int eLine = unit.getLineNumber(node.getStartPosition() + node.getLength() - 1);
+
 		if(this.node == null) {
 			if(startLine <= sLine && eLine <= endLine) {
 				this.node = node;
@@ -32,8 +42,7 @@ public class MinimumASTNodeRetriever extends ASTVisitor{
 			 * TODO Cheng Hin
 			 */
 			int nSLine = unit.getLineNumber(this.node.getStartPosition());
-			int nELine = unit.getLineNumber(this.node.getStartPosition() + this.node.getLength());
-			
+			int nELine = unit.getLineNumber(this.node.getStartPosition() + this.node.getLength() - 1);
 			if(startLine <= sLine && eLine <= endLine) {
 				if(sLine <= nSLine && nELine <= eLine) {
 					this.node = node;

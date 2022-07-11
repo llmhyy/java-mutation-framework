@@ -1,18 +1,27 @@
 package jmutation.mutation;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
 import jmutation.mutation.commands.MutationCommand;
 import jmutation.mutation.parser.MutationParser;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.*;
 
 import jmutation.execution.Coverage;
 import jmutation.model.Project;
 import jmutation.parser.ProjectParser;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.UndoEdit;
 
 /**
  * 
@@ -31,14 +40,23 @@ public class Mutator {
 		for(MutationRange range: ranges) {
 			String className = range.getClassName();
 			
-			String fileContent = retrieveFileFromClassName(className, newProject);
-			System.out.println("File Content \n" + fileContent);
+			File file = retrieveFileFromClassName(className, newProject);
+			String fileContent;
+			try {
+				fileContent = Files.readString(file.toPath());
+			} catch (IOException e) {
+				throw new RuntimeException("Could not read file at " + file.toPath());
+			}
 
 			CompilationUnit unit = ProjectParser.parseCompliationUnit(fileContent);
-			unit.types();
 			ASTNode node = parseRangeToNode(unit, range);
+			if (node == null) {
+				// If node type is not implemented, skip for now
+				continue;
+			}
 			MutationCommand mutationCommand = MutationParser.createMutationCommand(node);
-			ASTNode mutatedNode = mutationCommand.executeMutation();
+			unit.recordModifications();
+			mutationCommand.executeMutation();
 			/**
 			 * TODO:
 			 *
@@ -50,16 +68,16 @@ public class Mutator {
 			// step 1: define mutation operator based on AST node
 			// step 2: apply mutation on the AST node
 			// step 3: rewrite the AST node back to Java doc
-
-
+			writeToFile(unit, file);
+			break;
 		}
 		
 		return newProject;
 	}
 
-	private String retrieveFileFromClassName(String className, Project newProject) {
+	private File retrieveFileFromClassName(String className, Project newProject) {
 		File root = newProject.getRoot();
-		return ProjectParser.getFileContentsOfClass(className, root);
+		return ProjectParser.getFileOfClass(className, root);
 	}
 
 	/**
@@ -73,5 +91,31 @@ public class Mutator {
 		unit.accept(retriever);
 
 		return retriever.getNode();
+	}
+
+	private void writeToFile(CompilationUnit unit, File file) {
+		String fileContent;
+		try {
+			fileContent = Files.readString(file.toPath());
+		} catch (IOException e) {
+			throw new RuntimeException("Could not read file at " + file.toPath());
+		}
+		IDocument document = new Document(fileContent);
+		TextEdit edits = unit.rewrite(document, null);
+		UndoEdit undo;
+		try {
+			undo = edits.apply(document);
+		} catch(MalformedTreeException e) {
+			e.printStackTrace();
+		} catch(BadLocationException e) {
+			e.printStackTrace();
+		}
+		try {
+			FileWriter fw = new FileWriter(file);
+			fw.write(document.get());
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
