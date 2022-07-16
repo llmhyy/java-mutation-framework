@@ -1,6 +1,5 @@
 package jmutation.model;
 
-import jmutation.execution.Executor;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -13,6 +12,7 @@ public class MavenProject extends Project {
     private static final String COMPILATION_FOLDER = "target";
     private static final String TEST_CLASS_FOLDER = "test-classes";
     private static final String COMPILED_CLASS_FOLDER = "classes";
+
     public MavenProject(File root, List<TestCase> testCases) {
         super(root, testCases);
     }
@@ -24,7 +24,7 @@ public class MavenProject extends Project {
 
     @Override
     public String compileCommand() {
-        String mavenCmd = Executor.isWindows() ? "mvn" : "mvn.exe";
+        String mavenCmd = "mvn";
         return String.format(COMPILE_ALL_FMT, mavenCmd);
     }
 
