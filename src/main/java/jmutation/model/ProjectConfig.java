@@ -10,6 +10,7 @@ public class ProjectConfig {
 
     /**
      * Dataclass for various project settings, and a wrapper over the Project class
+     *
      * @param projectPath
      * @param dropInsDir
      */
@@ -39,6 +40,10 @@ public class ProjectConfig {
 
     public String getCompileCommand() {
         return project.compileCommand();
+    }
+
+    public String getPackageCommand() {
+        return project.packageCommand();
     }
 
     public String getDropInsDir() {

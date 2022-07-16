@@ -8,6 +8,7 @@ import java.util.List;
 
 public class MavenProject extends Project {
     private static final String COMPILE_ALL_FMT = "%s test-compile";
+    private static final String PACKAGE_ALL_FMT = "%s package";
     private static final String COMPILE_NO_RUN_TEST_FMT = "%s install -DskipTests";
     private static final String COMPILATION_FOLDER = "target";
     private static final String TEST_CLASS_FOLDER = "test-classes";
@@ -26,6 +27,12 @@ public class MavenProject extends Project {
     public String compileCommand() {
         String mavenCmd = "mvn";
         return String.format(COMPILE_ALL_FMT, mavenCmd);
+    }
+
+    @Override
+    public String packageCommand() {
+        String mavenCmd = "mvn";
+        return String.format(PACKAGE_ALL_FMT, mavenCmd);
     }
 
     @Override

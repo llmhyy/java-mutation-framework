@@ -1,15 +1,12 @@
 package jmutation.model;
 
-import org.apache.commons.io.FileUtils;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
  * a representation of a project
  *
  * @author Yun Lin
- *
  */
 public abstract class Project {
 
@@ -32,14 +29,17 @@ public abstract class Project {
     public abstract String singleTestCommand(TestCase testCase);
 
     public abstract ProjectType projectType();
+
     public abstract String compileCommand();
+
+    public abstract String packageCommand();
 
     public abstract File getCompiledTestFolder();
 
-    public abstract  File getCompiledClassFolder();
+    public abstract File getCompiledClassFolder();
 
     public abstract File getCompiledFolder();
 
-	public abstract Project cloneToOtherPath();
+    public abstract Project cloneToOtherPath();
 
 }

@@ -4,9 +4,8 @@ import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
-import microbat.model.ClassLocation;
-import microbat.model.trace.Trace;
 import jmutation.trace.FileReader;
+import microbat.model.ClassLocation;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,18 +18,44 @@ public class ProjectExecutor extends Executor {
     private final ProjectConfig projectConfig;
     private final MicrobatConfig microbatConfig;
     private boolean compiled = false;
+
     public ProjectExecutor(MicrobatConfig microbatConfig, ProjectConfig proj) {
         super(proj.getProjectRoot());
         this.projectConfig = proj;
         this.microbatConfig = microbatConfig;
     }
 
+    private static List<File> walk(File start) {
+        File[] list = start.listFiles();
+        if (list == null) {
+            return new ArrayList<>();
+        }
+
+        List<File> jarFiles = new ArrayList<>();
+
+        for (File f : list) {
+            if (f.isDirectory()) {
+                jarFiles.addAll(walk(f));
+            } else {
+                if (f.getName().contains(".jar")) {
+                    jarFiles.add(f);
+                }
+            }
+        }
+        return jarFiles;
+    }
+
     /**
      * Compiles the entire project, including test classes
+     *
      * @return stdout as String
      */
     public String compile() {
         return exec(projectConfig.getCompileCommand());
+    }
+
+    public String packageProj() {
+        return exec(projectConfig.getPackageCommand());
     }
 
     public ExecutionResult exec(TestCase testCase) {
@@ -40,15 +65,15 @@ public class ProjectExecutor extends Executor {
                 return out;
             }
         }
-    	String dumpFilePath = microbatConfig.getDumpFilePath();
+        String dumpFilePath = microbatConfig.getDumpFilePath();
         try {
-	        File microbatDumpFile = new File(dumpFilePath);
-	        boolean dumpFileCreated = microbatDumpFile.createNewFile();
-	        if (dumpFileCreated) {
-	        	System.out.println("New dump file created at " + dumpFilePath);
-	        }
+            File microbatDumpFile = new File(dumpFilePath);
+            boolean dumpFileCreated = microbatDumpFile.createNewFile();
+            if (dumpFileCreated) {
+                System.out.println("New dump file created at " + dumpFilePath);
+            }
         } catch (IOException e) {
-        	throw new RuntimeException("Could not create dump file at " + dumpFilePath);
+            throw new RuntimeException("Could not create dump file at " + dumpFilePath);
         }
         // include microbat details to instrument run
         InstrumentationCommandBuilder ib = new InstrumentationCommandBuilder(microbatConfig, projectConfig.getDropInsDir());
@@ -66,26 +91,6 @@ public class ProjectExecutor extends Executor {
 
     public List<File> findJars() {
         return walk(projectConfig.getCompiledFolder());
-    }
-
-    private static List<File> walk(File start) {
-            File[] list = start.listFiles();
-            if (list == null) {
-                return new ArrayList<>();
-            }
-
-            List<File> jarFiles = new ArrayList<>();
-
-            for (File f : list) {
-                if (f.isDirectory()) {
-                    jarFiles.addAll(walk(f));
-                } else {
-                    if (f.getName().contains(".jar")) {
-                        jarFiles.add(f);
-                    }
-                }
-            }
-            return jarFiles;
     }
 
     private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
