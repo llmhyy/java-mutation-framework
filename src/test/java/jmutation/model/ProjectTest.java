@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ProjectTest {
 
@@ -16,11 +16,11 @@ class ProjectTest {
         Project proj = config.getProject();
 
         List<TestCase> testList = proj.getTestCases();
-
-        List<TestCase> truth = List.of(new TestCase("testSum()", 11, 16, "testSum", "CalculatorTest", null),
-                new TestCase("testSubs()", 18, 23, "testSubs",  "CalculatorTest",null),
-                new TestCase("testMul()", 25, 30, "testMul", "CalculatorTest", null),
-                new TestCase("testDiv()", 32, 37, "testDiv", "CalculatorTest", null));
+        String testClassName = "fr.spoonlabs.FLtest1.CalculatorTest";
+        List<TestCase> truth = List.of(new TestCase("testSum()", 11, 16, "testSum", testClassName, null),
+                new TestCase("testSubs()", 18, 23, "testSubs", testClassName, null),
+                new TestCase("testMul()", 25, 30, "testMul", testClassName, null),
+                new TestCase("testDiv()", 32, 37, "testDiv", testClassName, null));
         assertEquals(truth, testList);
     }
 }

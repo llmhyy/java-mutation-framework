@@ -2,6 +2,8 @@ package jmutation.mutation;
 
 import org.eclipse.jdt.core.dom.*;
 
+import java.util.List;
+
 public class MinimumASTNodeRetriever extends ASTVisitor{
 
 	private int startLine;
@@ -9,6 +11,8 @@ public class MinimumASTNodeRetriever extends ASTVisitor{
 	
 	private CompilationUnit unit;
 	private ASTNode node;
+
+	private List<ASTNode> nodes;
 	
 	public MinimumASTNodeRetriever(CompilationUnit unit, MutationRange range) {
 		this.unit = unit;
@@ -18,16 +22,35 @@ public class MinimumASTNodeRetriever extends ASTVisitor{
 
 	@Override
 	public boolean visit(InfixExpression node) {
-		setNodeAndLines(node);
-		return super.visit(node);
+		setNodeToList(node);
+		return true;
 	}
 
 	@Override
 	public boolean visit(WhileStatement node) {
-		setNodeAndLines(node);
-		return super.visit(node);
+		setNodeToList(node);
+		return true;
 	}
 
+	@Override
+	public boolean visit(Block node) {
+		boolean shouldVisitBlock = ((int) Math.round(Math.random())) == 1;
+		if (!shouldVisitBlock) {
+			// If not deleting block, continue visiting children
+			return true;
+		}
+		setNodeToList(node);
+		return false;
+	}
+
+	private void setNodeToList(ASTNode node) {
+		int sLine = unit.getLineNumber(node.getStartPosition());
+		int eLine = unit.getLineNumber(node.getStartPosition() + node.getLength() - 1);
+		if(startLine <= sLine && eLine <= endLine) {
+			nodes.add(node);
+		}
+
+	}
 	public void setNodeAndLines(ASTNode node) {
 		int sLine = unit.getLineNumber(node.getStartPosition());
 		int eLine = unit.getLineNumber(node.getStartPosition() + node.getLength() - 1);
