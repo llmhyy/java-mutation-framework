@@ -4,9 +4,9 @@ import org.eclipse.jdt.core.dom.*;
 
 import java.util.List;
 
-public class MutationLoopToCondCommand extends MutationCommand {
+public class MutationWhileLoopToIfCommand extends MutationCommand {
 
-    public MutationLoopToCondCommand(ASTNode node) {
+    public MutationWhileLoopToIfCommand(ASTNode node) {
         super(node);
     }
 
