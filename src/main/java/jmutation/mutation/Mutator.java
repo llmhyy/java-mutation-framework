@@ -13,9 +13,6 @@ import org.eclipse.jdt.core.dom.*;
 import jmutation.execution.Coverage;
 import jmutation.model.Project;
 import jmutation.parser.ProjectParser;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -31,6 +28,11 @@ import org.eclipse.text.edits.UndoEdit;
  *
  */
 public class Mutator {
+	private MutationParser mutationParser;
+
+	public Mutator(MutationParser mutationParser) {
+		this.mutationParser = mutationParser;
+	}
 	public Project mutate(Coverage coverage, Project project) {
 		
 		// copy a project
@@ -49,27 +51,29 @@ public class Mutator {
 			}
 
 			CompilationUnit unit = ProjectParser.parseCompliationUnit(fileContent);
-			ASTNode node = parseRangeToNode(unit, range);
-			if (node == null) {
+			List<ASTNode> nodes = parseRangeToNodes(unit, range);
+
+			if (nodes.isEmpty()) {
 				// If node type is not implemented, skip for now
 				continue;
 			}
-			MutationCommand mutationCommand = MutationParser.createMutationCommand(node);
-			unit.recordModifications();
-			mutationCommand.executeMutation();
-			/**
-			 * TODO:
-			 *
-			 * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
-			 * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
-			 * to rewrite the AST
-			 */
+			for (ASTNode node: nodes) {
+				MutationCommand mutationCommand = mutationParser.createMutationCommand(node);
+				unit.recordModifications();
+				mutationCommand.executeMutation();
+				/**
+				 * TODO:
+				 *
+				 * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
+				 * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
+				 * to rewrite the AST
+				 */
 
-			// step 1: define mutation operator based on AST node
-			// step 2: apply mutation on the AST node
-			// step 3: rewrite the AST node back to Java doc
-			writeToFile(unit, file);
-			break;
+				// step 1: define mutation operator based on AST node
+				// step 2: apply mutation on the AST node
+				// step 3: rewrite the AST node back to Java doc
+				writeToFile(unit, file);
+			}
 		}
 		
 		return newProject;
@@ -86,11 +90,11 @@ public class Mutator {
 	 * @param range
 	 * @return
 	 */
-	private ASTNode parseRangeToNode(CompilationUnit unit, MutationRange range) {
-		MinimumASTNodeRetriever retriever = new MinimumASTNodeRetriever(unit, range);
+	private List<ASTNode> parseRangeToNodes(CompilationUnit unit, MutationRange range) {
+		ASTNodeRetriever retriever = new ASTNodeRetriever(unit, range);
 		unit.accept(retriever);
 
-		return retriever.getNode();
+		return retriever.getNodes();
 	}
 
 	private void writeToFile(CompilationUnit unit, File file) {

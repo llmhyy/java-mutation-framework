@@ -7,6 +7,7 @@ import com.beust.jcommander.Parameter;
 import jmutation.model.*;
 import jmutation.execution.ProjectExecutor;
 import jmutation.mutation.Mutator;
+import jmutation.mutation.parser.MutationParser;
 
 public class Main {
 	@Parameter(names = "-projectPath", description = "Path to project directory", required = true)
@@ -41,13 +42,13 @@ public class Main {
 
 		MicrobatConfig microbatConfig = params.microbatConfigPath == null ? MicrobatConfig.defaultConfig(projectPath) : MicrobatConfig.parse(params.microbatConfigPath, projectPath);
 
+		Mutator mutator = new Mutator(new MutationParser());
 		for(TestCase test: testList) {
 			System.out.println(test);
 			ExecutionResult result = new ProjectExecutor(microbatConfig, config).exec(test);
 			System.out.println(result);
 
-			Project mutatedProject = new Mutator().mutate(result.getCoverage(), proj);
-//			new ProjectCompiler().compile(mutatedProject);
+			Project mutatedProject = mutator.mutate(result.getCoverage(), proj);
 			ProjectConfig mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
 			ExecutionResult mutatedResult = new ProjectExecutor(microbatConfig, mutatedProjConfig).exec(test);

@@ -1,23 +1,44 @@
 package jmutation.mutation;
 
+import jmutation.mutation.parser.MutationParser;
 import org.eclipse.jdt.core.dom.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MinimumASTNodeRetriever extends ASTVisitor{
+/*
+Obtains nodes to be mutated within a given range
+ */
+public class ASTNodeRetriever extends ASTVisitor{
 
 	private int startLine;
 	private int endLine;
 	
 	private CompilationUnit unit;
-	private ASTNode node;
-
 	private List<ASTNode> nodes;
+
+	private boolean shouldRandomlyVisit = true;
 	
-	public MinimumASTNodeRetriever(CompilationUnit unit, MutationRange range) {
+	public ASTNodeRetriever(CompilationUnit unit, MutationRange range) {
 		this.unit = unit;
 		this.startLine = range.getStartLine();
 		this.endLine = range.getEndLine();
+		nodes = new ArrayList<>();
+	}
+
+	/* Constructor to turn off random visits, for testing */
+	public ASTNodeRetriever(CompilationUnit unit, MutationRange range, boolean shouldRandomlyVisit) {
+		this(unit, range);
+		this.shouldRandomlyVisit = shouldRandomlyVisit;
+	}
+
+	@Override
+	public boolean preVisit2(ASTNode node) {
+		if (!shouldRandomlyVisit) {
+			return true;
+		}
+		boolean shouldVisit = ((int) Math.round(Math.random())) == 1;
+		return shouldVisit;
 	}
 
 	@Override
@@ -34,12 +55,8 @@ public class MinimumASTNodeRetriever extends ASTVisitor{
 
 	@Override
 	public boolean visit(Block node) {
-		boolean shouldVisitBlock = ((int) Math.round(Math.random())) == 1;
-		if (!shouldVisitBlock) {
-			// If not deleting block, continue visiting children
-			return true;
-		}
 		setNodeToList(node);
+		// If removing block, should not visit its children
 		return false;
 	}
 
@@ -49,37 +66,9 @@ public class MinimumASTNodeRetriever extends ASTVisitor{
 		if(startLine <= sLine && eLine <= endLine) {
 			nodes.add(node);
 		}
-
-	}
-	public void setNodeAndLines(ASTNode node) {
-		int sLine = unit.getLineNumber(node.getStartPosition());
-		int eLine = unit.getLineNumber(node.getStartPosition() + node.getLength() - 1);
-
-		if(this.node == null) {
-			if(startLine <= sLine && eLine <= endLine) {
-				this.node = node;
-			}
-		}
-		else {
-			/**
-			 * TODO Cheng Hin
-			 */
-			int nSLine = unit.getLineNumber(this.node.getStartPosition());
-			int nELine = unit.getLineNumber(this.node.getStartPosition() + this.node.getLength() - 1);
-			if(startLine <= sLine && eLine <= endLine) {
-				if(sLine <= nSLine && nELine <= eLine) {
-					this.node = node;
-				}
-			}
-		}
 	}
 
-	public ASTNode getNode() {
-		return node;
+	public List<ASTNode> getNodes() {
+		return nodes;
 	}
-
-	public void setNode(ASTNode node) {
-		this.node = node;
-	}
-	
 }

@@ -3,6 +3,7 @@ package jmutation.mutation.parser;
 import jmutation.mutation.MathOperator;
 import jmutation.mutation.commands.*;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
@@ -17,7 +18,9 @@ public class MutationParser {
                 return new MutationMathOperatorCommand(node);
             }
         } else if (node instanceof WhileStatement) {
-            return new MutationLoopToCondCommand(node);
+            return new MutationWhileLoopToIfCommand(node);
+        } else if (node instanceof Block) {
+            return new MutationBlockRemovalCommand(node);
         }
         return null;
     }
