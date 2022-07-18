@@ -31,7 +31,8 @@ public class MutationChangeVarNameCommand extends MutationCommand {
             List<VariableDeclarationFragment> fragments = vd.fragments();
             VariableDeclarationFragment currentFragment = fragments.get(0);
             SimpleName currentName = currentFragment.getName();
-            if (currentName == simpleName) {
+            boolean isSameName = currentName.toString().equals(simpleName.toString());
+            if (isSameName) {
                 currentNodeType = vd.getType();
             }
         }
@@ -45,7 +46,8 @@ public class MutationChangeVarNameCommand extends MutationCommand {
             List<VariableDeclarationFragment> fragments = vd.fragments();
             VariableDeclarationFragment currentFragment = fragments.get(0);
             SimpleName currentName = currentFragment.getName();
-            if (currentName == simpleName) {
+            boolean isSameName = currentName.toString().equals(simpleName.toString());
+            if (isSameName) {
                 continue;
             }
             possibleReplacements.add(currentName);
