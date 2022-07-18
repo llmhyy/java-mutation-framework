@@ -1,9 +1,14 @@
 package jmutation.mutation.parser;
 
 import jmutation.mutation.MathOperator;
-import jmutation.mutation.commands.*;
+import jmutation.mutation.commands.MutationBlockRemovalCommand;
+import jmutation.mutation.commands.MutationCommand;
+import jmutation.mutation.commands.MutationForLoopToIfCommand;
+import jmutation.mutation.commands.MutationMathOperatorCommand;
+import jmutation.mutation.commands.MutationWhileLoopToIfCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
@@ -21,6 +26,8 @@ public class MutationParser {
             return new MutationWhileLoopToIfCommand(node);
         } else if (node instanceof Block) {
             return new MutationBlockRemovalCommand(node);
+        } else if (node instanceof ForStatement) {
+            return new MutationForLoopToIfCommand(node);
         }
         return null;
     }

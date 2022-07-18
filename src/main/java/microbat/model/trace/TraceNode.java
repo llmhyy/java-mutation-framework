@@ -1,5 +1,17 @@
 package microbat.model.trace;
 
+import microbat.graphdiff.GraphDiff;
+import microbat.graphdiff.HierarchyGraphDiffer;
+import microbat.model.AttributionVar;
+import microbat.model.Scope;
+import microbat.model.breakpoint.BreakPoint;
+import microbat.model.breakpoint.BreakPointValue;
+import microbat.model.value.VarValue;
+import microbat.model.variable.UserInterestedVariables;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,20 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.CatchClause;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import jmutation.graphdiff.GraphDiff;
-import jmutation.graphdiff.HierarchyGraphDiffer;
-import microbat.model.AttributionVar;
-import microbat.model.breakpoint.BreakPoint;
-import microbat.model.breakpoint.BreakPointValue;
-import microbat.model.Scope;
-import microbat.model.variable.UserInterestedVariables;
-import microbat.model.value.VarValue;
-
-public class TraceNode{
+public class TraceNode {
 
     public final static int STEP_CORRECT = 0;
     public final static int STEP_INCORRECT = 1;
@@ -35,21 +34,15 @@ public class TraceNode{
     public final static int WRITTEN_VARS_CORRECT = 6;
     public final static int WRITTEN_VARS_INCORRECT = 7;
     public final static int WRITTEN_VARS_UNKNOWN = 8;
-
+    protected List<VarValue> readVariables = new ArrayList<>();
+    protected List<VarValue> writtenVariables = new ArrayList<>();
     private Map<AttributionVar, Double> suspicousScoreMap = new HashMap<>();
-
     private int checkTime = -1;
-
     private BreakPoint breakPoint;
     private BreakPointValue programState;
     private BreakPointValue afterStepInState;
     private BreakPointValue afterStepOverState;
-
     private List<GraphDiff> consequences;
-
-    protected List<VarValue> readVariables = new ArrayList<>();
-    protected List<VarValue> writtenVariables = new ArrayList<>();
-
     private TraceNode controlDominator;
     private List<TraceNode> controlDominatees = new ArrayList<>();
 
@@ -87,6 +80,8 @@ public class TraceNode{
     private String bytecode;
 
     private transient double sliceBreakerProbability = 0;
+    private HashSet<TraceNode> allControlDominatees;
+    private List<TraceNode> allInvocationParents = null;
 
     /**
      * the first element of the pair is the read variable list, the second element is the
@@ -109,14 +104,14 @@ public class TraceNode{
         return this.getBreakPoint().isReturnStatement();
     }
 
-    public void addReturnVariable(VarValue var){
+    public void addReturnVariable(VarValue var) {
         this.returnedVariables.add(var);
     }
 
     public long calulcateDuration() {
         long t1 = getTimestamp();
         TraceNode next = getStepOverNext();
-        if(next != null) {
+        if (next != null) {
             long t2 = next.getTimestamp();
             return t2 - t1;
         }
@@ -128,16 +123,16 @@ public class TraceNode{
         return this.trace.findDataDependency(this, readVar);
     }
 
-    public int getReadVarCorrectness(UserInterestedVariables interestedVariables, boolean isUICheck){
+    public int getReadVarCorrectness(UserInterestedVariables interestedVariables, boolean isUICheck) {
 
-        for(VarValue var: getReadVariables()){
-            if(interestedVariables.contains(var)){
+        for (VarValue var : getReadVariables()) {
+            if (interestedVariables.contains(var)) {
                 return TraceNode.READ_VARS_INCORRECT;
             }
 
             List<VarValue> children = var.getAllDescedentChildren();
-            for(VarValue child: children){
-                if(interestedVariables.contains(child)){
+            for (VarValue child : children) {
+                if (interestedVariables.contains(child)) {
                     return TraceNode.READ_VARS_INCORRECT;
                 }
             }
@@ -150,34 +145,32 @@ public class TraceNode{
          * correct if either (1) the node has been checked or (2) it is being checked on the UI.
          *
          */
-        if(hasChecked() || isUICheck){
+        if (hasChecked() || isUICheck) {
             return TraceNode.READ_VARS_CORRECT;
-        }
-        else{
+        } else {
             return TraceNode.READ_VARS_UNKNOWN;
         }
 
     }
 
-    public int getWittenVarCorrectness(UserInterestedVariables interestedVariables, boolean isUICheck){
+    public int getWittenVarCorrectness(UserInterestedVariables interestedVariables, boolean isUICheck) {
 
-        for(VarValue var: getWrittenVariables()){
-            if(interestedVariables.contains(var)){
+        for (VarValue var : getWrittenVariables()) {
+            if (interestedVariables.contains(var)) {
                 return TraceNode.WRITTEN_VARS_INCORRECT;
             }
 
             List<VarValue> children = var.getAllDescedentChildren();
-            for(VarValue child: children){
-                if(interestedVariables.contains(child)){
+            for (VarValue child : children) {
+                if (interestedVariables.contains(child)) {
                     return TraceNode.READ_VARS_INCORRECT;
                 }
             }
         }
 
-        if(hasChecked()|| isUICheck){
+        if (hasChecked() || isUICheck) {
             return TraceNode.WRITTEN_VARS_CORRECT;
-        }
-        else{
+        } else {
             return TraceNode.WRITTEN_VARS_UNKNOWN;
         }
     }
@@ -204,7 +197,7 @@ public class TraceNode{
         return true;
     }
 
-    public String toString(){
+    public String toString() {
         StringBuffer buffer = new StringBuffer();
 
         buffer.append("order ");
@@ -216,7 +209,7 @@ public class TraceNode{
         buffer.append(getLineNumber());
 
         String methodName = this.breakPoint.getMethodName();
-        if(methodName != null){
+        if (methodName != null) {
             buffer.append(" in ");
             buffer.append(methodName);
             buffer.append("(...)");
@@ -225,15 +218,15 @@ public class TraceNode{
         return buffer.toString();
     }
 
-    public String getClassCanonicalName(){
+    public String getClassCanonicalName() {
         return this.breakPoint.getClassCanonicalName();
     }
 
-    public String getDeclaringCompilationUnitName(){
+    public String getDeclaringCompilationUnitName() {
         return this.breakPoint.getDeclaringCompilationUnitName();
     }
 
-    public int getLineNumber(){
+    public int getLineNumber() {
         return this.breakPoint.getLineNumber();
     }
 
@@ -262,10 +255,9 @@ public class TraceNode{
     }
 
     public BreakPointValue getAfterState() {
-        if(this.afterStepOverState != null){
+        if (this.afterStepOverState != null) {
             return this.afterStepOverState;
-        }
-        else{
+        } else {
             return afterStepInState;
         }
 
@@ -288,20 +280,18 @@ public class TraceNode{
     }
 
     public TraceNode getStepOverNext() {
-        if(stepOverNext!=null){
+        if (stepOverNext != null) {
             return stepOverNext;
-        }
-        else{
+        } else {
             TraceNode n = stepInNext;
-            while(n!=null) {
+            while (n != null) {
                 TraceNode p1 = n.getInvocationParent();
                 TraceNode p2 = this.getInvocationParent();
-                if(p1==null && p2==null) {
+                if (p1 == null && p2 == null) {
                     stepOverNext = n;
                     return n;
-                }
-                else if(p1!=null && p2!=null) {
-                    if(p1.getOrder()==p2.getOrder()) {
+                } else if (p1 != null && p2 != null) {
+                    if (p1.getOrder() == p2.getOrder()) {
                         stepOverNext = n;
                         return n;
                     }
@@ -318,20 +308,18 @@ public class TraceNode{
     }
 
     public TraceNode getStepOverPrevious() {
-        if(stepOverPrevious!=null){
+        if (stepOverPrevious != null) {
             return stepOverPrevious;
-        }
-        else if(stepInPrevious!=null){
+        } else if (stepInPrevious != null) {
             TraceNode n = stepInPrevious;
-            while(n!=null) {
+            while (n != null) {
                 TraceNode p1 = n.getInvocationParent();
                 TraceNode p2 = this.getInvocationParent();
-                if(p1==null && p2==null) {
+                if (p1 == null && p2 == null) {
                     stepOverPrevious = n;
                     return n;
-                }
-                else if(p1!=null && p2!=null) {
-                    if(p1.getOrder()==p2.getOrder()) {
+                } else if (p1 != null && p2 != null) {
+                    if (p1.getOrder() == p2.getOrder()) {
                         stepOverPrevious = n;
                         return n;
                     }
@@ -354,7 +342,7 @@ public class TraceNode{
         this.invocationChildren = invocationChildren;
     }
 
-    public void addInvocationChild(TraceNode node){
+    public void addInvocationChild(TraceNode node) {
         this.invocationChildren.add(node);
     }
 
@@ -410,9 +398,9 @@ public class TraceNode{
 
     public Map<TraceNode, VarValue> getDataDominators() {
         Map<TraceNode, VarValue> dataDominators = new HashMap<>();
-        for(VarValue readVar: this.getReadVariables()){
+        for (VarValue readVar : this.getReadVariables()) {
             TraceNode dominator = this.trace.findDataDependency(this, readVar);
-            if(dominator != null){
+            if (dominator != null) {
                 dataDominators.put(dominator, readVar);
             }
         }
@@ -422,9 +410,9 @@ public class TraceNode{
 
     public Map<TraceNode, VarValue> getDataDominatee() {
         Map<TraceNode, VarValue> dataDominatees = new HashMap<>();
-        for(VarValue writtenVar: this.getWrittenVariables()){
+        for (VarValue writtenVar : this.getWrittenVariables()) {
             List<TraceNode> dominatees = this.trace.findDataDependentee(this, writtenVar);
-            for(TraceNode dominatee: dominatees){
+            for (TraceNode dominatee : dominatees) {
                 dataDominatees.put(dominatee, writtenVar);
             }
         }
@@ -448,7 +436,7 @@ public class TraceNode{
         this.readVariables = readVariables;
     }
 
-    public void addReadVariable(VarValue var){
+    public void addReadVariable(VarValue var) {
         this.readVariables.add(var);
     }
 
@@ -460,7 +448,7 @@ public class TraceNode{
         this.writtenVariables = writtenVariables;
     }
 
-    public void addWrittenVariable(VarValue var){
+    public void addWrittenVariable(VarValue var) {
         this.writtenVariables.add(var);
     }
 
@@ -474,15 +462,14 @@ public class TraceNode{
 
     public void addSuspicousScore(AttributionVar var, double score) {
         Double ss = getSuspicousScore(var);
-        if(ss == null){
+        if (ss == null) {
             setSuspicousScore(var, score);
-        }
-        else{
-            setSuspicousScore(var, ss+score);
+        } else {
+            setSuspicousScore(var, ss + score);
         }
     }
 
-    public boolean hasChecked(){
+    public boolean hasChecked() {
         return checkTime != -1;
     }
 
@@ -494,18 +481,18 @@ public class TraceNode{
         this.checkTime = markTime;
     }
 
-    public boolean isReadVariablesContains(String varID){
-        for(VarValue readVar: this.getReadVariables()){
-            if(readVar.getVarID().equals(varID)){
+    public boolean isReadVariablesContains(String varID) {
+        for (VarValue readVar : this.getReadVariables()) {
+            if (readVar.getVarID().equals(varID)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean isWrittenVariablesContains(String varID){
-        for(VarValue writtenVar: this.getWrittenVariables()){
-            if(writtenVar.getVarID().equals(varID)){
+    public boolean isWrittenVariablesContains(String varID) {
+        for (VarValue writtenVar : this.getWrittenVariables()) {
+            if (writtenVar.getVarID().equals(varID)) {
                 return true;
             }
         }
@@ -529,14 +516,14 @@ public class TraceNode{
     }
 
     private void findDominators(TraceNode node, Map<Integer, TraceNode> dominators) {
-        for(TraceNode dominator: node.getDataDominators().keySet()){
-            if(!dominators.containsKey(dominator.getOrder())){
+        for (TraceNode dominator : node.getDataDominators().keySet()) {
+            if (!dominators.containsKey(dominator.getOrder())) {
                 dominators.put(dominator.getOrder(), dominator);
                 findDominators(dominator, dominators);
             }
         }
 
-        if(this.controlDominator != null){
+        if (this.controlDominator != null) {
             dominators.put(this.controlDominator.getOrder(), this.controlDominator);
         }
 
@@ -551,9 +538,9 @@ public class TraceNode{
     }
 
     private void findDominatees(TraceNode node, Map<Integer, TraceNode> dominatees) {
-        for(TraceNode dominatee: node.getDataDominatee().keySet()){
-            if(!dominatees.containsKey(dominatee.getOrder())){
-                if(dominatee.getOrder() == 1){
+        for (TraceNode dominatee : node.getDataDominatee().keySet()) {
+            if (!dominatees.containsKey(dominatee.getOrder())) {
+                if (dominatee.getOrder() == 1) {
                     System.currentTimeMillis();
                 }
 
@@ -562,9 +549,9 @@ public class TraceNode{
             }
         }
 
-        for(TraceNode controlDominatee: node.getControlDominatees()){
-            if(!dominatees.containsKey(controlDominatee.getOrder())){
-                if(controlDominatee.getOrder() == 1){
+        for (TraceNode controlDominatee : node.getControlDominatees()) {
+            if (!dominatees.containsKey(controlDominatee.getOrder())) {
+                if (controlDominatee.getOrder() == 1) {
                     System.currentTimeMillis();
                 }
 
@@ -574,12 +561,12 @@ public class TraceNode{
         }
     }
 
-    public void setControlDominator(TraceNode controlDominator){
-        this.controlDominator = controlDominator;
+    public TraceNode getControlDominator() {
+        return this.controlDominator;
     }
 
-    public TraceNode getControlDominator(){
-        return this.controlDominator;
+    public void setControlDominator(TraceNode controlDominator) {
+        this.controlDominator = controlDominator;
     }
 
     public List<TraceNode> getControlDominatees() {
@@ -590,32 +577,32 @@ public class TraceNode{
         this.controlDominatees = controlDominatees;
     }
 
-    public void addControlDominatee(TraceNode dominatee){
-        if(!this.controlDominatees.contains(dominatee)){
+    public void addControlDominatee(TraceNode dominatee) {
+        if (!this.controlDominatees.contains(dominatee)) {
             this.controlDominatees.add(dominatee);
         }
     }
 
-    public boolean isConditional(){
+    public boolean isConditional() {
         return this.breakPoint.isConditional();
     }
 
-    public boolean isBranch(){
+    public boolean isBranch() {
         return this.breakPoint.isBranch();
     }
 
-    public Scope getControlScope(){
+    public Scope getControlScope() {
         return this.breakPoint.getControlScope();
     }
 
-    public Scope getLoopScope(){
+    public Scope getLoopScope() {
         return this.breakPoint.getLoopScope();
     }
 
     public int getInvocationLevel() {
         int level = 0;
         TraceNode parent = getInvocationParent();
-        while(parent != null){
+        while (parent != null) {
             parent = parent.getInvocationParent();
             level++;
         }
@@ -626,7 +613,7 @@ public class TraceNode{
     public int getAbstractionLevel() {
         int level = 0;
         TraceNode parent = getAbstractionParent();
-        while(parent != null){
+        while (parent != null) {
             parent = parent.getAbstractionParent();
             level++;
         }
@@ -635,25 +622,13 @@ public class TraceNode{
     }
 
     public boolean isLoopCondition() {
-        if(isConditional()){
+        if (isConditional()) {
             Scope scope = getControlScope();
-            if(scope != null){
+            if (scope != null) {
                 return scope.isLoop();
             }
         }
         return false;
-    }
-
-    private HashSet<TraceNode> allControlDominatees;
-    public List<TraceNode> findAllControlDominatees() {
-        if(allControlDominatees==null){
-            HashSet<TraceNode> controlDominatees = new HashSet<>();
-            findAllControlDominatees(this, controlDominatees);
-            allControlDominatees = controlDominatees;
-        }
-
-
-        return new ArrayList<TraceNode>(allControlDominatees);
     }
 
 //	private void findAllControlDominatees(TraceNode node, HashSet<TraceNode> controlDominatees) {
@@ -666,13 +641,24 @@ public class TraceNode{
 //		}
 //	}
 
+    public List<TraceNode> findAllControlDominatees() {
+        if (allControlDominatees == null) {
+            HashSet<TraceNode> controlDominatees = new HashSet<>();
+            findAllControlDominatees(this, controlDominatees);
+            allControlDominatees = controlDominatees;
+        }
+
+
+        return new ArrayList<TraceNode>(allControlDominatees);
+    }
+
     private void findAllControlDominatees(TraceNode node, HashSet<TraceNode> controlDominatees) {
         Stack<TraceNode> stack = new Stack<>();
         stack.push(node);
         while (!stack.isEmpty()) {
             TraceNode curNode = stack.pop();
-            for(TraceNode dominatee: curNode.getControlDominatees()){
-                if(!controlDominatees.contains(dominatee)){
+            for (TraceNode dominatee : curNode.getControlDominatees()) {
+                if (!controlDominatees.contains(dominatee)) {
                     controlDominatees.add(dominatee);
                     stack.push(dominatee);
                 }
@@ -682,11 +668,12 @@ public class TraceNode{
 
     public boolean hasSameLocation(TraceNode node) {
         return getDeclaringCompilationUnitName().equals(node.getDeclaringCompilationUnitName()) &&
-                getLineNumber()==node.getLineNumber();
+                getLineNumber() == node.getLineNumber();
     }
 
     /**
      * The nearest control diminator which is a loop condition.
+     *
      * @return
      */
     public TraceNode findContainingLoopControlDominator() {
@@ -698,13 +685,12 @@ public class TraceNode{
 //			}
 //		}
 
-        if(this.controlDominator != null){
+        if (this.controlDominator != null) {
             TraceNode controlDominator = this.controlDominator;
-            while(controlDominator != null){
-                if(controlDominator.isLoopCondition()  && controlDominator.isLoopContainsNodeScope(this)){
+            while (controlDominator != null) {
+                if (controlDominator.isLoopCondition() && controlDominator.isLoopContainsNodeScope(this)) {
                     return controlDominator;
-                }
-                else{
+                } else {
                     controlDominator = controlDominator.getControlDominator();
                 }
             }
@@ -738,14 +724,14 @@ public class TraceNode{
      *
      * <code>
      * while(true){<br>
-     *    int a = 1;<br>
-     *    m();<br>
+     * int a = 1;<br>
+     * m();<br>
      * }<br>
      * void m(){<br>
-     *    int b = 2;<br>
+     * int b = 2;<br>
      * }<br>
      * </code>
-     *
+     * <p>
      * the node (<code>int b = 2;</code>) is under the scope of node (<code>while(true)</code>).
      *
      * @param traceNode
@@ -753,17 +739,17 @@ public class TraceNode{
      */
     public boolean isLoopContainsNodeScope(TraceNode traceNode) {
 
-        if(this.isLoopCondition()){
+        if (this.isLoopCondition()) {
             List<TraceNode> parentList = new ArrayList<>();
             TraceNode node = traceNode;
-            while(node != null){
+            while (node != null) {
                 parentList.add(node);
                 node = node.getInvocationParent();
             }
 //			Scope scope = getControlScope();
             Scope scope = getLoopScope();
-            for(TraceNode parent: parentList){
-                if(scope.containsNodeScope(parent)){
+            for (TraceNode parent : parentList) {
+                if (scope.containsNodeScope(parent)) {
                     return true;
                 }
             }
@@ -772,27 +758,24 @@ public class TraceNode{
         return false;
     }
 
-    public TraceNode getAbstractionParent(){
+    public TraceNode getAbstractionParent() {
         TraceNode invocationParent = getInvocationParent();
         TraceNode loopParent = getLoopParent();
 
-        if(invocationParent==null && loopParent==null){
+        if (invocationParent == null && loopParent == null) {
             return null;
-        }
-        else if(invocationParent!=null && loopParent==null){
+        } else if (invocationParent != null && loopParent == null) {
             return invocationParent;
-        }
-        else if(invocationParent==null && loopParent!=null){
+        } else if (invocationParent == null && loopParent != null) {
             return loopParent;
-        }
-        else{
-            TraceNode abstractionParent = (invocationParent.getOrder()>loopParent.getOrder())?
-                    invocationParent:loopParent;
+        } else {
+            TraceNode abstractionParent = (invocationParent.getOrder() > loopParent.getOrder()) ?
+                    invocationParent : loopParent;
             return abstractionParent;
         }
     }
 
-    public List<TraceNode> getAbstractChildren(){
+    public List<TraceNode> getAbstractChildren() {
         List<TraceNode> abstractChildren = new ArrayList<>();
 
 //		if(this.loopChildren.isEmpty() && this.invocationChildren.isEmpty()){
@@ -817,8 +800,8 @@ public class TraceNode{
 
         abstractChildren.addAll(this.invocationChildren);
         clearLoopParentsInMethodParent(abstractChildren);
-        for(TraceNode loopChild: this.loopChildren){
-            if(!abstractChildren.contains(loopChild)){
+        for (TraceNode loopChild : this.loopChildren) {
+            if (!abstractChildren.contains(loopChild)) {
                 abstractChildren.add(loopChild);
             }
         }
@@ -826,15 +809,15 @@ public class TraceNode{
         return abstractChildren;
     }
 
-    public boolean isAbstractParent(){
-        return getAbstractChildren().size()!=0;
+    public boolean isAbstractParent() {
+        return getAbstractChildren().size() != 0;
     }
 
     private void clearLoopParentsInMethodParent(List<TraceNode> abstractChildren) {
         Iterator<TraceNode> iter = abstractChildren.iterator();
-        while(iter.hasNext()){
+        while (iter.hasNext()) {
             TraceNode node = iter.next();
-            if(isIndirectlyLoopContains(node)){
+            if (isIndirectlyLoopContains(node)) {
                 iter.remove();
             }
         }
@@ -843,13 +826,13 @@ public class TraceNode{
     private boolean isIndirectlyLoopContains(TraceNode node) {
         List<TraceNode> loopParents = new ArrayList<>();
         TraceNode loopParent = node.getLoopParent();
-        while(loopParent != null){
+        while (loopParent != null) {
             loopParents.add(loopParent);
             loopParent = loopParent.getLoopParent();
         }
 
-        for(TraceNode lParent: loopParents){
-            if(this.invocationChildren.contains(lParent)){
+        for (TraceNode lParent : loopParents) {
+            if (this.invocationChildren.contains(lParent)) {
                 return true;
             }
         }
@@ -859,11 +842,10 @@ public class TraceNode{
 
     public int findTraceLength() {
         TraceNode node = this;
-        while(node.getStepInNext() != null){
-            if(node.getStepOverNext() != null){
+        while (node.getStepInNext() != null) {
+            if (node.getStepOverNext() != null) {
                 node = node.getStepOverNext();
-            }
-            else{
+            } else {
                 node = node.getStepInNext();
             }
         }
@@ -887,18 +869,16 @@ public class TraceNode{
         this.loopParent = loopParent;
     }
 
-    public void addLoopChild(TraceNode loopChild){
+    public void addLoopChild(TraceNode loopChild) {
         this.loopChildren.add(loopChild);
     }
 
-    private List<TraceNode> allInvocationParents = null;
-
     public List<TraceNode> findAllInvocationParents() {
-        if(allInvocationParents==null) {
+        if (allInvocationParents == null) {
             Set<TraceNode> set = new HashSet<>();
             TraceNode parent = this.getInvocationParent();
-            while(parent != null){
-                if(set.contains(parent)) {
+            while (parent != null) {
+                if (set.contains(parent)) {
                     break;
                 }
                 set.add(parent);
@@ -918,15 +898,15 @@ public class TraceNode{
 
     public List<VarValue> getWrongReadVars(UserInterestedVariables interestedVariables) {
         List<VarValue> vars = new ArrayList<>();
-        for(VarValue var: getReadVariables()){
-            if(interestedVariables.contains(var)){
+        for (VarValue var : getReadVariables()) {
+            if (interestedVariables.contains(var)) {
                 vars.add(var);
             }
 
             List<VarValue> children = var.getAllDescedentChildren();
-            for(VarValue child: children){
-                if(interestedVariables.contains(child)){
-                    if(!vars.contains(child)){
+            for (VarValue child : children) {
+                if (interestedVariables.contains(child)) {
+                    if (!vars.contains(child)) {
                         vars.add(child);
                     }
                 }
@@ -937,9 +917,9 @@ public class TraceNode{
     }
 
     public boolean containSynonymousReadVar(VarValue readVar) {
-        for(VarValue readVariable: getReadVariables()){
-            if(readVariable.getVarName().equals(readVar.getVarName())
-                    && readVariable.getClass().equals(readVar.getClass())){
+        for (VarValue readVariable : getReadVariables()) {
+            if (readVariable.getVarName().equals(readVar.getVarName())
+                    && readVariable.getClass().equals(readVar.getClass())) {
                 return true;
             }
         }
@@ -950,18 +930,15 @@ public class TraceNode{
         TraceNode controlDom = getControlDominator();
         TraceNode invocationParent = getInvocationParent();
 
-        if(controlDom!=null && invocationParent!=null) {
-            if(controlDom.getOrder()<invocationParent.getOrder()) {
+        if (controlDom != null && invocationParent != null) {
+            if (controlDom.getOrder() < invocationParent.getOrder()) {
                 return invocationParent;
-            }
-            else {
+            } else {
                 return controlDom;
             }
-        }
-        else if(controlDom!=null && invocationParent==null) {
+        } else if (controlDom != null && invocationParent == null) {
             return controlDom;
-        }
-        else if(controlDom==null && invocationParent!=null) {
+        } else if (controlDom == null && invocationParent != null) {
             return invocationParent;
         }
 
@@ -992,31 +969,7 @@ public class TraceNode{
         this.runtimePC = runtimePC;
     }
 
-    class CatchClauseFinder extends ASTVisitor{
-        int line;
-        CompilationUnit cu;
-
-        boolean find = false;
-
-        public CatchClauseFinder(int line, CompilationUnit cu) {
-            super();
-            this.line = line;
-            this.cu = cu;
-        }
-
-        public boolean visit(CatchClause clause){
-            int startLine = cu.getLineNumber(clause.getStartPosition());
-            int endLine = cu.getLineNumber(clause.getStartPosition()+clause.getLength());
-
-            if(startLine<=line && line<=endLine){
-                find = true;
-            }
-
-            return false;
-        }
-    }
-
-    public void setSourceVersion(boolean flag){
+    public void setSourceVersion(boolean flag) {
         this.breakPoint.setSourceVersion(flag);
     }
 
@@ -1050,6 +1003,30 @@ public class TraceNode{
 
     public void setBytecode(String bytecode) {
         this.bytecode = bytecode;
+    }
+
+    class CatchClauseFinder extends ASTVisitor {
+        int line;
+        CompilationUnit cu;
+
+        boolean find = false;
+
+        public CatchClauseFinder(int line, CompilationUnit cu) {
+            super();
+            this.line = line;
+            this.cu = cu;
+        }
+
+        public boolean visit(CatchClause clause) {
+            int startLine = cu.getLineNumber(clause.getStartPosition());
+            int endLine = cu.getLineNumber(clause.getStartPosition() + clause.getLength());
+
+            if (startLine <= line && line <= endLine) {
+                find = true;
+            }
+
+            return false;
+        }
     }
 
 }

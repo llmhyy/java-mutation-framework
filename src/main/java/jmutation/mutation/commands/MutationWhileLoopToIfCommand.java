@@ -1,6 +1,12 @@
 package jmutation.mutation.commands;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import java.util.List;
 
@@ -11,7 +17,7 @@ public class MutationWhileLoopToIfCommand extends MutationCommand {
     }
 
     @Override
-    public ASTNode executeMutation(){
+    public ASTNode executeMutation() {
         WhileStatement whileStatement = (WhileStatement) node;
         Block parent = (Block) whileStatement.getParent();
         List<Statement> stmtLs = parent.statements();
@@ -24,13 +30,10 @@ public class MutationWhileLoopToIfCommand extends MutationCommand {
         Expression expCopy = (Expression) ASTNode.copySubtree(expression.getAST(), expression);
         Statement bodyCopy = (Statement) ASTNode.copySubtree(body.getAST(), body);
 
-        try {
-            ifStmt.setExpression(expCopy);
-            ifStmt.setThenStatement(bodyCopy);
-            stmtLs.set(idxOfWhile, ifStmt);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        ifStmt.setExpression(expCopy);
+        ifStmt.setThenStatement(bodyCopy);
+        stmtLs.set(idxOfWhile, ifStmt);
+
         return ifStmt;
     }
 }
