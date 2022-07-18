@@ -1,5 +1,6 @@
-package jmutation.mutation;
+package jmutation.mutation.command;
 
+import jmutation.mutation.MutationTestHelper;
 import jmutation.mutation.commands.MutationBlockRemovalCommand;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MutationBlockRemovalCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
+
     @Test
     public void executeMutation_validASTNode_mutatesCorrectly() {
         String documentStr = "public class Main {" +

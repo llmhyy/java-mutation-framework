@@ -33,4 +33,8 @@ public class MutationTestHelper {
         List<BodyDeclaration> bodyDeclarations = typeRoot.bodyDeclarations();
         return bodyDeclarations;
     }
+
+    public CompilationUnit getCompilationUnit() {
+        return cu;
+    }
 }

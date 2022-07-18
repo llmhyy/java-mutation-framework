@@ -31,7 +31,6 @@ public class MutationChangeVarNameCommand extends MutationCommand {
             List<VariableDeclarationFragment> fragments = vd.fragments();
             VariableDeclarationFragment currentFragment = fragments.get(0);
             SimpleName currentName = currentFragment.getName();
-            // Use subtree match
             if (currentName == simpleName) {
                 currentNodeType = vd.getType();
             }
@@ -39,13 +38,13 @@ public class MutationChangeVarNameCommand extends MutationCommand {
         List<SimpleName> possibleReplacements = new ArrayList<>();
         for (VariableDeclarationStatement vd : variableDeclarations) {
             Type currentType = vd.getType();
-            if (currentType != currentNodeType) {
+            boolean isSameType = currentNodeType.toString().equals(currentType.toString());
+            if (!isSameType) {
                 continue;
             }
             List<VariableDeclarationFragment> fragments = vd.fragments();
             VariableDeclarationFragment currentFragment = fragments.get(0);
             SimpleName currentName = currentFragment.getName();
-            // Use subtree match
             if (currentName == simpleName) {
                 continue;
             }
@@ -57,7 +56,9 @@ public class MutationChangeVarNameCommand extends MutationCommand {
         ASTNode parent = simpleName.getParent();
         StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
         int randIdx = (int) Math.round(Math.random() * (possibleReplacements.size() - 1));
-        parent.setStructuralProperty(locationInParent, possibleReplacements.get(randIdx));
+        SimpleName replacement = possibleReplacements.get(randIdx);
+        SimpleName replacementClone = ast.newSimpleName(replacement.getIdentifier());
+        parent.setStructuralProperty(locationInParent, replacementClone);
         return simpleName;
     }
 }
