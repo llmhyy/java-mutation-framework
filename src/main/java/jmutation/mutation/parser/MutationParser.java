@@ -7,34 +7,52 @@ import jmutation.mutation.commands.MutationForLoopToIfCommand;
 import jmutation.mutation.commands.MutationMathOperatorCommand;
 import jmutation.mutation.commands.MutationWhileLoopToIfCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import java.util.Set;
 
-public class MutationParser {
-    static public MutationCommand createMutationCommand(ASTNode node) {
-        // TODO: check and return correct mutation command based on contents of ASTNode
-        if (node instanceof InfixExpression) {
-            InfixExpression currNode = (InfixExpression) node;
-            if (isMathOperator(currNode)) {
-                return new MutationMathOperatorCommand(node);
-            }
-        } else if (node instanceof WhileStatement) {
-            return new MutationWhileLoopToIfCommand(node);
-        } else if (node instanceof Block) {
-            return new MutationBlockRemovalCommand(node);
-        } else if (node instanceof ForStatement) {
-            return new MutationForLoopToIfCommand(node);
-        }
-        return null;
-    }
+public class MutationParser extends ASTVisitor {
+    MutationCommand command;
 
     private static boolean isMathOperator(InfixExpression e) {
-        Set<InfixExpression.Operator> mathOperators = MathOperator.getOperatorSet();
+        Set<Operator> mathOperators = MathOperator.getOperatorSet();
         InfixExpression.Operator currentOp = e.getOperator();
         return mathOperators.contains(currentOp);
+    }
+
+    public MutationCommand parse(ASTNode node) {
+        node.accept(this);
+        return command;
+    }
+
+    @Override
+    public boolean visit(InfixExpression node) {
+        if (isMathOperator(node)) {
+            command = new MutationMathOperatorCommand(node);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean visit(WhileStatement node) {
+        command = new MutationWhileLoopToIfCommand(node);
+        return false;
+    }
+
+    @Override
+    public boolean visit(ForStatement node) {
+        command = new MutationForLoopToIfCommand(node);
+        return false;
+    }
+
+    @Override
+    public boolean visit(Block node) {
+        command = new MutationBlockRemovalCommand(node);
+        return false;
     }
 }

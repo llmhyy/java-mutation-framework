@@ -27,7 +27,8 @@ public class MutationParserTest {
         helper.parseDocStr(documentStr);
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         ASTNode methodBody = (ASTNode) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
-        MutationCommand command = MutationParser.createMutationCommand(methodBody);
+        MutationParser parser = new MutationParser();
+        MutationCommand command = parser.parse(methodBody);
         assertTrue(command instanceof MutationBlockRemovalCommand);
     }
 }
