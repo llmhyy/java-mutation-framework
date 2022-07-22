@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,9 +28,11 @@ import java.util.List;
  */
 public class Mutator {
     private MutationParser mutationParser;
+    private List<MutationCommand> mutationHistory;
 
     public Mutator(MutationParser mutationParser) {
         this.mutationParser = mutationParser;
+        this.mutationHistory = new ArrayList<>();
     }
 
     public Project mutate(Coverage coverage, Project project) {
@@ -60,6 +63,7 @@ public class Mutator {
             for (ASTNode node : nodes) {
                 MutationCommand mutationCommand = mutationParser.createMutationCommand(node);
                 mutationCommand.executeMutation();
+                mutationHistory.add(mutationCommand);
                 /**
                  * TODO:
                  *
@@ -121,5 +125,9 @@ public class Mutator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<MutationCommand> getMutationHistory() {
+        return mutationHistory;
     }
 }

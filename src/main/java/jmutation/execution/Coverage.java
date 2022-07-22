@@ -1,33 +1,62 @@
 package jmutation.execution;
 
-import java.util.*;
-
 import jmutation.mutation.MutationRange;
 import microbat.model.ClassLocation;
+import microbat.model.breakpoint.BreakPoint;
+import microbat.model.trace.Trace;
+import microbat.model.trace.TraceNode;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 public class Coverage {
-    private Set<ClassLocation> classLocationSet;
-    
-    private List<MutationRange> ranges;
+	private List<MutationRange> ranges;
 
-    public Coverage(Set<ClassLocation> classLocationSet) {
-        this.classLocationSet = classLocationSet;
+	private Trace trace;
+
+	public Coverage(Set<ClassLocation> classLocationSet) {
 		Iterator<ClassLocation> classLocationIterator = classLocationSet.iterator();
-        ranges = new ArrayList<>();
 		Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
-		while(classLocationIterator.hasNext()) {
-        	ClassLocation classLocation = classLocationIterator.next();
+		while (classLocationIterator.hasNext()) {
+			ClassLocation classLocation = classLocationIterator.next();
 			String canonicalClassName = classLocation.getClassCanonicalName();
 			int lineNumber = classLocation.getLineNumber();
-			if (!classAndLineNumbersMap.containsKey(canonicalClassName)) {
-				PriorityQueue<Integer> lineNumberQueue = new PriorityQueue<>();
-				lineNumberQueue.add(lineNumber);
-				classAndLineNumbersMap.put(canonicalClassName, lineNumberQueue);
-			} else {
-				PriorityQueue<Integer> existingLineNumQueue = classAndLineNumbersMap.get(canonicalClassName);
-				existingLineNumQueue.add(lineNumber);
-			}
-        }
+			addClassNameAndLineNumToMap(classAndLineNumbersMap, canonicalClassName, lineNumber);
+		}
+		ranges = formMutationRangesFromClassNameLineNumMap(classAndLineNumbersMap);
+	}
+
+	public Coverage(Trace trace) {
+		this.trace = trace;
+		List<TraceNode> traceNodes = trace.getExecutionList();
+		Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
+		for (TraceNode traceNode : traceNodes) {
+			BreakPoint breakPoint = traceNode.getBreakPoint();
+			String canonicalClassName = breakPoint.getClassCanonicalName();
+			int lineNumber = breakPoint.getLineNumber();
+			addClassNameAndLineNumToMap(classAndLineNumbersMap, canonicalClassName, lineNumber);
+		}
+		ranges = formMutationRangesFromClassNameLineNumMap(classAndLineNumbersMap);
+	}
+
+	private void addClassNameAndLineNumToMap(Map<String, PriorityQueue<Integer>> classAndLineNumbersMap, String canonicalClassName, int lineNumber) {
+		if (!classAndLineNumbersMap.containsKey(canonicalClassName)) {
+			PriorityQueue<Integer> lineNumberQueue = new PriorityQueue<>();
+			lineNumberQueue.add(lineNumber);
+			classAndLineNumbersMap.put(canonicalClassName, lineNumberQueue);
+		} else {
+			PriorityQueue<Integer> existingLineNumQueue = classAndLineNumbersMap.get(canonicalClassName);
+			existingLineNumQueue.add(lineNumber);
+		}
+	}
+
+	private List<MutationRange> formMutationRangesFromClassNameLineNumMap(Map<String, PriorityQueue<Integer>> classAndLineNumbersMap) {
+		List<MutationRange> mutationRanges = new ArrayList<>();
 		Iterator<Map.Entry<String, PriorityQueue<Integer>>> classAndLineNumberIterator = classAndLineNumbersMap.entrySet().iterator();
 		while (classAndLineNumberIterator.hasNext()) {
 			Map.Entry<String, PriorityQueue<Integer>> classLineNumbersEntry = classAndLineNumberIterator.next();
@@ -46,7 +75,7 @@ public class Coverage {
 				}
 				if (Math.abs(previousLineNum - lineNumber) > 1) {
 					MutationRange range = new MutationRange(classCanonicalName, startLineNum, lineNumber);
-					ranges.add(range);
+					mutationRanges.add(range);
 					previousLineNum = lineNumber;
 					startLineNum = lineNumber;
 					continue;
@@ -54,9 +83,10 @@ public class Coverage {
 				previousLineNum = lineNumber;
 			}
 			MutationRange range = new MutationRange(classCanonicalName, startLineNum, lineNumber);
-			ranges.add(range);
+			mutationRanges.add(range);
 		}
-    }
+		return mutationRanges;
+	}
 
 	public List<MutationRange> getRanges() {
 		return ranges;
@@ -66,4 +96,7 @@ public class Coverage {
 		this.ranges = ranges;
 	}
 
+	public Trace getTrace() {
+		return trace;
+	}
 }

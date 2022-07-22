@@ -1,14 +1,22 @@
 package jmutation.model;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import static java.lang.String.valueOf;
 
 public class MicrobatConfig {
     public static final String OPT_CLASS_PATH = "class_path";
@@ -40,54 +48,13 @@ public class MicrobatConfig {
             OPT_EXCLUDES_FILE, OPT_OVER_LONG_METHODS, OPT_REQUIRE_METHOD_SPLITTING, OPT_AVOID_TO_STRING_OF_PROXY_OBJ,
             OPT_LAUNCH_CLASS, OPT_JAVA_HOME, OPT_DUMP_FILE, OPT_TCP_PORT, OPT_CODE_RANGE, OPT_TRACE_RECORDER,
             OPT_RUN_ID);
-
-    private final Map<String, List<String>> argMap;
-
     private static final String AGENT_OPTION_SEPARATOR = "=";
     private static final String AGENT_PARAMS_SEPARATOR = ",";
     private static final String AGENT_PARAMS_MULTI_VALUE_SEPARATOR = File.pathSeparator;
+    private final Map<String, List<String>> argMap;
+
     MicrobatConfig(Map<String, List<String>> argMap) {
         this.argMap = argMap;
-    }
-
-    private MicrobatConfig updateEntry(String key, List<String> values) {
-        if (!validKeys.contains(key)) {
-            throw new RuntimeException("Updating invalid agent parameter " + key);
-        }
-        Map<String, List<String>> newArgMap = new HashMap<>(argMap);
-        newArgMap.put(key, values);
-        return new MicrobatConfig(newArgMap);
-    }
-
-    public MicrobatConfig setClassPaths(List<String> classPaths) {
-        return updateEntry(OPT_CLASS_PATH, classPaths);
-    }
-    public MicrobatConfig setDumpFilePath(String dumpFilePath) {
-        return updateEntry(OPT_DUMP_FILE, Arrays.asList(dumpFilePath));
-    }
-    public MicrobatConfig setTraceRecorder(String traceRecorder) {
-        return updateEntry(OPT_TRACE_RECORDER, Arrays.asList(traceRecorder));
-    }
-
-    public MicrobatConfig setLaunchClass(String launchClass) {
-        return updateEntry(OPT_LAUNCH_CLASS, Arrays.asList(launchClass));
-    }
-    public String getDumpFilePath() {
-        return argMap.get(OPT_DUMP_FILE).get(0);
-    }
-
-    public String getJavaHome() {
-        return argMap.get(OPT_JAVA_HOME).get(0);
-    }
-
-    public String getClassPathStr() {
-        List<String> classPaths;
-        if (argMap.containsKey(OPT_CLASS_PATH)) {
-            classPaths = argMap.get(OPT_CLASS_PATH);
-        } else {
-            classPaths = new ArrayList<>();
-        }
-        return String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, classPaths);
     }
 
     public static MicrobatConfig parse(String pathToConfigFile, String projectPath) {
@@ -136,10 +103,57 @@ public class MicrobatConfig {
         argMap.put(OPT_TRACE_RECORDER, List.of("FILE"));
         argMap.put(OPT_VARIABLE_LAYER, List.of("5"));
         argMap.put(OPT_LOG, List.of("printProgress", "error"));
-        argMap.put(OPT_PRECHECK, List.of("true"));
+        argMap.put(OPT_PRECHECK, List.of("false"));
         argMap.put(OPT_RUN_ID, List.of("1763794d-c0c2-4704-a483-20725cb39fd3"));
         argMap.put(OPT_WORKING_DIR, List.of(projectPath));
         return new MicrobatConfig(argMap);
+    }
+
+    private MicrobatConfig updateEntry(String key, List<String> values) {
+        if (!validKeys.contains(key)) {
+            throw new RuntimeException("Updating invalid agent parameter " + key);
+        }
+        Map<String, List<String>> newArgMap = new HashMap<>(argMap);
+        newArgMap.put(key, values);
+        return new MicrobatConfig(newArgMap);
+    }
+
+    public MicrobatConfig setPrecheck(boolean usePrecheck) {
+        return updateEntry(OPT_PRECHECK, Arrays.asList(valueOf(usePrecheck)));
+    }
+
+    public MicrobatConfig setClassPaths(List<String> classPaths) {
+        return updateEntry(OPT_CLASS_PATH, classPaths);
+    }
+
+    public MicrobatConfig setTraceRecorder(String traceRecorder) {
+        return updateEntry(OPT_TRACE_RECORDER, Arrays.asList(traceRecorder));
+    }
+
+    public MicrobatConfig setLaunchClass(String launchClass) {
+        return updateEntry(OPT_LAUNCH_CLASS, Arrays.asList(launchClass));
+    }
+
+    public String getDumpFilePath() {
+        return argMap.get(OPT_DUMP_FILE).get(0);
+    }
+
+    public MicrobatConfig setDumpFilePath(String dumpFilePath) {
+        return updateEntry(OPT_DUMP_FILE, Arrays.asList(dumpFilePath));
+    }
+
+    public String getJavaHome() {
+        return argMap.get(OPT_JAVA_HOME).get(0);
+    }
+
+    public String getClassPathStr() {
+        List<String> classPaths;
+        if (argMap.containsKey(OPT_CLASS_PATH)) {
+            classPaths = argMap.get(OPT_CLASS_PATH);
+        } else {
+            classPaths = new ArrayList<>();
+        }
+        return String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, classPaths);
     }
 
     @Override
@@ -158,7 +172,7 @@ public class MicrobatConfig {
             return false;
         }
 
-        for (Map.Entry<String, List<String>> keyValuePair: argMap.entrySet()) {
+        for (Map.Entry<String, List<String>> keyValuePair : argMap.entrySet()) {
             String key = keyValuePair.getKey();
             if (!otherArgMap.containsKey(key)) {
                 return false;
@@ -175,18 +189,18 @@ public class MicrobatConfig {
     @Override
     public String toString() {
         List<String> options = new ArrayList<>();
-        for (Map.Entry<String, List<String>> keyValuePair: argMap.entrySet()) {
+        for (Map.Entry<String, List<String>> keyValuePair : argMap.entrySet()) {
             StringBuilder optionBuilder = new StringBuilder();
             String key = keyValuePair.getKey();
             optionBuilder.append(key);
             List<String> values = keyValuePair.getValue();
             optionBuilder.append(AGENT_OPTION_SEPARATOR);
             String combinedValues = String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, values);
-            
-            if(key.equals("java_home")) {
-            	combinedValues = "\"" + combinedValues + "\"";
+
+            if (key.equals("java_home")) {
+                combinedValues = "\"" + combinedValues + "\"";
             }
-            
+
             optionBuilder.append(combinedValues);
             options.add(optionBuilder.toString());
         }

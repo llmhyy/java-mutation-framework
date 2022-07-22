@@ -1,34 +1,40 @@
 package jmutation.trace;
 
-import java.io.*;
+import microbat.model.ClassLocation;
+import microbat.model.ControlScope;
+import microbat.model.SourceScope;
+import microbat.model.breakpoint.BreakPoint;
+import microbat.model.trace.Trace;
+import microbat.model.trace.TraceNode;
+import microbat.model.value.VarValue;
+import microbat.util.ByteConverterUtil;
+import microbat.util.FileUtils;
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import microbat.model.breakpoint.BreakPoint;
-import microbat.model.trace.Trace;
-import microbat.model.trace.TraceNode;
-import microbat.model.ClassLocation;
-import microbat.model.ControlScope;
-import microbat.model.SourceScope;
-import microbat.model.value.VarValue;
-import microbat.util.FileUtils;
-import microbat.util.ByteConverterUtil;
-
 public class TraceInputStream extends DataInputStream {
 
-    private static final String HEADER = "Precheck";
+    private static final String PRECHECK_HEADER = "Precheck";
+    private static final String TRACE_HEADER = "TracingResult";
     private String traceExecFolder;
+
     TraceInputStream(File traceFile) throws FileNotFoundException {
         super(new FileInputStream(traceFile));
         traceExecFolder = traceFile.getParent();
     }
+
     public Set<ClassLocation> readClassLocations() {
-        FileInputStream stream = null;
         try {
             String header = readString();
-            if (!HEADER.equals(header)) {
+            if (!PRECHECK_HEADER.equals(header)) {
                 throw new RuntimeException("Invalid Precheck file result!");
             }
             readString();
@@ -57,53 +63,50 @@ public class TraceInputStream extends DataInputStream {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            try {
-                if (stream != null) {
-                    stream.close();
-                }
-            } catch (Exception e) {
-                // ignore
-            }
         }
     }
-    public Trace readTrace() throws IOException {
-        String header = readString();
-        String programMsg;
-        int expectedSteps = 0;
-        int collectedSteps = 0;
-        if (HEADER.equals(header)) {
-            programMsg = readString();
-            expectedSteps = readInt();
-            collectedSteps = readInt();
-        } else {
-            programMsg = header; // for compatible reason with old version. TO BE REMOVED.
-        }
-        int traceNo = readVarInt();
-        if (traceNo == 0) {
+
+    public Trace readTrace() {
+        try {
+            String header = readString();
+            String programMsg;
+            int expectedSteps = 0;
+            int collectedSteps = 0;
+            if (TRACE_HEADER.equals(header)) {
+                programMsg = readString();
+                expectedSteps = readInt();
+                collectedSteps = readInt();
+            } else {
+                programMsg = header; // for compatible reason with old version. TO BE REMOVED.
+            }
+            int traceNo = readVarInt();
+            if (traceNo == 0) {
+                return null;
+            }
+
+            for (int i = 0; i < traceNo; i++) {
+                Trace trace = new Trace(null);
+                readString(); // projectName
+                readString(); // projectVersion
+                readString(); // launchClass
+                readString(); // launchMethod
+                boolean isMainTrace = readBoolean();
+                trace.setMain(isMainTrace);
+                trace.setThreadName(readString());
+                trace.setThreadId(Long.parseLong(readString()));
+                trace.setIncludedLibraryClasses(readFilterInfo());
+                trace.setExcludedLibraryClasses(readFilterInfo());
+                List<BreakPoint> locationList = readLocations();
+                trace.setExecutionList(readSteps(trace, locationList));
+                if (!isMainTrace) {
+                    continue;
+                }
+                return trace;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
-
-        for(int i=0; i<traceNo; i++) {
-            Trace trace = new Trace(null);
-            readString(); // projectName
-            readString(); // projectVersion
-            readString(); // launchClass
-            readString(); // launchMethod
-            boolean isMainTrace = readBoolean();
-            trace.setMain(isMainTrace);
-            trace.setThreadName(readString());
-            trace.setThreadId(Long.parseLong(readString()));
-            trace.setIncludedLibraryClasses(readFilterInfo());
-            trace.setExcludedLibraryClasses(readFilterInfo());
-            List<BreakPoint> locationList = readLocations();
-            trace.setExecutionList(readSteps(trace, locationList));
-            if (!isMainTrace) {
-                continue;
-            }
-            return trace;
-        }
-
         return null;
     }
 
@@ -178,6 +181,7 @@ public class TraceInputStream extends DataInputStream {
         }
         return list;
     }
+
     private List<BreakPoint> readLocations() throws IOException {
         int bkpTotal = readVarInt();
         int numOfClasses = readVarInt();
@@ -211,6 +215,7 @@ public class TraceInputStream extends DataInputStream {
         location.setLoopScope(readLoopScope());
         return location;
     }
+
     private ControlScope readControlScope() throws IOException {
         int rangeSize = readVarInt();
         if (rangeSize == 0) {
@@ -237,6 +242,7 @@ public class TraceInputStream extends DataInputStream {
 
         return scope;
     }
+
     private List<TraceNode> readSteps(Trace trace, List<BreakPoint> locationList) throws IOException {
         int size = readVarInt();
         List<TraceNode> allSteps = new ArrayList<>(size);
@@ -291,6 +297,7 @@ public class TraceInputStream extends DataInputStream {
         }
         return allSteps.get(nodeOrder - 1);
     }
+
     private void readRWVarValues(List<TraceNode> allSteps, boolean isWrittenVar) throws IOException {
         int i = 0;
         while (i < allSteps.size()) {
@@ -306,7 +313,7 @@ public class TraceInputStream extends DataInputStream {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T>List<T> readSerializableList() throws IOException {
+    protected <T> List<T> readSerializableList() throws IOException {
         int size = readVarInt();
         if (size == 0) {
             return new ArrayList<>(0);
