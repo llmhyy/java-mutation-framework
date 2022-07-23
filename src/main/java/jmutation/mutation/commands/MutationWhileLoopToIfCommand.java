@@ -1,6 +1,5 @@
 package jmutation.mutation.commands;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -23,7 +22,6 @@ public class MutationWhileLoopToIfCommand extends MutationCommand {
         List<Statement> stmtLs = parent.statements();
         int idxOfWhile = stmtLs.indexOf(whileStatement);
 
-        AST ast = whileStatement.getAST();
         IfStatement ifStmt = ast.newIfStatement();
         Expression expression = whileStatement.getExpression();
         Statement body = whileStatement.getBody();
