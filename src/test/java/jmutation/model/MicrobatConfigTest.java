@@ -20,7 +20,7 @@ public class MicrobatConfigTest {
         expectedConfigMap.put("entry_point", Arrays.asList("C:/path/to/entry/point/0", "C:/path/to/entry/point/1"));
 
         // defaults
-        expectedConfigMap.put("precheck", Arrays.asList("true"));
+        expectedConfigMap.put("precheck", Arrays.asList("false"));
         expectedConfigMap.put("run_id", Arrays.asList("1763794d-c0c2-4704-a483-20725cb39fd3"));
         expectedConfigMap.put("log", Arrays.asList("printProgress", "error"));
         expectedConfigMap.put("varLayer", Arrays.asList("5"));

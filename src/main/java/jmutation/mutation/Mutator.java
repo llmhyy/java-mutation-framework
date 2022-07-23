@@ -56,7 +56,7 @@ public class Mutator {
             List<ASTNode> nodes = parseRangeToNodes(unit, range);
 
             if (nodes.isEmpty()) {
-                // If node type is not implemented, skip for now
+                // If mutation for node type is not implemented, skip for now
                 continue;
             }
             unit.recordModifications();
