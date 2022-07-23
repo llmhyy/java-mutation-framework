@@ -4,12 +4,14 @@ import jmutation.mutation.MathOperator;
 import jmutation.mutation.commands.MutationBlockRemovalCommand;
 import jmutation.mutation.commands.MutationCommand;
 import jmutation.mutation.commands.MutationForLoopToIfCommand;
+import jmutation.mutation.commands.MutationIfCondToTrueCommand;
 import jmutation.mutation.commands.MutationMathOperatorCommand;
 import jmutation.mutation.commands.MutationWhileLoopToIfCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -28,6 +30,11 @@ public class MutationParser extends ASTVisitor {
     public MutationCommand parse(ASTNode node) {
         node.accept(this);
         return command;
+    }
+
+    @Override
+    public void preVisit(ASTNode node) {
+        command = null;
     }
 
     @Override
@@ -53,6 +60,12 @@ public class MutationParser extends ASTVisitor {
     @Override
     public boolean visit(Block node) {
         command = new MutationBlockRemovalCommand(node);
+        return false;
+    }
+
+    @Override
+    public boolean visit(IfStatement node) {
+        command = new MutationIfCondToTrueCommand(node);
         return false;
     }
 }
