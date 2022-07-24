@@ -1,16 +1,10 @@
 {
-  "precheck": [
-    "false"
-  ],
   "run_id": [
     "1763794d-c0c2-4704-a483-20725cb39fd3"
   ],
   "log": [
     "printProgress",
     "error"
-  ],
-  "working_dir": [
-    "C:\\Users\\bchenghi\\Desktop\\NUS\\FYP\\repos1\\java-mutation-framework\\sample\\math_70"
   ],
   "varLayer": [
     "5"

@@ -2,13 +2,12 @@ package jmutation.execution;
 
 import jmutation.model.MicrobatConfig;
 import jmutation.model.TestCase;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import org.apache.commons.io.FilenameUtils;
 
 public class InstrumentationCommandBuilder {
     private static final List<String> SYSTEM_JARS = List.of("junit", "org.hamcrest.core", "testrunner", "bcel-6.0", "javassist", "instrumentator");
@@ -16,6 +15,7 @@ public class InstrumentationCommandBuilder {
     private final String dropInsDir;
     private final MicrobatConfig microbatConfig;
     List<String> classPaths = new ArrayList<>();
+    private String workingDirectory = "";
     private List<String> externalLibPaths = new ArrayList<>();
     private Optional<String> testClass = Optional.empty();
     private Optional<String> testMethod = Optional.empty();
@@ -33,6 +33,7 @@ public class InstrumentationCommandBuilder {
 
     /**
      * Sets up microbat config from command line instead of json file.
+     *
      * @return Microbat configuration object
      */
     private MicrobatConfig setupMicrobatConfig() {
@@ -54,6 +55,7 @@ public class InstrumentationCommandBuilder {
         } else {
             updatedMicrobatConfig = updatedMicrobatConfig.setLaunchClass(testClass.get());
         }
+        updatedMicrobatConfig = updatedMicrobatConfig.setWorkingDir(workingDirectory);
         StringBuilder commandStrBuilder = new StringBuilder();
         commandStrBuilder.append("\"" + updatedMicrobatConfig.getJavaHome() + "\"" + File.separator + "bin" + File.separator + "java");
         File instrumentatorFile = new File("lib/instrumentator.jar");
@@ -79,6 +81,10 @@ public class InstrumentationCommandBuilder {
 
     public void addExternalLibPath(File file) {
         this.externalLibPaths.add(FilenameUtils.normalize(file.getAbsolutePath()));
+    }
+
+    public void setWorkingDirectory(File workingDirectory) {
+        this.workingDirectory = FilenameUtils.normalize(workingDirectory.getAbsolutePath());
     }
 
     public String getTraceFilePath() {

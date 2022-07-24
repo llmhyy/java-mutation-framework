@@ -79,6 +79,7 @@ public class ProjectExecutor extends Executor {
         ib.setTestCase(testCase); // set class and method name
         ib.addClassPath(projectConfig.getCompiledTestFolder()); // add target/test-classes
         ib.addClassPath(projectConfig.getCompiledClassFolder()); // add target/classes
+        ib.setWorkingDirectory(projectConfig.getProjectRoot());
 
         findJars().stream().forEach(file -> { // add jar files
             ib.addClassPath(file);

@@ -24,7 +24,7 @@ public class Coverage {
         Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
         while (classLocationIterator.hasNext()) {
             ClassLocation classLocation = classLocationIterator.next();
-            String canonicalClassName = classLocation.getClassCanonicalName();
+            String canonicalClassName = classLocation.getDeclaringCompilationUnitName();
             int lineNumber = classLocation.getLineNumber();
             addClassNameAndLineNumToMap(classAndLineNumbersMap, canonicalClassName, lineNumber);
         }
@@ -37,7 +37,7 @@ public class Coverage {
         Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
         for (TraceNode traceNode : traceNodes) {
             BreakPoint breakPoint = traceNode.getBreakPoint();
-            String canonicalClassName = breakPoint.getClassCanonicalName();
+            String canonicalClassName = breakPoint.getDeclaringCompilationUnitName();
             int lineNumber = breakPoint.getLineNumber();
             addClassNameAndLineNumToMap(classAndLineNumbersMap, canonicalClassName, lineNumber);
         }

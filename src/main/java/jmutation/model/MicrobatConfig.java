@@ -156,6 +156,17 @@ public class MicrobatConfig {
         return String.join(AGENT_PARAMS_MULTI_VALUE_SEPARATOR, classPaths);
     }
 
+    public String getWorkingDir() {
+        if (argMap.containsKey(OPT_WORKING_DIR)) {
+            return argMap.get(OPT_WORKING_DIR).get(0);
+        }
+        return "";
+    }
+
+    public MicrobatConfig setWorkingDir(String workingDir) {
+        return updateEntry(OPT_WORKING_DIR, Arrays.asList(workingDir));
+    }
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {
