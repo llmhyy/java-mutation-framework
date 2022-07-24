@@ -55,7 +55,9 @@ public class InstrumentationCommandBuilder {
         } else {
             updatedMicrobatConfig = updatedMicrobatConfig.setLaunchClass(testClass.get());
         }
-        updatedMicrobatConfig = updatedMicrobatConfig.setWorkingDir(workingDirectory);
+        if (!workingDirectory.isEmpty()) {
+            updatedMicrobatConfig = updatedMicrobatConfig.setWorkingDir(workingDirectory);
+        }
         StringBuilder commandStrBuilder = new StringBuilder();
         commandStrBuilder.append("\"" + updatedMicrobatConfig.getJavaHome() + "\"" + File.separator + "bin" + File.separator + "java");
         File instrumentatorFile = new File("lib/instrumentator.jar");
