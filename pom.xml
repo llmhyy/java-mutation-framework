@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>java-mutation-framework</groupId>
     <artifactId>java-mutation-framework</artifactId>
@@ -32,11 +33,11 @@
             <artifactId>org.eclipse.jdt.core</artifactId>
             <version>3.29.0</version>
             <exclusions>
-			    <exclusion>
-			        <groupId>org.osgi.service</groupId>
-			        <artifactId>org.osgi.service.prefs</artifactId>
-			    </exclusion>
-			</exclusions>
+                <exclusion>
+                    <groupId>org.osgi.service</groupId>
+                    <artifactId>org.osgi.service.prefs</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.eclipse.platform</groupId>
@@ -44,20 +45,14 @@
             <version>3.7.200</version>
         </dependency>
         <dependency>
-          <groupId>com.beust</groupId>
-          <artifactId>jcommander</artifactId>
-          <version>1.82</version>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.82</version>
         </dependency>
         <dependency>
-		    <groupId>org.json</groupId>
-		    <artifactId>json</artifactId>
-		    <version>20220320</version>
-		</dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20220320</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
