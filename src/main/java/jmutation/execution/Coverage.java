@@ -2,7 +2,7 @@ package jmutation.execution;
 
 import jmutation.mutation.MutationRange;
 import microbat.model.ClassLocation;
-import microbat.model.breakpoint.BreakPoint;
+import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 

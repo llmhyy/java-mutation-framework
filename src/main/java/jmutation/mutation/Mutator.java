@@ -36,15 +36,11 @@ public class Mutator {
     }
 
     public Project mutate(Coverage coverage, Project project) {
-
-        // copy a project
-        Project newProject = project.cloneToOtherPath();
-
         List<MutationRange> ranges = coverage.getRanges();
         for (MutationRange range : ranges) {
             String className = range.getClassName();
 
-            File file = retrieveFileFromClassName(className, newProject);
+            File file = retrieveFileFromClassName(className, project);
             String fileContent;
             try {
                 fileContent = Files.readString(file.toPath());
@@ -79,7 +75,7 @@ public class Mutator {
             writeToFile(unit, file);
         }
 
-        return newProject;
+        return project;
     }
 
     private File retrieveFileFromClassName(String className, Project newProject) {

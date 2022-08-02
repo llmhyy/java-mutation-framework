@@ -24,7 +24,7 @@ public class ProjectParser {
         // TODO: Determine project type (gradle or maven or none from project structure)
         // Currently assume project type is maven
         if (!root.exists()) {
-            throw new RuntimeException("Project does not exist");
+            throw new RuntimeException("Project " + root.getAbsolutePath() + " does not exist");
         }
         this.root = root;
     }

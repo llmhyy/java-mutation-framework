@@ -36,6 +36,15 @@ public class MavenProject extends Project {
     }
 
     @Override
+    public String getSrcPath() {
+        return getRoot().getAbsolutePath() + "src/main/java";
+    }
+
+    @Override
+    public String getTestPath() {
+        return getRoot().getAbsolutePath() + "src/main/test";
+    }
+    @Override
     public ProjectType projectType() {
         return ProjectType.MAVEN;
     }

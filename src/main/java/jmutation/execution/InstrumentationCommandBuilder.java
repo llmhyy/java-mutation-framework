@@ -60,7 +60,7 @@ public class InstrumentationCommandBuilder {
         }
         StringBuilder commandStrBuilder = new StringBuilder();
         commandStrBuilder.append("\"" + updatedMicrobatConfig.getJavaHome() + "\"" + File.separator + "bin" + File.separator + "java");
-        File instrumentatorFile = new File("lib/instrumentator.jar");
+        File instrumentatorFile = new File(dropInsDir + "/instrumentator.jar");
         String instrumentatorFilePath = instrumentatorFile.getAbsolutePath();
         commandStrBuilder.append(" -Xmx10G -XX:+UseG1GC -ea -noverify -javaagent:" + instrumentatorFilePath + "=");
         commandStrBuilder.append(updatedMicrobatConfig);

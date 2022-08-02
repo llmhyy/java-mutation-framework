@@ -26,6 +26,9 @@ public abstract class Project {
         return this.root;
     }
 
+    public abstract String getSrcPath();
+    public abstract String getTestPath();
+
     public abstract String singleTestCommand(TestCase testCase);
 
     public abstract ProjectType projectType();

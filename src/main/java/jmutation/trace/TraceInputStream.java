@@ -1,9 +1,10 @@
 package jmutation.trace;
 
+import jmutation.parser.ProjectParser;
 import microbat.model.ClassLocation;
 import microbat.model.ControlScope;
 import microbat.model.SourceScope;
-import microbat.model.breakpoint.BreakPoint;
+import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import microbat.model.value.VarValue;
@@ -247,7 +248,7 @@ public class TraceInputStream extends DataInputStream {
         int size = readVarInt();
         List<TraceNode> allSteps = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            TraceNode node = new TraceNode(null, null, i + 1, trace);
+            TraceNode node = new TraceNode(null, null, i + 1, trace, "");
             allSteps.add(node);
         }
         for (int i = 0; i < size; i++) {

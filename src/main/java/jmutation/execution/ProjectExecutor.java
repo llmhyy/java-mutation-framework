@@ -4,8 +4,11 @@ import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
+import jmutation.parser.ProjectParser;
 import jmutation.trace.FileReader;
+import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
+import microbat.model.trace.TraceNode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -104,9 +107,20 @@ public class ProjectExecutor extends Executor {
             throw new RuntimeException("File " + traceFilePath + " not found");
         }
         Trace trace = traceFileReader.readTrace();
+        setClassPathsToBreakpoints(trace);
         Coverage coverage = new Coverage(trace);
         ExecutionResult executionResult = new ExecutionResult(executionResultStr);
         executionResult.setCoverage(coverage);
         return executionResult;
+    }
+
+    private void setClassPathsToBreakpoints(Trace trace) {
+        List<TraceNode> executionList = trace.getExecutionList();
+        for (TraceNode traceNode : executionList) {
+            BreakPoint breakPoint = traceNode.getBreakPoint();
+            File breakPointFile = ProjectParser.getFileOfClass(breakPoint.getClassCanonicalName(), projectConfig.getProjectRoot());
+            String breakPointFilePath = breakPointFile.getAbsolutePath();
+            breakPoint.setFullJavaFilePath(breakPointFilePath);
+        }
     }
 }

@@ -17,7 +17,7 @@ public class InstrumentationCommandBuilderTest {
         InstrumentationCommandBuilder instrumentationCommandBuilder = new InstrumentationCommandBuilder(microbatConfig, dropInsDir);
         String actualCommand = instrumentationCommandBuilder.generateCommand();
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(instrumentationCommandBuilder.classPaths);
-        File instrumentatorFile = new File("lib/instrumentator.jar");
+        File instrumentatorFile = new File(dropInsDir + "/instrumentator.jar");
         String instrumentatorFilePath = instrumentatorFile.getAbsolutePath();
         String expectedCommand = "\"C:\\java\"" + File.separator + "bin" + File.separator + "java -Xmx10G -XX:+UseG1GC -ea -noverify -javaagent:" + instrumentatorFilePath + "=" + updatedMicrobatConfig + " -cp " + updatedMicrobatConfig.getClassPathStr();
         assertEquals(expectedCommand, actualCommand);

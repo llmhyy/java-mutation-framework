@@ -2,16 +2,7 @@ package jmutation;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import jmutation.execution.ProjectExecutor;
-import jmutation.model.ExecutionResult;
-import jmutation.model.MicrobatConfig;
-import jmutation.model.Project;
-import jmutation.model.ProjectConfig;
-import jmutation.model.TestCase;
-import jmutation.mutation.Mutator;
-import jmutation.mutation.parser.MutationParser;
 
-import java.util.List;
 
 public class Main {
     @Parameter(names = "-projectPath", description = "Path to project directory", required = true)
@@ -40,24 +31,11 @@ public class Main {
         Main params = new Main();
         JCommander.newBuilder().addObject(params).build().parse(args);
 
-        String projectPath = params.projectPath;
-        ProjectConfig config = new ProjectConfig(projectPath, params.dropInsDir); // Contains class paths
-        Project proj = config.getProject();
-        List<TestCase> testList = proj.getTestCases();
+        MutationFramework mutationFramework = new MutationFramework();
+        mutationFramework.setDropInsDir(params.dropInsDir);
+        mutationFramework.setMicrobatConfigPath(params.microbatConfigPath);
+        mutationFramework.setProjectPath(params.projectPath);
 
-        MicrobatConfig microbatConfig = params.microbatConfigPath == null ? MicrobatConfig.defaultConfig(projectPath) : MicrobatConfig.parse(params.microbatConfigPath, projectPath);
-
-        Mutator mutator = new Mutator(new MutationParser());
-        for (TestCase test : testList) {
-            System.out.println(test);
-            ExecutionResult result = new ProjectExecutor(microbatConfig, config).exec(test);
-            System.out.println("Normal trace done");
-
-            Project mutatedProject = mutator.mutate(result.getCoverage(), proj);
-            ProjectConfig mutatedProjConfig = new ProjectConfig(config, mutatedProject);
-
-            ExecutionResult mutatedResult = new ProjectExecutor(microbatConfig, mutatedProjConfig).exec(test);
-            System.out.println("Mutated trace done");
-        }
+        mutationFramework.startMutationFramework();
     }
 }
