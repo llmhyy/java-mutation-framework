@@ -50,7 +50,6 @@ public class Mutator {
 
             CompilationUnit unit = ProjectParser.parseCompliationUnit(fileContent);
             List<ASTNode> nodes = parseRangeToNodes(unit, range);
-
             if (nodes.isEmpty()) {
                 // If mutation for node type is not implemented, skip for now
                 continue;
@@ -60,6 +59,7 @@ public class Mutator {
                 MutationCommand mutationCommand = mutationParser.parse(node);
                 mutationCommand.executeMutation();
                 mutationHistory.add(mutationCommand);
+
                 /**
                  * TODO:
                  *

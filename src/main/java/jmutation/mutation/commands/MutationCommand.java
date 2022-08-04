@@ -14,4 +14,8 @@ public abstract class MutationCommand {
         rewriter = ASTRewrite.create(ast);
     }
     abstract public ASTNode executeMutation();
+
+    public ASTNode getNode() {
+        return node;
+    }
 }
