@@ -16,13 +16,16 @@ public class MutationResult {
 
     Project originalProject;
     Project mutatedProject;
-    public MutationResult(Trace originalTrace, Trace mutatedTrace, List<MutationCommand> mutationHistory, Project originalProject, Project mutatedProject, List<TraceNode> rootCauses) {
+
+    List<TestIO> testIOs;
+    public MutationResult(Trace originalTrace, Trace mutatedTrace, List<MutationCommand> mutationHistory, Project originalProject, Project mutatedProject, List<TraceNode> rootCauses, List<TestIO> testIOs) {
         this.originalTrace = originalTrace;
         this.mutatedTrace = mutatedTrace;
         this.mutationHistory = mutationHistory;
         this.originalProject = originalProject;
         this.mutatedProject = mutatedProject;
         this.rootCauses = rootCauses;
+        this.testIOs = testIOs;
     }
 
     public Trace getOriginalTrace() {

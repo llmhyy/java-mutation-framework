@@ -7,6 +7,7 @@ import jmutation.model.MutationResult;
 import jmutation.model.Project;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
+import jmutation.model.TestIO;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.parser.MutationParser;
 import jmutation.utils.TraceHelper;
@@ -97,9 +98,10 @@ public class MutationFramework {
 
         Trace mutatedTrace = mutatedResult.getCoverage().getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
-
+        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedTrace, testCase);
         MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
-                mutatedResult.getCoverage().getTrace(), mutator.getMutationHistory(), proj, mutatedProject, rootCauses);
+                mutatedResult.getCoverage().getTrace(), mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
+                testIOs);
 
         return mutationResult;
     }

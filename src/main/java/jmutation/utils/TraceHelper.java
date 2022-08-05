@@ -1,5 +1,7 @@
 package jmutation.utils;
 
+import jmutation.model.TestCase;
+import jmutation.model.TestIO;
 import jmutation.mutation.commands.MutationCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
@@ -41,5 +43,24 @@ public class TraceHelper {
             }
         }
         return result;
+    }
+    public static List<TestIO> getTestInputOutputs(Trace trace, TestCase testCase) {
+       List<TraceNode> executionList = trace.getExecutionList();
+       List<TestIO> result = new ArrayList<>();
+       String testCaseName = testCase.qualifiedName();
+       for (TraceNode traceNode : executionList) {
+            BreakPoint breakPoint = traceNode.getBreakPoint();
+            String currentMethodName = breakPoint.getMethodName();
+            if (currentMethodName.equals("<init>") || currentMethodName.equals("<clinit>")) {
+                continue;
+            }
+            String fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + currentMethodName;
+           if (fullMethodName.equals(testCaseName)){
+               continue;
+           }
+           TestIO testIO = new TestIO(traceNode.getReadVariables(), traceNode.getWrittenVariables());
+           result.add(testIO);
+       }
+       return result;
     }
 }
