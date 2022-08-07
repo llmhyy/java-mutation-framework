@@ -57,6 +57,9 @@ public class Mutator {
             unit.recordModifications();
             for (ASTNode node : nodes) {
                 MutationCommand mutationCommand = mutationParser.parse(node);
+                if (mutationCommand == null) {
+                    continue;
+                }
                 mutationCommand.executeMutation();
                 mutationHistory.add(mutationCommand);
 

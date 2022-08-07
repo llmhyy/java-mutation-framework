@@ -1,8 +1,10 @@
 package jmutation.mutation.parser;
 
+import jmutation.mutation.ComparisonOperator;
 import jmutation.mutation.MathOperator;
 import jmutation.mutation.commands.MutationBlockRemovalCommand;
 import jmutation.mutation.commands.MutationCommand;
+import jmutation.mutation.commands.MutationComparisonOperatorCommand;
 import jmutation.mutation.commands.MutationForLoopToIfCommand;
 import jmutation.mutation.commands.MutationIfCondToTrueCommand;
 import jmutation.mutation.commands.MutationMathOperatorCommand;
@@ -27,6 +29,12 @@ public class MutationParser extends ASTVisitor {
         return mathOperators.contains(currentOp);
     }
 
+    private static boolean isComparisonOperator(InfixExpression e) {
+        Set<Operator> comparisonOperators = ComparisonOperator.getOperatorSet();
+        InfixExpression.Operator currentOp = e.getOperator();
+        return comparisonOperators.contains(currentOp);
+    }
+
     public MutationCommand parse(ASTNode node) {
         node.accept(this);
         return command;
@@ -41,6 +49,9 @@ public class MutationParser extends ASTVisitor {
     public boolean visit(InfixExpression node) {
         if (isMathOperator(node)) {
             command = new MutationMathOperatorCommand(node);
+        }
+        if (isComparisonOperator(node)) {
+            command = new MutationComparisonOperatorCommand(node);
         }
         return false;
     }
