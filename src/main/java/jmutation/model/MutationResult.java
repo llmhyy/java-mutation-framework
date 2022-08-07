@@ -51,4 +51,8 @@ public class MutationResult {
     public List<TraceNode> getRootCauses() {
         return rootCauses;
     }
+
+    public List<TestIO> getTestIOs() {
+        return testIOs;
+    }
 }

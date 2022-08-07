@@ -89,14 +89,14 @@ public class ProjectExecutor extends Executor {
             ib.addExternalLibPath(file);
         });
 
-        return instrumentationExec(ib);
+        return instrumentationExec(ib, testCase);
     }
 
     public List<File> findJars() {
         return walk(projectConfig.getCompiledFolder());
     }
 
-    private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
+    private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder, TestCase testCase) {
         String commandStr = instrumentationCommandBuilder.generateCommand();
         String executionResultStr = exec(commandStr);
         String traceFilePath = instrumentationCommandBuilder.getTraceFilePath();
@@ -108,7 +108,7 @@ public class ProjectExecutor extends Executor {
         }
         Trace trace = traceFileReader.readTrace();
         setClassPathsToBreakpoints(trace);
-        Coverage coverage = new Coverage(trace);
+        Coverage coverage = new Coverage(trace, testCase);
         ExecutionResult executionResult = new ExecutionResult(executionResultStr);
         executionResult.setCoverage(coverage);
         return executionResult;

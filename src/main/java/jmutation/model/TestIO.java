@@ -5,18 +5,18 @@ import microbat.model.value.VarValue;
 import java.util.List;
 
 public class TestIO {
-    private List<VarValue> readVariables;
-    private List<VarValue> writtenVariables;
-    public TestIO(List<VarValue> readVariables, List<VarValue> writtenVariables) {
-        this.readVariables = readVariables;
-        this.writtenVariables = writtenVariables;
+    private List<VarValue> inputs;
+    private List<VarValue> outputs;
+    public TestIO(List<VarValue> inputs, List<VarValue> outputs) {
+        this.inputs = inputs;
+        this.outputs = outputs;
     }
 
-    public List<VarValue> getReadVariables() {
-        return readVariables;
+    public List<VarValue> getInputs() {
+        return inputs;
     }
 
-    public List<VarValue> getWrittenVariables() {
-        return writtenVariables;
+    public List<VarValue> getOutputs() {
+        return outputs;
     }
 }
