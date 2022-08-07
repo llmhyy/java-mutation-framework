@@ -1,5 +1,6 @@
 package jmutation.execution;
 
+import jmutation.model.TestCase;
 import jmutation.mutation.MutationRange;
 import microbat.model.ClassLocation;
 import microbat.model.BreakPoint;
@@ -31,13 +32,18 @@ public class Coverage {
         ranges = formMutationRangesFromClassNameLineNumMap(classAndLineNumbersMap);
     }
 
-    public Coverage(Trace trace) {
+    public Coverage(Trace trace, TestCase testCase) {
         this.trace = trace;
         List<TraceNode> traceNodes = trace.getExecutionList();
         Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
+        String testCaseClassName = testCase.testClass;
         for (TraceNode traceNode : traceNodes) {
             BreakPoint breakPoint = traceNode.getBreakPoint();
             String canonicalClassName = breakPoint.getDeclaringCompilationUnitName();
+            // Do not create mutation range if class name is the test class i.e. don't mutate test class
+            if (canonicalClassName.equals(testCaseClassName)) {
+                continue;
+            }
             int lineNumber = breakPoint.getLineNumber();
             addClassNameAndLineNumToMap(classAndLineNumbersMap, canonicalClassName, lineNumber);
         }
