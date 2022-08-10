@@ -62,9 +62,7 @@ public class BinaryFunctionTest {
     public void testFix1st() throws FunctionEvaluationException {
         ComposableFunction f = BinaryFunction.POW.fix1stArgument(2);
         for (double x = 0.0; x < 1.0; x += 0.01) {
-            Assert.assertEquals(x, x, 1.0e-15); // Only read
-            Assert.assertEquals(f.value(1), f.value(1), 1.0e-15); // Only write?
-            Assert.assertEquals(Math.pow(2.0, x), f.value(x), 1.0e-15); // Read and write
+            Assert.assertEquals(Math.pow(2.0, x), f.value(x), 1.0e-15);
         }
     }
 
