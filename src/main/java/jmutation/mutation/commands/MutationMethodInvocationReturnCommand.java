@@ -38,6 +38,7 @@ public class MutationMethodInvocationReturnCommand extends MutationCommand {
             int childIdx = children.indexOf(methodInvocation);
             children.set(childIdx, replacement);
         }
+        node = replacement;
         return methodInvocation;
     }
 

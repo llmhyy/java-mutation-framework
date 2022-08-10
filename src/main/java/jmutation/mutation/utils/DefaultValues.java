@@ -1,6 +1,7 @@
 package jmutation.mutation.utils;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -33,7 +34,7 @@ public class DefaultValues {
                 characterLiteral.setCharValue('\u0000');
                 return characterLiteral;
             }
-        } else if (type instanceof SimpleType) {
+        } else if (type instanceof SimpleType || type instanceof ArrayType) {
             return ast.newNullLiteral();
         }
         return null;

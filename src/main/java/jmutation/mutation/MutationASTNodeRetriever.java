@@ -63,6 +63,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(Block node) {
+        // Since we are removing all stmts in block, should not visit its children
         if (addNodeToListRandomly(node)) {
             return false;
         }
@@ -77,7 +78,11 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(ReturnStatement node) {
-        addNodeToListRandomly(node);
+        // Should not visit children in return statement, if we are replacing the expression (return <expression>;)
+        // with default value.
+        if (addNodeToListRandomly(node)) {
+            return false;
+        };
         return true;
     }
 

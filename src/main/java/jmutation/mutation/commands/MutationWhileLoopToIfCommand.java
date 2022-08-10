@@ -32,6 +32,8 @@ public class MutationWhileLoopToIfCommand extends MutationCommand {
         ifStmt.setThenStatement(bodyCopy);
         stmtLs.set(idxOfWhile, ifStmt);
 
+        node = ifStmt;
+
         return ifStmt;
     }
 }

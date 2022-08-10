@@ -61,6 +61,7 @@ public class MutationChangeVarNameCommand extends MutationCommand {
         SimpleName replacement = possibleReplacements.get(randIdx);
         SimpleName replacementClone = ast.newSimpleName(replacement.getIdentifier());
         parent.setStructuralProperty(locationInParent, replacementClone);
+        node = replacementClone;
         return simpleName;
     }
 }

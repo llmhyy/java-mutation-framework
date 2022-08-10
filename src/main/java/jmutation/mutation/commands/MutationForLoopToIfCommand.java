@@ -35,6 +35,7 @@ public class MutationForLoopToIfCommand extends MutationCommand {
         } catch (Exception e) {
             System.out.println(e);
         }
+        node = ifStmt;
         return ifStmt;
     }
 }
