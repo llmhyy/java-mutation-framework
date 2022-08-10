@@ -75,7 +75,7 @@ public class ProjectParser {
         return code.contains("junit") || code.contains("@Test");
     }
 
-    public static CompilationUnit parseCompliationUnit(String fileContent) {
+    public static CompilationUnit parseCompilationUnit(String fileContent) {
 
         ASTParser parser = ASTParser.newParser(AST.getJLSLatest()); // handles JDK 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6
         parser.setSource(fileContent.toCharArray());
@@ -97,7 +97,7 @@ public class ProjectParser {
         // code taken from regminer
         List<TestCase> methods = new ArrayList<>();
         JdtMethodRetriever retriever = new JdtMethodRetriever();
-        CompilationUnit unit = parseCompliationUnit(codeContent);
+        CompilationUnit unit = parseCompilationUnit(codeContent);
         unit.accept(retriever);
         List<MethodDeclaration> methodNodes = retriever.getMethods();
         PackageDeclaration packageDeclaration = unit.getPackage();

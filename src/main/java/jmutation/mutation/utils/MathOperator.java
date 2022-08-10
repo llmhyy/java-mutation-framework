@@ -1,4 +1,4 @@
-package jmutation.mutation;
+package jmutation.mutation.utils;
 
 import org.eclipse.jdt.core.dom.InfixExpression;
 

@@ -48,7 +48,7 @@ public class Mutator {
                 throw new RuntimeException("Could not read file at " + file.toPath());
             }
 
-            CompilationUnit unit = ProjectParser.parseCompliationUnit(fileContent);
+            CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
             List<ASTNode> nodes = parseRangeToNodes(unit, range);
             if (nodes.isEmpty()) {
                 // If mutation for node type is not implemented, skip for now

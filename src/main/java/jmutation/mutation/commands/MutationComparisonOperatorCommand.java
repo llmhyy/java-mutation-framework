@@ -1,6 +1,6 @@
 package jmutation.mutation.commands;
 
-import jmutation.mutation.ComparisonOperator;
+import jmutation.mutation.utils.ComparisonOperator;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;

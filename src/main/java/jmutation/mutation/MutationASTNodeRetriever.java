@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import java.util.ArrayList;
@@ -70,6 +71,12 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(IfStatement node) {
+        addNodeToListRandomly(node);
+        return true;
+    }
+
+    @Override
+    public boolean visit(ReturnStatement node) {
         addNodeToListRandomly(node);
         return true;
     }
