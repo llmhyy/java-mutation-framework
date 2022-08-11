@@ -27,6 +27,8 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     private MutationProbabilityCalculator mutationProbabilityCalculator;
 
+    private boolean isRandomRetrieval = true;
+
     public MutationASTNodeRetriever(CompilationUnit unit, MutationRange range) {
         this.unit = unit;
         this.startLine = range.getStartLine();
@@ -43,28 +45,31 @@ public class MutationASTNodeRetriever extends ASTVisitor {
         this.mutationProbabilityCalculator = mutationProbabilityCalculator;
     }
 
+    public void setRandomness(boolean isRandomRetrieval) {
+        this.isRandomRetrieval = isRandomRetrieval;
+    }
     @Override
     public boolean visit(InfixExpression node) {
-        addNodeToListRandomly(node);
+        addNodeToList(node);
         return true;
     }
 
     @Override
     public boolean visit(WhileStatement node) {
-        addNodeToListRandomly(node);
+        addNodeToList(node);
         return true;
     }
 
     @Override
     public boolean visit(ForStatement node) {
-        addNodeToListRandomly(node);
+        addNodeToList(node);
         return true;
     }
 
     @Override
     public boolean visit(Block node) {
         // Since we are removing all stmts in block, should not visit its children
-        if (addNodeToListRandomly(node)) {
+        if (addNodeToList(node)) {
             return false;
         }
         return true;
@@ -72,7 +77,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(IfStatement node) {
-        addNodeToListRandomly(node);
+        addNodeToList(node);
         return true;
     }
 
@@ -80,7 +85,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
     public boolean visit(ReturnStatement node) {
         // Should not visit children in return statement, if we are replacing the expression (return <expression>;)
         // with default value.
-        if (addNodeToListRandomly(node)) {
+        if (addNodeToList(node)) {
             return false;
         };
         return true;
@@ -92,13 +97,15 @@ public class MutationASTNodeRetriever extends ASTVisitor {
      * @param node
      * @return True if node was added, false otherwise.
      */
-    private boolean addNodeToListRandomly(ASTNode node) {
+    private boolean addNodeToList(ASTNode node) {
         if (!nodeIsWithinRange(node)) {
             return false;
         }
-        boolean shouldNotAdd = Math.random() > mutationProbabilityCalculator.getProbability(node);
-        if (shouldNotAdd) {
-            return false;
+        if (isRandomRetrieval) {
+            boolean shouldNotAdd = Math.random() > mutationProbabilityCalculator.getProbability(node);
+            if (shouldNotAdd) {
+                return false;
+            }
         }
         nodes.add(node);
         return true;

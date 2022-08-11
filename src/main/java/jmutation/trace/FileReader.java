@@ -1,11 +1,12 @@
 package jmutation.trace;
 
-import microbat.model.ClassLocation;
+import jmutation.model.microbat.PrecheckResult;
+import jmutation.model.microbat.InstrumentationResult;
 import microbat.model.trace.Trace;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Set;
+import java.util.List;
 
 public class FileReader {
     TraceInputStream fileStream;
@@ -18,11 +19,25 @@ public class FileReader {
         this(new File(traceFilePath));
     }
 
-    public Set<ClassLocation> readPrecheck() {
-        return fileStream.readClassLocations();
+    public PrecheckResult readPrecheck() {
+        return fileStream.readPrecheck();
     }
 
-    public Trace readTrace() {
-        return fileStream.readTrace();
+    public InstrumentationResult readInstrumentation() {
+         List<Trace> traceList = fileStream.readTraces();
+         InstrumentationResult instrumentationResult = new InstrumentationResult();
+         instrumentationResult.setTraces(traceList);
+         return instrumentationResult;
+    }
+
+    public Trace readMainTrace() {
+        InstrumentationResult instrumentationResult = readInstrumentation();
+        List<Trace> traceList = instrumentationResult.getTraces();
+        for (Trace trace : traceList) {
+            if (trace.isMain()) {
+                return trace;
+            }
+        }
+        return null;
     }
 }

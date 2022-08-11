@@ -122,6 +122,10 @@ public class MicrobatConfig {
         return updateEntry(OPT_PRECHECK, Arrays.asList(valueOf(usePrecheck)));
     }
 
+    public boolean getPrecheck() {
+        return Boolean.parseBoolean(argMap.get(OPT_PRECHECK).get(0));
+    }
+
     public MicrobatConfig setClassPaths(List<String> classPaths) {
         return updateEntry(OPT_CLASS_PATH, classPaths);
     }

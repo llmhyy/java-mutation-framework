@@ -7,12 +7,14 @@ import jmutation.mutation.commands.MutationCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
+import microbat.model.value.ReferenceValue;
 import microbat.model.value.VarValue;
 import microbat.model.variable.FieldVar;
 import microbat.model.variable.LocalVar;
 import microbat.model.variable.Variable;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -58,7 +60,7 @@ public class TraceHelper {
     }
 
     public static List<TestIO> getTestInputOutputs(Trace trace, TestCase testCase) {
-        Set<Integer> assertionLineNums = getAssertionLineNums(testCase);
+        Set<Integer> assertionLineNums = getAssertionActualValLineNums(testCase);
         List<TraceNode> executionList = trace.getExecutionList();
         List<TestIO> result = new ArrayList<>();
         String testCaseName = testCase.qualifiedName();
@@ -86,6 +88,10 @@ public class TraceHelper {
             if (fullMethodName.equals(testCaseName)) {
                for (VarValue writtenVarVal : writtenVarVals) {
                    Variable writtenVariable = writtenVarVal.getVariable();
+                   // Ignore objects e.g. Object x = constructor(); x is not user defined input
+                   if (writtenVarVal instanceof ReferenceValue) {
+                       continue;
+                   }
                    // Location of var has to be appended as the location is not used in equals method for vars.
                    // i.e. int x = 1; and func(int x);
                    // Both x will be treated the same without location when they should be different inputs
@@ -104,7 +110,7 @@ public class TraceHelper {
         return result;
     }
 
-    private static Set<Integer> getAssertionLineNums(TestCase testCase) {
+    private static Set<Integer> getAssertionActualValLineNums(TestCase testCase) {
         MethodDeclaration methodDeclaration = testCase.mtd;
         CompilationUnit compilationUnit = (CompilationUnit) methodDeclaration.getRoot();
         ASTNodeRetriever<MethodInvocation> methodInvocationASTNodeRetriever = new ASTNodeRetriever<>(MethodInvocation.class);
@@ -114,8 +120,18 @@ public class TraceHelper {
         for (MethodInvocation methodInvocation : methodInvocations) {
             String methodName = methodInvocation.getName().toString();
             if (methodName.toLowerCase(Locale.ROOT).contains("assert")) {
-                int lineNum = compilationUnit.getLineNumber(methodInvocation.getStartPosition());
-                result.add(lineNum);
+                List<Expression> arguments = methodInvocation.arguments();
+                Expression actualResult;
+                if (arguments.size() > 1) {
+                    actualResult = arguments.get(1);
+                } else {
+                    actualResult = arguments.get(0);
+                }
+                int startLineNum = compilationUnit.getLineNumber(actualResult.getStartPosition());
+                int endLineNum = compilationUnit.getLineNumber(actualResult.getStartPosition() + actualResult.getLength() - 1);
+                for (int i = startLineNum; i <= endLineNum; i++) {
+                    result.add(i);
+                }
             }
         }
         return result;

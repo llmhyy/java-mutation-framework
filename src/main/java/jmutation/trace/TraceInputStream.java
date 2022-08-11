@@ -1,6 +1,6 @@
 package jmutation.trace;
 
-import jmutation.parser.ProjectParser;
+import jmutation.model.microbat.PrecheckResult;
 import microbat.model.ClassLocation;
 import microbat.model.ControlScope;
 import microbat.model.SourceScope;
@@ -32,16 +32,17 @@ public class TraceInputStream extends DataInputStream {
         traceExecFolder = traceFile.getParent();
     }
 
-    public Set<ClassLocation> readClassLocations() {
+    public PrecheckResult readPrecheck() {
         try {
             String header = readString();
             if (!PRECHECK_HEADER.equals(header)) {
                 throw new RuntimeException("Invalid Precheck file result!");
             }
-            readString();
-            readVarInt();
-            readBoolean();
-            readVarInt();
+            PrecheckResult precheckResult = new PrecheckResult();
+            String programMessage = readString();
+            int threadNum = readVarInt();
+            precheckResult.setOverLong(readBoolean());
+            precheckResult.setTotalSteps(readVarInt());
             int exceedingMethodsSize = readVarInt();
             for (int i = 0; i < exceedingMethodsSize; i++) {
                 readString();
@@ -55,19 +56,20 @@ public class TraceInputStream extends DataInputStream {
                 ClassLocation loc = new ClassLocation(className, methodSignature, lineNumber);
                 visitedLocs.add(loc);
             }
+            precheckResult.setVisitedClassLocations(visitedLocs);
             int loadedClassesSize = readVarInt();
             List<String> loadedClasses = new ArrayList<>(loadedClassesSize);
             for (int i = 0; i < loadedClassesSize; i++) {
                 loadedClasses.add(readString());
             }
-            return visitedLocs;
+            return precheckResult;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public Trace readTrace() {
+    public List<Trace> readTraces() {
         try {
             String header = readString();
             String programMsg;
@@ -84,7 +86,7 @@ public class TraceInputStream extends DataInputStream {
             if (traceNo == 0) {
                 return null;
             }
-
+            List<Trace> traces = new ArrayList<>();
             for (int i = 0; i < traceNo; i++) {
                 Trace trace = new Trace(null);
                 readString(); // projectName
@@ -99,16 +101,13 @@ public class TraceInputStream extends DataInputStream {
                 trace.setExcludedLibraryClasses(readFilterInfo());
                 List<BreakPoint> locationList = readLocations();
                 trace.setExecutionList(readSteps(trace, locationList));
-                if (!isMainTrace) {
-                    continue;
-                }
-                return trace;
+                traces.add(trace);
             }
+            return traces;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        return null;
     }
 
     private List<String> readFilterInfo() throws IOException {

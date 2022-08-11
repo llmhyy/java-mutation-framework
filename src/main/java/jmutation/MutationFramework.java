@@ -4,10 +4,12 @@ import jmutation.execution.ProjectExecutor;
 import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.MutationResult;
+import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.Project;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
 import jmutation.model.TestIO;
+import jmutation.model.microbat.PrecheckResult;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.parser.MutationParser;
 import jmutation.utils.TraceHelper;
@@ -86,21 +88,40 @@ public class MutationFramework {
         mutator = new Mutator(new MutationParser());
 
         System.out.println(testCase);
-        ExecutionResult result = new ProjectExecutor(microbatConfig, config).exec(testCase);
-        System.out.println("Normal trace done");
+        // Do precheck for normal + mutation to catch issues
+        // If there are issues, set it in MutationResult, and return it
+        // Otherwise, collect trace for normal + mutation, and return them in mutation result
+
+        ProjectExecutor projectExecutor = new ProjectExecutor(microbatConfig, config);
+        // Precheck
+        PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase);
+        if (precheckExecutionResult.isOverLong()) {
+            throw new RuntimeException("Precheck for test case " + testCase + " was over long");
+        }
+        System.out.println("Normal precheck done");
 
         Project clonedProject = proj.cloneToOtherPath();
-        Project mutatedProject = mutator.mutate(result.getCoverage(), clonedProject);
+        Project mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
         ProjectConfig mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
-        ExecutionResult mutatedResult = new ProjectExecutor(microbatConfig, mutatedProjConfig).exec(testCase);
+        ProjectExecutor mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+        PrecheckExecutionResult mutatedPrecheckExecutionResult = mutatedProjectExecutor.execPrecheck(testCase);
+        if (mutatedPrecheckExecutionResult.isOverLong()) {
+            throw new RuntimeException("Precheck for mutated test case " + testCase + " was over long");
+        }
+        System.out.println("Mutated precheck done");
+
+        // Actual trace
+        ExecutionResult result = projectExecutor.exec(testCase);
+        System.out.println("Normal trace done");
+        ExecutionResult mutatedResult = mutatedProjectExecutor.exec(testCase);
         System.out.println("Mutated trace done");
 
         Trace mutatedTrace = mutatedResult.getCoverage().getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
         List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedTrace, testCase);
         MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
-                mutatedResult.getCoverage().getTrace(), mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
+                mutatedTrace, mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
                 testIOs);
 
         return mutationResult;

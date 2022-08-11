@@ -2,6 +2,9 @@ package jmutation;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import jmutation.model.TestCase;
+
+import java.util.List;
 
 
 public class Main {
@@ -35,7 +38,15 @@ public class Main {
         mutationFramework.setDropInsDir(params.dropInsDir);
         mutationFramework.setMicrobatConfigPath(params.microbatConfigPath);
         mutationFramework.setProjectPath(params.projectPath);
-
-        mutationFramework.startMutationFramework();
+        List<TestCase> testCaseList = mutationFramework.getTestCases();
+        for (TestCase testCase : testCaseList) {
+            mutationFramework.setTestCase(testCase);
+            try {
+                mutationFramework.startMutationFramework();
+            } catch (RuntimeException e) {
+                System.out.println(e);
+                continue;
+            }
+        }
     }
 }

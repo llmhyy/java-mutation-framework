@@ -1,5 +1,6 @@
 package jmutation.trace;
 
+import jmutation.model.microbat.PrecheckResult;
 import microbat.model.ClassLocation;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +12,8 @@ public class FileReaderTest {
     public void readTrace_validTrace_formsCorrectTrace() throws FileNotFoundException {
         String traceFilePath = "./src/test/files/jmutation/trace/dumpFile.exec";
         FileReader fileReader = new FileReader(traceFilePath);
-        Set<ClassLocation> classLocationSet = fileReader.readPrecheck();
+        PrecheckResult precheckResult = fileReader.readPrecheck();
+        Set<ClassLocation> classLocationSet = precheckResult.getVisitedClassLocations();
         assert (classLocationSet.size() == 17);
     }
 }

@@ -50,7 +50,7 @@ public class MutationProbabilityCalculator extends ASTVisitor {
 
     @Override
     public boolean visit(ReturnStatement node) {
-        probability = 0.9;
+        probability = 0.2;
         return false;
     }
 

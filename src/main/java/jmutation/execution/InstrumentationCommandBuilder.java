@@ -89,7 +89,11 @@ public class InstrumentationCommandBuilder {
         this.workingDirectory = FilenameUtils.normalize(workingDirectory.getAbsolutePath());
     }
 
-    public String getTraceFilePath() {
+    public String getDumpFilePath() {
         return microbatConfig.getDumpFilePath();
+    }
+
+    public boolean isPrecheck() {
+        return microbatConfig.getPrecheck();
     }
 }

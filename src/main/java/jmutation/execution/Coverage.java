@@ -20,19 +20,24 @@ public class Coverage {
 
     private Trace trace;
 
-    public Coverage(Set<ClassLocation> classLocationSet) {
+    public void formMutationRanges(Set<ClassLocation> classLocationSet, TestCase testCase) {
         Iterator<ClassLocation> classLocationIterator = classLocationSet.iterator();
         Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
+        String testCaseClassName = testCase.testClass;
         while (classLocationIterator.hasNext()) {
             ClassLocation classLocation = classLocationIterator.next();
-            String canonicalClassName = classLocation.getDeclaringCompilationUnitName();
+            String canonicalClassName = classLocation.getClassCanonicalName();
+            // Do not create mutation range if class name is the test class i.e. don't mutate test class
+            if (canonicalClassName.contains(testCaseClassName)) {
+                continue;
+            }
             int lineNumber = classLocation.getLineNumber();
             addClassNameAndLineNumToMap(classAndLineNumbersMap, canonicalClassName, lineNumber);
         }
         ranges = formMutationRangesFromClassNameLineNumMap(classAndLineNumbersMap);
     }
 
-    public Coverage(Trace trace, TestCase testCase) {
+    public void formMutationRanges(Trace trace, TestCase testCase) {
         this.trace = trace;
         List<TraceNode> traceNodes = trace.getExecutionList();
         Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
@@ -49,7 +54,6 @@ public class Coverage {
         }
         ranges = formMutationRangesFromClassNameLineNumMap(classAndLineNumbersMap);
     }
-
     private void addClassNameAndLineNumToMap(Map<String, PriorityQueue<Integer>> classAndLineNumbersMap, String className, int lineNumber) {
         if (!classAndLineNumbersMap.containsKey(className)) {
             PriorityQueue<Integer> lineNumberQueue = new PriorityQueue<>();
