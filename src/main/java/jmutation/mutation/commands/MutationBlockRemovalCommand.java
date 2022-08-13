@@ -27,7 +27,21 @@ public class MutationBlockRemovalCommand extends MutationCommand {
                 }
             }
         }
+        // If block is inside a constructor, do not empty the block.
+        // Could lead to compilation errors if fields in class are not assigned.
+        MethodDeclaration methodDeclarationParent = getMethodDeclarationParent();
+        if (methodDeclarationParent != null && methodDeclarationParent.isConstructor()) {
+            return null;
+        }
         stmts.clear();
         return block;
+    }
+
+    private MethodDeclaration getMethodDeclarationParent() {
+        ASTNode current = node;
+        if (current != null && !(current instanceof MethodDeclaration)) {
+           current = current.getParent();
+        }
+        return (MethodDeclaration) current;
     }
 }
