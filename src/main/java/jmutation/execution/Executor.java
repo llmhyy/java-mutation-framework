@@ -1,5 +1,6 @@
 package jmutation.execution;
 
+import jmutation.execution.output.OutputHandler;
 import jmutation.model.OperatingSystem;
 
 import java.io.BufferedReader;
@@ -23,6 +24,8 @@ public class Executor {
 
 	private final ProcessBuilder pb = new ProcessBuilder();
 
+	private OutputHandler outputHandler = new OutputHandler();
+
 	public Executor(File root) {
 		pb.directory(root);
 	}
@@ -45,6 +48,9 @@ public class Executor {
 		return getOS() == OperatingSystem.WINDOWS;
 	}
 
+	public void setOutputHandler(OutputHandler outputHandler) {
+		this.outputHandler = outputHandler;
+	}
 
 	protected String exec(String cmd) {
 		try {
@@ -74,7 +80,7 @@ public class Executor {
 			} else {
 				pb.command("bash", "-c", cmd);
 			}
-			System.out.println(cmd);
+			outputHandler.output(cmd);
 			process = pb.start();
 			if (timeout > 0) {
 				boolean completed = process.waitFor(timeout, TimeUnit.MINUTES);
@@ -85,7 +91,7 @@ public class Executor {
 			bufferReader = new BufferedReader(inputStr);
 			String line;
 			while ((line = bufferReader.readLine()) != null) {
-				System.out.println(line);
+				outputHandler.output(line);
 				builder.append("\n").append(line);
 			}
 		} catch (IOException | InterruptedException ex) {

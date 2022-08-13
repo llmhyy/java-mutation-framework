@@ -1,5 +1,7 @@
 package jmutation.execution;
 
+import jmutation.execution.output.MicrobatOutputHandler;
+import jmutation.execution.output.OutputHandler;
 import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.PrecheckExecutionResult;
@@ -25,12 +27,16 @@ import java.util.Set;
  */
 public class ProjectExecutor extends Executor {
     private final ProjectConfig projectConfig;
-    private final MicrobatConfig microbatConfig;
+    private MicrobatConfig microbatConfig;
     private boolean compiled = false;
 
     public ProjectExecutor(MicrobatConfig microbatConfig, ProjectConfig proj) {
         super(proj.getProjectRoot());
         this.projectConfig = proj;
+        this.microbatConfig = microbatConfig;
+    }
+
+    public void setMicrobatConfig(MicrobatConfig microbatConfig) {
         this.microbatConfig = microbatConfig;
     }
 
@@ -61,6 +67,10 @@ public class ProjectExecutor extends Executor {
      */
     public String compile() {
         return exec(projectConfig.getCompileCommand());
+    }
+
+    public String clean() {
+        return exec(projectConfig.getCleanCommand());
     }
 
     public String packageProj() {
@@ -100,7 +110,9 @@ public class ProjectExecutor extends Executor {
 
     private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder, TestCase testCase) {
         String commandStr = instrumentationCommandBuilder.generateCommand();
+        setOutputHandler(new MicrobatOutputHandler());
         String executionResultStr = exec(commandStr);
+        setOutputHandler(new OutputHandler());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         FileReader fileReader;
         try {
@@ -119,7 +131,9 @@ public class ProjectExecutor extends Executor {
 
     private PrecheckExecutionResult precheckExec(InstrumentationCommandBuilder instrumentationCommandBuilder, TestCase testCase) {
         String commandStr = instrumentationCommandBuilder.generateCommand();
+        setOutputHandler(new MicrobatOutputHandler());
         String executionResultStr = exec(commandStr);
+        setOutputHandler(new OutputHandler());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         FileReader fileReader;
         try {
