@@ -99,7 +99,7 @@ public class MicrobatConfig {
         Map<String, List<String>> argMap = new HashMap<>();
         argMap.put(OPT_DUMP_FILE, List.of(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
         argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));
-        argMap.put(OPT_STEP_LIMIT, List.of("200000"));
+        argMap.put(OPT_STEP_LIMIT, List.of("400000"));
         argMap.put(OPT_TRACE_RECORDER, List.of("FILE"));
         argMap.put(OPT_VARIABLE_LAYER, List.of("5"));
         argMap.put(OPT_LOG, List.of("printProgress", "error"));
@@ -173,6 +173,10 @@ public class MicrobatConfig {
 
     public MicrobatConfig setExpectedSteps(int expectedSteps) {
         return updateEntry(OPT_EXPECTED_STEP, Arrays.asList(String.valueOf(expectedSteps)));
+    }
+
+    public int getStepLimit() {
+        return Integer.parseInt(argMap.get(OPT_STEP_LIMIT).get(0));
     }
 
     @Override

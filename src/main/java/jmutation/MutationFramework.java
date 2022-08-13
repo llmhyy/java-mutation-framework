@@ -95,7 +95,7 @@ public class MutationFramework {
         // Precheck
         PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase);
         if (precheckExecutionResult.isOverLong()) {
-            throw new RuntimeException("Precheck for test case " + testCase + " was over long");
+            throw new RuntimeException("Precheck for test case " + testCase + " was over long as step limit was " + microbatConfig.getStepLimit() + " but had " + precheckExecutionResult.getTotalSteps() + " steps");
         }
         System.out.println("Normal precheck done");
 
@@ -106,7 +106,7 @@ public class MutationFramework {
         ProjectExecutor mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
         PrecheckExecutionResult mutatedPrecheckExecutionResult = mutatedProjectExecutor.execPrecheck(testCase);
         if (mutatedPrecheckExecutionResult.isOverLong()) {
-            throw new RuntimeException("Precheck for mutated test case " + testCase + " was over long");
+            throw new RuntimeException("Precheck for mutated test case " + testCase + " was over long as step limit was " + microbatConfig.getStepLimit() + " but had " + mutatedPrecheckExecutionResult.getTotalSteps() + " steps");
         }
         System.out.println("Mutated precheck done");
 

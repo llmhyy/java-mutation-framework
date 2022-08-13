@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -123,7 +125,7 @@ public class ProjectExecutor extends Executor {
         Trace trace = fileReader.readMainTrace();
         setClassPathsToBreakpoints(trace);
         Coverage coverage = new Coverage();
-        coverage.formMutationRanges(trace, testCase);
+        coverage.setTrace(trace);
         ExecutionResult executionResult = new ExecutionResult(executionResultStr);
         executionResult.setCoverage(coverage);
         return executionResult;
@@ -151,20 +153,34 @@ public class ProjectExecutor extends Executor {
     }
 
     private void setClassPathsToBreakpoints(Trace trace) {
+        Map<String, String> classNameToFilePath = new HashMap<>();
         List<TraceNode> executionList = trace.getExecutionList();
         for (TraceNode traceNode : executionList) {
             BreakPoint breakPoint = traceNode.getBreakPoint();
-            File breakPointFile = ProjectParser.getFileOfClass(breakPoint.getClassCanonicalName(), projectConfig.getProjectRoot());
+            String classCanonicalName = breakPoint.getClassCanonicalName();
+            if (classNameToFilePath.containsKey(classCanonicalName)) {
+                breakPoint.setFullJavaFilePath(classNameToFilePath.get(classCanonicalName));
+                continue;
+            }
+            File breakPointFile = ProjectParser.getFileOfClass(classCanonicalName, projectConfig.getProjectRoot());
             String breakPointFilePath = breakPointFile.getAbsolutePath();
             breakPoint.setFullJavaFilePath(breakPointFilePath);
+            classNameToFilePath.put(classCanonicalName, breakPointFilePath);
         }
     }
 
     private void setClassPathsToClassLocations(Set<ClassLocation> classLocationSet) {
+        Map<String, String> classNameToFilePath = new HashMap<>();
         for (ClassLocation classLocation : classLocationSet) {
-            File breakPointFile = ProjectParser.getFileOfClass(classLocation.getClassCanonicalName(), projectConfig.getProjectRoot());
+            String classCanonicalName = classLocation.getClassCanonicalName();
+            if (classNameToFilePath.containsKey(classCanonicalName)) {
+                classLocation.setFullJavaFilePath(classNameToFilePath.get(classCanonicalName));
+                continue;
+            }
+            File breakPointFile = ProjectParser.getFileOfClass(classCanonicalName, projectConfig.getProjectRoot());
             String breakPointFilePath = breakPointFile.getAbsolutePath();
             classLocation.setFullJavaFilePath(breakPointFilePath);
+            classNameToFilePath.put(classCanonicalName, breakPointFilePath);
         }
     }
 

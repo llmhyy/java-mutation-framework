@@ -108,4 +108,8 @@ public class Coverage {
     public Trace getTrace() {
         return trace;
     }
+
+    public void setTrace(Trace trace) {
+        this.trace = trace;
+    }
 }
