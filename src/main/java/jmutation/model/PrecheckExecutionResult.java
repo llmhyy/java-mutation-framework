@@ -12,4 +12,8 @@ public class PrecheckExecutionResult extends ExecutionResult {
     public boolean isOverLong() {
         return precheckResult.isOverLong();
     }
+
+    public int getTotalSteps() {
+        return precheckResult.getTotalSteps();
+    }
 }

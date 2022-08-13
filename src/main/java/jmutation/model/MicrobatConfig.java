@@ -171,6 +171,10 @@ public class MicrobatConfig {
         return updateEntry(OPT_WORKING_DIR, Arrays.asList(workingDir));
     }
 
+    public MicrobatConfig setExpectedSteps(int expectedSteps) {
+        return updateEntry(OPT_EXPECTED_STEP, Arrays.asList(String.valueOf(expectedSteps)));
+    }
+
     @Override
     public boolean equals(Object that) {
         if (this == that) {

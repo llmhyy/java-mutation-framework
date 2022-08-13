@@ -37,6 +37,8 @@ public abstract class Project {
 
     public abstract String packageCommand();
 
+    public abstract String cleanCommand();
+
     public abstract File getCompiledTestFolder();
 
     public abstract File getCompiledClassFolder();

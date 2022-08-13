@@ -8,6 +8,7 @@ import java.util.List;
 
 public class MavenProject extends Project {
     private static final String COMPILE_ALL_FMT = "%s test-compile";
+    private static final String CLEAN_FMT = "%s clean";
     private static final String PACKAGE_ALL_FMT = "%s package";
     private static final String COMPILE_NO_RUN_TEST_FMT = "%s install -DskipTests";
     private static final String COMPILATION_FOLDER = "target";
@@ -33,6 +34,12 @@ public class MavenProject extends Project {
     public String packageCommand() {
         String mavenCmd = "mvn";
         return String.format(PACKAGE_ALL_FMT, mavenCmd);
+    }
+
+    @Override
+    public String cleanCommand() {
+        String mavenCmd = "mvn";
+        return String.format(CLEAN_FMT, mavenCmd);
     }
 
     @Override
@@ -62,6 +69,7 @@ public class MavenProject extends Project {
     public File getCompiledFolder() {
         return new File(getRoot(), COMPILATION_FOLDER);
     }
+
 
     @Override
     public Project cloneToOtherPath() {

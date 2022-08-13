@@ -42,6 +42,10 @@ public class ProjectConfig {
         return project.compileCommand();
     }
 
+    public String getCleanCommand() {
+        return project.cleanCommand();
+    }
+
     public String getPackageCommand() {
         return project.packageCommand();
     }
