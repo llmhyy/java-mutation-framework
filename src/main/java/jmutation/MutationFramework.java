@@ -89,7 +89,6 @@ public class MutationFramework {
 
         System.out.println(testCase);
         // Do precheck for normal + mutation to catch issues
-        // If there are issues, set it in MutationResult, and return it
         // Otherwise, collect trace for normal + mutation, and return them in mutation result
 
         ProjectExecutor projectExecutor = new ProjectExecutor(microbatConfig, config);
@@ -112,8 +111,12 @@ public class MutationFramework {
         System.out.println("Mutated precheck done");
 
         // Actual trace
+        MicrobatConfig updatedMicrobatConfig = microbatConfig.setExpectedSteps(precheckExecutionResult.getTotalSteps());
+        projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
         ExecutionResult result = projectExecutor.exec(testCase);
         System.out.println("Normal trace done");
+        MicrobatConfig updatedMutationMicrobatConfig = microbatConfig.setExpectedSteps(mutatedPrecheckExecutionResult.getTotalSteps());
+        mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
         ExecutionResult mutatedResult = mutatedProjectExecutor.exec(testCase);
         System.out.println("Mutated trace done");
 
