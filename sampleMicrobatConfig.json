@@ -17,5 +17,8 @@
   ],
   "require_method_split": [
     "false"
+  ],
+  "java_home": [
+    "C:\\Tools\\Java\\jdk1.8.0_202"
   ]
 }
