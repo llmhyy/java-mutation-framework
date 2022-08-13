@@ -2,13 +2,12 @@ package jmutation.execution.output;
 
 public class MicrobatOutputHandler extends OutputHandler {
     final private String PROGRESS_HEADER = "$progress";
-    final private String LOG_HEADER = "Agent: ";
     @Override
     public void output(String outputString) {
         if (outputString.startsWith(PROGRESS_HEADER)) {
             String[] fragments = outputString.split(" ");
             printProgress(Integer.valueOf(fragments[1]), Integer.valueOf(fragments[2]));
-        } else if (outputString.startsWith(LOG_HEADER)) {
+        } else {
             super.output(outputString);
         }
     }
