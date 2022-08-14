@@ -13,7 +13,7 @@
     "FILE"
   ],
   "stepLimit": [
-    "400000"
+    "200000"
   ],
   "require_method_split": [
     "false"
