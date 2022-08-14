@@ -18,4 +18,9 @@ public abstract class MutationCommand {
     public ASTNode getNode() {
         return node;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "#" + node;
+    }
 }

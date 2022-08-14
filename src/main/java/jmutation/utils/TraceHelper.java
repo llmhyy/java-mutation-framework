@@ -40,7 +40,13 @@ public class TraceHelper {
         List<TraceNode> executionList = buggyTrace.getExecutionList();
         for (MutationCommand mutationCommand: mutationHistory) {
             ASTNode node = mutationCommand.getNode();
-            CompilationUnit unit = (CompilationUnit) node.getRoot();
+            ASTNode root = node.getRoot();
+            if (!(root instanceof CompilationUnit)) {
+                // If the ASTNode in mutation history is no longer part of a class, it must have been overwritten by another mutation.
+                // No need to look for corresponding TraceNode.
+                continue;
+            }
+            CompilationUnit unit = (CompilationUnit) root;
             PackageDeclaration packageDeclaration = unit.getPackage();
             TypeDeclaration typeDeclaration = (TypeDeclaration) unit.types().get(0);
             String mutatedClassName = typeDeclaration.getName().getFullyQualifiedName();
