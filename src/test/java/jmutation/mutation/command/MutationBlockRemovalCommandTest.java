@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class MutationBlockRemovalCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
@@ -52,7 +52,7 @@ public class MutationBlockRemovalCommandTest {
     }
 
     @Test
-    public void executeMutation_containsAssignment_doesNotClearBlock() {
+    public void canExecute_containsAssignment_doesNotClearBlock() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "int a;" +
@@ -72,14 +72,11 @@ public class MutationBlockRemovalCommandTest {
         WhileStatement whileStatement = (WhileStatement) methodStmts.get(2);
         Block whileStmtBody = (Block) whileStatement.getBody();
         MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(whileStmtBody);
-        command.executeMutation();
-        helper.parseDocStr(documentStr);
-        String expectedDoc = helper.getCompilationUnit().toString();
-        assertEquals(expectedDoc, cu.toString());
+        assertFalse(command.canExecute());
     }
 
     @Test
-    public void executeMutation_containsInnerBlock_doesNotClearBlock() {
+    public void canExecute_containsInnerBlock_doesNotClearBlock() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "int a;" +
@@ -97,15 +94,11 @@ public class MutationBlockRemovalCommandTest {
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(methodBody);
-
-        command.executeMutation();
-        helper.parseDocStr(documentStr);
-        String expectedDoc = helper.getCompilationUnit().toString();
-        assertEquals(expectedDoc, cu.toString());
+        assertFalse(command.canExecute());
     }
 
     @Test
-    public void executeMutation_constructorAssignments_doesNotClearBlock() {
+    public void canExecute_constructorAssignments_doesNotClearBlock() {
         String documentStr = "public class A {" +
                 "int a;" +
                 "public A(int a) {" +
@@ -119,10 +112,6 @@ public class MutationBlockRemovalCommandTest {
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(1);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(methodBody);
-
-        command.executeMutation();
-        helper.parseDocStr(documentStr);
-        String expectedDoc = helper.getCompilationUnit().toString();
-        assertEquals(expectedDoc, cu.toString());
+        assertFalse(command.canExecute());
     }
 }
