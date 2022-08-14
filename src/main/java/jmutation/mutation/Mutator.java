@@ -58,6 +58,10 @@ public class Mutator {
             }
             unit.recordModifications();
             for (ASTNode node : nodes) {
+                ASTNode root = node.getRoot();
+                if (!(root instanceof CompilationUnit)) {
+                    continue;
+                }
                 MutationCommand mutationCommand = mutationParser.parse(node);
                 if (mutationCommand == null) {
                     continue;

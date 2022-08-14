@@ -103,4 +103,26 @@ public class MutationBlockRemovalCommandTest {
         String expectedDoc = helper.getCompilationUnit().toString();
         assertEquals(expectedDoc, cu.toString());
     }
+
+    @Test
+    public void executeMutation_constructorAssignments_doesNotClearBlock() {
+        String documentStr = "public class A {" +
+                "int a;" +
+                "public A(int a) {" +
+                "this.a = a;" +
+                "}" +
+                "}";
+
+
+        helper.parseDocStr(documentStr);
+        CompilationUnit cu = helper.getCompilationUnit();
+        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(1);
+        Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
+        MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(methodBody);
+
+        command.executeMutation();
+        helper.parseDocStr(documentStr);
+        String expectedDoc = helper.getCompilationUnit().toString();
+        assertEquals(expectedDoc, cu.toString());
+    }
 }

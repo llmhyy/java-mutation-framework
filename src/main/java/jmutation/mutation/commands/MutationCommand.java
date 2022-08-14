@@ -3,7 +3,11 @@ package jmutation.mutation.commands;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
+import java.util.List;
 
 public abstract class MutationCommand {
     ASTNode node;
@@ -29,6 +33,13 @@ public abstract class MutationCommand {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "#" + cu.getPackage() + "." + cu.getClass() + "#" + startLine + "-" + endLine + "#" + node;
+        List<TypeDeclaration> types = cu.types();
+        String className = types.get(0).getName().toString();
+        PackageDeclaration packageDeclaration = cu.getPackage();
+        if (packageDeclaration == null) {
+            return getClass().getSimpleName() + "#" + className + "#lines " + startLine + "-" + endLine + "#[" + node + "]";
+        }
+        String packageName = packageDeclaration.getName().toString();
+        return getClass().getSimpleName() + "#" + packageName + "." + className + "#lines " + startLine + "-" + endLine + "#[" + node + "]";
     }
 }

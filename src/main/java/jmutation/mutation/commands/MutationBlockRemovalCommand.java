@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -77,11 +78,16 @@ public class MutationBlockRemovalCommand extends MutationCommand {
                 if (expression instanceof Assignment) {
                     Assignment assignment = (Assignment) expression;
                     Expression leftHandSide = assignment.getLeftHandSide();
+                    String varName;
                     if (leftHandSide instanceof SimpleName) {
-                        String varName = ((SimpleName) leftHandSide).getFullyQualifiedName();
-                        if (!declaredVarNames.contains(varName)) {
-                            return false;
-                        }
+                        varName = ((SimpleName) leftHandSide).getFullyQualifiedName();
+                    } else if (leftHandSide instanceof FieldAccess) {
+                       varName = ((FieldAccess) leftHandSide).getName().toString();
+                    } else {
+                        continue;
+                    }
+                    if (!declaredVarNames.contains(varName)) {
+                        return false;
                     }
                 }
             }
