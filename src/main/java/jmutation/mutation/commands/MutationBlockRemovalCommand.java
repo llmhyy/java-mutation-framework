@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import java.util.HashSet;
@@ -27,38 +29,35 @@ public class MutationBlockRemovalCommand extends MutationCommand {
     public ASTNode executeMutation() {
         Block block = (Block) node;
         List<Statement> stmts = block.statements();
-        if (!canClearBlock()) {
-            return null;
-        }
         stmts.clear();
         return block;
     }
 
-    private boolean canClearBlock() {
+    @Override
+    public boolean canExecute() {
         Block block = (Block) node;
-        ASTNodeRetriever<Block> blockASTNodeRetriever = new ASTNodeRetriever<>(Block.class);
-        blockASTNodeRetriever.setShouldStopAtFirstEncounter(true);
         List<Statement> stmts = block.statements();
-        if (stmts.size() == 0) {
+        if (stmts.isEmpty() || hasInnerBlock(stmts) || hasTopLayerReturnStmt(stmts) ||
+                hasIrremovableAssignmentsInBlock(stmts) || hasThrowsStmt(stmts) ||
+        isTryBlock(block)) {
             return false;
         }
+        return true;
+    }
+
+    private boolean hasInnerBlock(List<Statement> stmts) {
+        ASTNodeRetriever<Block> blockASTNodeRetriever = new ASTNodeRetriever<>(Block.class);
+        blockASTNodeRetriever.setShouldStopAtFirstEncounter(true);
         for (Statement stmt : stmts) {
             stmt.accept(blockASTNodeRetriever);
         }
         List<Block> innerBlocks = blockASTNodeRetriever.getNodes();
-        if (!innerBlocks.isEmpty()) {
+        if (innerBlocks.isEmpty()) {
             return false;
         }
-        ASTNode blockParent = node.getParent();
-        if (blockParent instanceof MethodDeclaration) {
-            // If block is not outermost block, safe to remove
-            for (Statement stmt : stmts) {
-                // If return statement removed, will not compile.
-                if (stmt instanceof ReturnStatement) {
-                    return false;
-                }
-            }
-        }
+        return true;
+    }
+    private boolean hasIrremovableAssignmentsInBlock(List<Statement> stmts) {
         ASTNodeRetriever<VariableDeclaration> variableDeclarationRetriever = new ASTNodeRetriever<>(VariableDeclaration.class);
         int lastStmtIdx = stmts.size() - 1;
         variableDeclarationRetriever.setStopNode(stmts.get(lastStmtIdx));
@@ -82,16 +81,47 @@ public class MutationBlockRemovalCommand extends MutationCommand {
                     if (leftHandSide instanceof SimpleName) {
                         varName = ((SimpleName) leftHandSide).getFullyQualifiedName();
                     } else if (leftHandSide instanceof FieldAccess) {
-                       varName = ((FieldAccess) leftHandSide).getName().toString();
+                        varName = ((FieldAccess) leftHandSide).getName().toString();
                     } else {
                         continue;
                     }
                     if (!declaredVarNames.contains(varName)) {
-                        return false;
+                        return true;
                     }
                 }
             }
         }
-        return true;
+        return false;
+    }
+
+    private boolean hasTopLayerReturnStmt(List<Statement> stmts) {
+        ASTNode blockParent = node.getParent();
+        if (blockParent instanceof MethodDeclaration) {
+            // If block is not outermost block, safe to remove
+            for (Statement stmt : stmts) {
+                // If return statement removed, will not compile.
+                if (stmt instanceof ReturnStatement) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasThrowsStmt(List<Statement> stmts) {
+        for (Statement stmt : stmts) {
+            if (stmt instanceof ThrowStatement) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isTryBlock(Block block) {
+        ASTNode parent = block.getParent();
+        if (parent instanceof TryStatement) {
+            return true;
+        }
+        return false;
     }
 }

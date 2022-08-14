@@ -56,14 +56,22 @@ public class Mutator {
                 if (nodes.isEmpty()) continue;
                 // If mutation for node types in mutation range not implemented, skip to next mutation range
             }
+            List<MutationCommand> newMutationCommands = new ArrayList<>();
             unit.recordModifications();
             for (ASTNode node : nodes) {
-                ASTNode root = node.getRoot();
-                if (!(root instanceof CompilationUnit)) {
-                    continue;
-                }
                 MutationCommand mutationCommand = mutationParser.parse(node);
                 if (mutationCommand == null) {
+                    continue;
+                }
+                if (mutationCommand.canExecute()) {
+                    newMutationCommands.add(mutationCommand);
+                }
+            }
+
+            for (MutationCommand mutationCommand : newMutationCommands) {
+                ASTNode node = mutationCommand.getNode();
+                ASTNode root = node.getRoot();
+                if (!(root instanceof CompilationUnit)) {
                     continue;
                 }
                 mutationCommand.executeMutation();

@@ -27,6 +27,10 @@ public abstract class MutationCommand {
     }
     abstract public ASTNode executeMutation();
 
+    public boolean canExecute() {
+        return true;
+    }
+
     public ASTNode getNode() {
         return node;
     }
