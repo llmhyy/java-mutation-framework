@@ -14,12 +14,18 @@ public class ASTNodeRetriever<T extends ASTNode> extends ASTVisitor {
 
     boolean shouldStopVisits = false;
 
+    boolean shouldStopAtFirstEncounter = false;
+
     public ASTNodeRetriever(Class<T> nodeType) {
         this.nodeType = nodeType;
     }
 
     public void setStopNode(ASTNode node) {
         this.stopNode = node;
+    }
+
+    public void setShouldStopAtFirstEncounter(boolean shouldStopAtFirstEncounter) {
+        this.shouldStopAtFirstEncounter = shouldStopAtFirstEncounter;
     }
 
     @Override
@@ -29,6 +35,9 @@ public class ASTNodeRetriever<T extends ASTNode> extends ASTVisitor {
             return;
         }
         nodeLs.add((T) node);
+        if (shouldStopAtFirstEncounter) {
+           shouldStopVisits = true;
+        }
     }
 
     @Override
