@@ -8,9 +8,17 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 
-import javax.swing.plaf.nimbus.State;
 import java.util.List;
 
+/**
+ * Converts for loop to if statement.
+ * for (int i = 0; i < n; i++) {body}
+ * ->
+ * if (true) {
+ *     int i = 0;
+ *     if (i < n) {body}
+ * }
+ */
 public class MutationForLoopToIfCommand extends MutationCommand {
 
     public MutationForLoopToIfCommand(ASTNode node) {
@@ -24,6 +32,9 @@ public class MutationForLoopToIfCommand extends MutationCommand {
         List<Statement> stmtLs = parent.statements();
         int idxOfWhile = stmtLs.indexOf(forStatement);
 
+        IfStatement wrapperIfStmt = ast.newIfStatement();
+        Expression trueExpression = ast.newBooleanLiteral(true);
+        Block wrapperIfStmtBlock = ast.newBlock();
         IfStatement ifStmt = ast.newIfStatement();
         Expression expression = forStatement.getExpression();
         List<Expression> initializers = forStatement.initializers();
@@ -35,17 +46,20 @@ public class MutationForLoopToIfCommand extends MutationCommand {
         try {
             ifStmt.setExpression(expCopy);
             ifStmt.setThenStatement(bodyCopy);
-            stmtLs.set(idxOfWhile, ifStmt);
-            for (int i = initializers.size() - 1; i >= 0; i--) {
-                Expression initializer = initializers.get(i);
-                initializer.delete();
-                ExpressionStatement expressionStatement = ast.newExpressionStatement(initializer);
-                stmtLs.add(idxOfWhile, expressionStatement);
+            wrapperIfStmt.setExpression(trueExpression);
+            wrapperIfStmt.setThenStatement(wrapperIfStmtBlock);
+            stmtLs.set(idxOfWhile, wrapperIfStmt);
+            List<Statement> wrapperStmtLs = wrapperIfStmtBlock.statements();
+            for (Expression initializer : initializers) {
+                Expression initializerCopy = (Expression) ASTNode.copySubtree(initializer.getAST(), initializer);
+                ExpressionStatement expressionStatement = ast.newExpressionStatement(initializerCopy);
+                wrapperStmtLs.add(expressionStatement);
             }
+            wrapperStmtLs.add(ifStmt);
         } catch (Exception e) {
             System.out.println(e);
         }
-        node = ifStmt;
-        return ifStmt;
+        node = wrapperIfStmt;
+        return wrapperIfStmt;
     }
 }

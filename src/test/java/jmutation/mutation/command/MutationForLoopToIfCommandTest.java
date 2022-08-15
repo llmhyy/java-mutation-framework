@@ -35,10 +35,12 @@ public class MutationForLoopToIfCommandTest {
         String expectedDoc = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "int a = 0;" +
+                "if (true) {" +
                 "int i = 0;" +
                 "if(i < a) {" +
                 "a++;" +
                 "int b = 0;" +
+                "}" +
                 "}" +
                 "}" +
                 "}";

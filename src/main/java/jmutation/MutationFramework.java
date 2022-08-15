@@ -89,7 +89,7 @@ public class MutationFramework {
 
         System.out.println(testCase);
         // Do precheck for normal + mutation to catch issues
-        // Otherwise, collect trace for normal + mutation, and return them in mutation result
+        // If no issues, collect trace for normal + mutation, and return them in mutation result
 
         ProjectExecutor projectExecutor = new ProjectExecutor(microbatConfig, config);
         // Precheck
