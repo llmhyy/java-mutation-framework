@@ -18,9 +18,7 @@ public class MutationReturnStmtCommand extends MutationCommand {
     @Override
     public ASTNode executeMutation(){
         ReturnStatement returnStatement = (ReturnStatement) node;
-        MethodDeclaration methodDeclaration = MutationHelper.getMethodDeclarationParent(node);
-        Type returnType = methodDeclaration.getReturnType2();
-        Expression replacement = DefaultValues.getDefaultExpression(returnType);
+        Expression replacement = getReplacementExpression();
         returnStatement.setExpression(replacement);
         return returnStatement;
     }
@@ -32,6 +30,18 @@ public class MutationReturnStmtCommand extends MutationCommand {
         if (expression instanceof MethodInvocation) {
             return false;
         }
+        Expression replacement = getReplacementExpression();
+        if (replacement == null) {
+            return false;
+        }
         return true;
     }
+
+    private Expression getReplacementExpression() {
+        MethodDeclaration methodDeclaration = MutationHelper.getMethodDeclarationParent(node);
+        Type returnType = methodDeclaration.getReturnType2();
+        Expression replacement = DefaultValues.getDefaultExpression(returnType);
+        return replacement;
+    }
+
 }
