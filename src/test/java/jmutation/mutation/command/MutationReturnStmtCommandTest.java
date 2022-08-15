@@ -10,12 +10,14 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MutationReturnStmtCommandTest {
@@ -48,5 +50,53 @@ public class MutationReturnStmtCommandTest {
         ASTMatcher matcher = new ASTMatcher();
         boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
         assertTrue(isCorrectMutation);
+    }
+
+    @Test
+    public void canExecute_returnStmtInTryBlock_cannotMutate() {
+
+        String documentStr = "public class Main {" +
+                "public int bar() {" +
+                "try {" +
+                "return foo();" +
+                "} catch (Exception e) {" +
+                "}" +
+                "}" +
+                "public int foo() {" +
+                "return 1;" +
+                "}" +
+                "}";
+
+        helper.parseDocStr(documentStr);
+        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
+        Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
+        List<Statement> stmts = methodBody.statements();
+        TryStatement tryStatement = (TryStatement) stmts.get(0);
+        Block tryBlock = tryStatement.getBody();
+        List<Statement> tryBlockStmts = tryBlock.statements();
+        ReturnStatement returnStatement = (ReturnStatement) tryBlockStmts.get(0);
+        MutationReturnStmtCommand command = new MutationReturnStmtCommand(returnStatement);
+        assertFalse(command.canExecute());
+    }
+
+    @Test
+    public void canExecute_methodHasThrows_cannotMutate() {
+
+        String documentStr = "public class Main {" +
+                "public int bar() throws Exception {" +
+                "return foo();" +
+                "}" +
+                "public int foo() {" +
+                "return 1;" +
+                "}" +
+                "}";
+
+        helper.parseDocStr(documentStr);
+        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
+        Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
+        List<Statement> stmts = methodBody.statements();
+        ReturnStatement returnStatement = (ReturnStatement) stmts.get(0);
+        MutationReturnStmtCommand command = new MutationReturnStmtCommand(returnStatement);
+        assertFalse(command.canExecute());
     }
 }

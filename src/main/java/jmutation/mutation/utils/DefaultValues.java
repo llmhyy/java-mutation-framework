@@ -11,8 +11,8 @@ import org.eclipse.jdt.core.dom.Type;
 public class DefaultValues {
     /**
      *  Returns expression representing the default value for given type
-     *  i.e. 0 for int byte short long types, null for reference type, false for boolean, etc
-     * @return
+     *  i.e. 0 for int byte short long types, false for boolean, etc.
+     *  null for reference types is not implemented, as it can often lead to crashes
      */
     public static Expression getDefaultExpression(Type type) {
         AST ast = type.getAST();
@@ -34,8 +34,6 @@ public class DefaultValues {
                 characterLiteral.setCharValue('\u0000');
                 return characterLiteral;
             }
-        } else if (type instanceof SimpleType || type instanceof ArrayType) {
-            return ast.newNullLiteral();
         }
         return null;
     }

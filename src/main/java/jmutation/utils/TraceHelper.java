@@ -36,7 +36,7 @@ public class TraceHelper {
      * @return list of TraceNodes
      */
     public static List<TraceNode> getMutatedTraceNodes(Trace buggyTrace, List<MutationCommand> mutationHistory) {
-        List<TraceNode> result = new ArrayList<>();
+        Set<TraceNode> result = new HashSet<>();
         List<TraceNode> executionList = buggyTrace.getExecutionList();
         for (MutationCommand mutationCommand: mutationHistory) {
             ASTNode node = mutationCommand.getNode();
@@ -62,7 +62,8 @@ public class TraceHelper {
                 }
             }
         }
-        return result;
+
+        return new ArrayList<>(result);
     }
 
     public static List<TestIO> getTestInputOutputs(Trace trace, TestCase testCase) {
