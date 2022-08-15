@@ -19,7 +19,9 @@ public class JdtMethodRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(TypeDeclaration type) {
-        this.className = type.getName().toString();
+        if (this.className == null) {
+            this.className = type.getName().toString();
+        }
         return true;
     }
 
