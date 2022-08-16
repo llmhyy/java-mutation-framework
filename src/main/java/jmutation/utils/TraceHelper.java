@@ -63,20 +63,23 @@ public class TraceHelper {
         return new ArrayList<>(result);
     }
 
-    public static List<TestIO> getTestInputOutputs(Trace trace, TestCase testCase) {
+    public static List<TestIO> getTestInputOutputs(Trace trace, Trace traceWithAssertion, TestCase testCase) {
         List<TraceNode> executionList = trace.getExecutionList();
+        List<TraceNode> executionListWithAssertions = traceWithAssertion.getExecutionList();
         List<TestIO> result = new ArrayList<>();
         String testCaseName = testCase.qualifiedName();
         Map<String, VarValue> varToValMap = new HashMap<>(); // Store the inputs
-        for (TraceNode traceNode : executionList) {
+        for (int i = 0; i < executionList.size(); i++) {
+            TraceNode traceNode = executionList.get(i);
+            TraceNode traceNodeWithAssertion = executionListWithAssertions.get(i);
             BreakPoint breakPoint = traceNode.getBreakPoint();
             String currentMethodName = breakPoint.getMethodName();
             if (currentMethodName.equals("<init>") || currentMethodName.equals("<clinit>")) {
                 continue;
             }
-            boolean shouldCallGetOutput = isOutputNode(traceNode);
+            boolean shouldCallGetOutput = isOutputNode(traceNodeWithAssertion);
             if (shouldCallGetOutput) {
-                VarValue output = getOutput(traceNode);
+                VarValue output = getOutput(traceNode, traceNodeWithAssertion);
                 List<VarValue> inputs = new ArrayList<>();
                 inputs.addAll(varToValMap.values());
                 TestIO testIO = new TestIO(inputs, output);
@@ -119,12 +122,17 @@ public class TraceHelper {
      * @param node
      * @return
      */
-    private static VarValue getOutput(TraceNode node) {
-        List<VarValue> writtenVarValues = node.getWrittenVariables();
+    private static VarValue getOutput(TraceNode node, TraceNode traceNodeWithAssertion) {
+        List<VarValue> writtenVarValues = traceNodeWithAssertion.getWrittenVariables();
         for (VarValue varValue : writtenVarValues) {
             Variable var = varValue.getVariable();
             if (getVarLocation(var).equals("org.junit.Assert") && varIsOutput(var)) {
-                return varValue;
+                List<VarValue> readVarVals = node.getReadVariables();
+                for (VarValue readVarVal : readVarVals) {
+                    if (readVarVal.getStringValue().equals(varValue.getStringValue())) {
+                        return readVarVal;
+                    }
+                }
             }
         }
         return null;

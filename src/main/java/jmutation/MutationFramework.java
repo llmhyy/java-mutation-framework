@@ -128,7 +128,7 @@ public class MutationFramework {
 
         Trace mutatedTrace = mutatedResult.getCoverage().getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
-        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedResultWithAssertionsInTrace.getCoverage().getTrace(), testCase);
+        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedTrace, mutatedResultWithAssertionsInTrace.getCoverage().getTrace(), testCase);
         MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
                 mutatedTrace, mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
                 testIOs, mutatedResult.isSuccessful());
