@@ -2,7 +2,7 @@ package jmutation.utils;
 
 import jmutation.model.TestCase;
 import jmutation.model.TestIO;
-import jmutation.model.ast.ASTNodeRetriever;
+import jmutation.model.ast.ASTNodeParentRetriever;
 import jmutation.mutation.commands.MutationCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
@@ -14,9 +14,6 @@ import microbat.model.variable.LocalVar;
 import microbat.model.variable.Variable;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
@@ -24,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,9 +42,10 @@ public class TraceHelper {
                 // No need to look for corresponding TraceNode.
                 continue;
             }
+            ASTNodeParentRetriever<TypeDeclaration> typeDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(TypeDeclaration.class);
+            TypeDeclaration typeDeclaration = typeDeclarationASTNodeParentRetriever.getParentOfType(node);
             CompilationUnit unit = (CompilationUnit) root;
             PackageDeclaration packageDeclaration = unit.getPackage();
-            TypeDeclaration typeDeclaration = (TypeDeclaration) unit.types().get(0);
             String mutatedClassName = typeDeclaration.getName().getFullyQualifiedName();
             String fullMutatedClassName = packageDeclaration == null ? mutatedClassName : packageDeclaration.getName() + "." + mutatedClassName;
             int startPos = unit.getLineNumber(node.getStartPosition());
@@ -67,7 +64,6 @@ public class TraceHelper {
     }
 
     public static List<TestIO> getTestInputOutputs(Trace trace, TestCase testCase) {
-        Set<Integer> assertionLineNums = getAssertionActualValLineNums(testCase);
         List<TraceNode> executionList = trace.getExecutionList();
         List<TestIO> result = new ArrayList<>();
         String testCaseName = testCase.qualifiedName();
@@ -78,9 +74,9 @@ public class TraceHelper {
             if (currentMethodName.equals("<init>") || currentMethodName.equals("<clinit>")) {
                 continue;
             }
-            boolean shouldCallGetOutput = isOutputNode(traceNode, testCase, assertionLineNums);
+            boolean shouldCallGetOutput = isOutputNode(traceNode);
             if (shouldCallGetOutput) {
-                List<VarValue> output = getOutput(traceNode, testCase);
+                VarValue output = getOutput(traceNode);
                 List<VarValue> inputs = new ArrayList<>();
                 inputs.addAll(varToValMap.values());
                 TestIO testIO = new TestIO(inputs, output);
@@ -117,90 +113,55 @@ public class TraceHelper {
         return result;
     }
 
-    private static Set<Integer> getAssertionActualValLineNums(TestCase testCase) {
-        MethodDeclaration methodDeclaration = testCase.mtd;
-        CompilationUnit compilationUnit = (CompilationUnit) methodDeclaration.getRoot();
-        ASTNodeRetriever<MethodInvocation> methodInvocationASTNodeRetriever = new ASTNodeRetriever<>(MethodInvocation.class);
-        methodDeclaration.accept(methodInvocationASTNodeRetriever);
-        List<MethodInvocation> methodInvocations = methodInvocationASTNodeRetriever.getNodes();
-        Set<Integer> result = new HashSet<>();
-        for (MethodInvocation methodInvocation : methodInvocations) {
-            String methodName = methodInvocation.getName().toString();
-            if (methodName.toLowerCase(Locale.ROOT).contains("assert")) {
-                List<Expression> arguments = methodInvocation.arguments();
-                Expression actualResult;
-                if (arguments.size() > 1) {
-                    actualResult = arguments.get(1);
-                } else {
-                    actualResult = arguments.get(0);
-                }
-                int startLineNum = compilationUnit.getLineNumber(actualResult.getStartPosition());
-                int endLineNum = compilationUnit.getLineNumber(actualResult.getStartPosition() + actualResult.getLength() - 1);
-                for (int i = startLineNum; i <= endLineNum; i++) {
-                    result.add(i);
-                }
-            }
-        }
-        return result;
-    }
-
     /**
      * Returns the output of a test case (assertion)
      * Caller must implement logic to know when to call this method. i.e. isOutputNode method
      * @param node
-     * @param testCase
      * @return
      */
-    private static List<VarValue> getOutput(TraceNode node, TestCase testCase) {
-        String testCaseName = testCase.qualifiedName();
-        TraceNode stepInPrev = node.getStepInPrevious();
-        BreakPoint breakPoint = stepInPrev.getBreakPoint();
-        String fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + breakPoint.getMethodName();
-        // No method calls inside the assertion, just take the read variables from the assertion
-        // e.g. assertEquals(2, x); Get read var x
-        if (testCaseName.equals(fullMethodName)) {
-            return node.getReadVariables();
+    private static VarValue getOutput(TraceNode node) {
+        List<VarValue> writtenVarValues = node.getWrittenVariables();
+        for (VarValue varValue : writtenVarValues) {
+            Variable var = varValue.getVariable();
+            if (getVarLocation(var).equals("org.junit.Assert") && varIsOutput(var)) {
+                return varValue;
+            }
         }
-        // Method call inside assertion, take written variable just before inner func call returns to the assertion
-        // e.g. assertEquals(2, funcCall(5)); Take the written var inside funcCall(5)
-        return stepInPrev.getWrittenVariables();
+        return null;
     }
 
     /**
      * Checks if trace node should be used to obtain test output i.e. whether to call getOutput method
-     * Current node is top layer, stepInNext is top layer, stepOverPrevious is top layer, line num is assertion
      * @param node
-     * @param testCase
-     * @param assertionLineNums
      * @return
      */
-    private static boolean isOutputNode(TraceNode node, TestCase testCase, Set<Integer> assertionLineNums) {
-        int lineNum = node.getLineNumber();
-        if (!assertionLineNums.contains(lineNum)) {
-            return false;
-        }
-        String testCaseName = testCase.qualifiedName();
-        BreakPoint breakPoint = node.getBreakPoint();
-        String fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + breakPoint.getMethodName();
-        if (!testCaseName.equals(fullMethodName)) {
-            return false;
-        }
-        TraceNode stepInNext = node.getStepInNext();
-        if (stepInNext != null) {
-            breakPoint = stepInNext.getBreakPoint();
-            fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + breakPoint.getMethodName();
-            if (!testCaseName.equals(fullMethodName)) {
-                return false;
+    private static boolean isOutputNode(TraceNode node) {
+        List<VarValue> writtenVarValues = node.getWrittenVariables();
+        for (VarValue varValue : writtenVarValues) {
+            Variable var = varValue.getVariable();
+            if (getVarLocation(var).equals("org.junit.Assert") && varIsOutput(var)) {
+                return true;
             }
         }
-        TraceNode stepOverPrev = node.getStepOverPrevious();
-        if (stepOverPrev != null) {
-            breakPoint = stepOverPrev.getBreakPoint();
-            fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + breakPoint.getMethodName();
-            if (!testCaseName.equals(fullMethodName)) {
-                return false;
-            }
-        }
-        return true;
+        return false;
     }
+
+    private static String getVarLocation(Variable var) {
+        String varLocation;
+        if (var instanceof LocalVar) {
+            varLocation = ((LocalVar) var).getLocationClass();
+        } else if (var instanceof FieldVar) {
+            varLocation = ((FieldVar) var).getDeclaringType();
+        } else {
+            varLocation = "";
+        }
+        return varLocation;
+    }
+
+    private static boolean varIsOutput(Variable var) {
+        String varName = var.getName();
+        return varName.equals("actual") || varName.equals("actuals") || varName.equals("condition") || varName.equals("object");
+
+    }
+
 }

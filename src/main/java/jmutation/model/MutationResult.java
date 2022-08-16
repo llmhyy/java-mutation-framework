@@ -18,7 +18,9 @@ public class MutationResult {
     Project mutatedProject;
 
     List<TestIO> testIOs;
-    public MutationResult(Trace originalTrace, Trace mutatedTrace, List<MutationCommand> mutationHistory, Project originalProject, Project mutatedProject, List<TraceNode> rootCauses, List<TestIO> testIOs) {
+
+    boolean testCasePassed;
+    public MutationResult(Trace originalTrace, Trace mutatedTrace, List<MutationCommand> mutationHistory, Project originalProject, Project mutatedProject, List<TraceNode> rootCauses, List<TestIO> testIOs, boolean testCasePassed) {
         this.originalTrace = originalTrace;
         this.mutatedTrace = mutatedTrace;
         this.mutationHistory = mutationHistory;
@@ -26,6 +28,7 @@ public class MutationResult {
         this.mutatedProject = mutatedProject;
         this.rootCauses = rootCauses;
         this.testIOs = testIOs;
+        this.testCasePassed = testCasePassed;
     }
 
     public Trace getOriginalTrace() {
@@ -54,5 +57,9 @@ public class MutationResult {
 
     public List<TestIO> getTestIOs() {
         return testIOs;
+    }
+
+    public boolean mutatedTestCasePassed() {
+        return testCasePassed;
     }
 }

@@ -18,7 +18,7 @@ public class ExecutionResult {
 		this.coverage = coverage;
 	}
 
-	public boolean isSuccessful() { return !consoleOut.contains("FAIL");}
+	public boolean isSuccessful() { return !consoleOut.contains("is successful? false");}
 
 	@Override
 	public String toString() {

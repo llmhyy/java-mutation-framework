@@ -125,7 +125,7 @@ public class MutationFramework {
         List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedTrace, testCase);
         MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
                 mutatedTrace, mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
-                testIOs);
+                testIOs, mutatedResult.isSuccessful());
 
         return mutationResult;
     }

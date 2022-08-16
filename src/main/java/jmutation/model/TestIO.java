@@ -6,17 +6,17 @@ import java.util.List;
 
 public class TestIO {
     private List<VarValue> inputs;
-    private List<VarValue> outputs;
-    public TestIO(List<VarValue> inputs, List<VarValue> outputs) {
+    private VarValue output;
+    public TestIO(List<VarValue> inputs, VarValue output) {
         this.inputs = inputs;
-        this.outputs = outputs;
+        this.output = output;
     }
 
     public List<VarValue> getInputs() {
         return inputs;
     }
 
-    public List<VarValue> getOutputs() {
-        return outputs;
+    public VarValue getOutput() {
+        return output;
     }
 }

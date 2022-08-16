@@ -106,6 +106,7 @@ public class MicrobatConfig {
         argMap.put(OPT_PRECHECK, List.of("false"));
         argMap.put(OPT_RUN_ID, List.of("1763794d-c0c2-4704-a483-20725cb39fd3"));
         argMap.put(OPT_WORKING_DIR, List.of(projectPath));
+        argMap.put(OPT_INCLUDES, List.of("org.junit.Assert"));
         return new MicrobatConfig(argMap);
     }
 
