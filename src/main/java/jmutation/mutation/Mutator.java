@@ -49,12 +49,11 @@ public class Mutator {
             }
 
             CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
-            // Attempt random retrieval. If no nodes, attempt to get all possible nodes for mutation.
+            // Attempt random retrieval.
             List<ASTNode> nodes = parseRangeToNodes(unit, range, true);
             if (nodes.isEmpty()) {
-                nodes = parseRangeToNodes(unit, range, false);
-                if (nodes.isEmpty()) continue;
                 // If mutation for node types in mutation range not implemented, skip to next mutation range
+                continue;
             }
             List<MutationCommand> newMutationCommands = new ArrayList<>();
             unit.recordModifications();

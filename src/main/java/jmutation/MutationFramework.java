@@ -16,6 +16,7 @@ import jmutation.utils.TraceHelper;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
+import java.util.Arrays;
 import java.util.List;
 
 // API class for other projects to call
@@ -120,9 +121,14 @@ public class MutationFramework {
         ExecutionResult mutatedResult = mutatedProjectExecutor.exec(testCase);
         System.out.println("Mutated trace done");
 
+        // Trace with assertions to get output of test case
+        MicrobatConfig includeAssertionsMutationMicrobatConfig = updatedMutationMicrobatConfig.setIncludes(Arrays.asList("org.junit.Assert"));
+        mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
+        ExecutionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
+
         Trace mutatedTrace = mutatedResult.getCoverage().getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
-        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedTrace, testCase);
+        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedResultWithAssertionsInTrace.getCoverage().getTrace(), testCase);
         MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
                 mutatedTrace, mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
                 testIOs, mutatedResult.isSuccessful());

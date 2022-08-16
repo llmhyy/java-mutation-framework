@@ -28,7 +28,6 @@ public class MicrobatConfigTest {
         expectedConfigMap.put("trace_recorder", Arrays.asList("FILE"));
         expectedConfigMap.put("dump_file_path", Arrays.asList(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
         expectedConfigMap.put("stepLimit", Arrays.asList("400000"));
-        expectedConfigMap.put("includes", Arrays.asList("org.junit.Assert"));
         MicrobatConfig expectedConfig = new MicrobatConfig(expectedConfigMap);
         assertEquals(expectedConfig, actualConfig);
     }
