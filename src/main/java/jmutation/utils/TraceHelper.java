@@ -7,6 +7,7 @@ import jmutation.mutation.commands.MutationCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
+import microbat.model.value.ArrayValue;
 import microbat.model.value.ReferenceValue;
 import microbat.model.value.VarValue;
 import microbat.model.variable.FieldVar;
@@ -87,30 +88,11 @@ public class TraceHelper {
                 continue;
             }
             String fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + currentMethodName;
-            List<VarValue> writtenVarVals = traceNode.getWrittenVariables();
             // Only take written vars in the test case (top layer) as inputs, not inner method calls
             // e.g. int f = 1; int x = funcCall(2,3); Store 1, 2, 3 and written val to x
             // Store the input values if not yet declared, otherwise, update the value
             if (fullMethodName.equals(testCaseName)) {
-               for (VarValue writtenVarVal : writtenVarVals) {
-                   Variable writtenVariable = writtenVarVal.getVariable();
-                   // Ignore objects e.g. Object x = constructor(); x is not user defined input
-                   if (writtenVarVal instanceof ReferenceValue) {
-                       continue;
-                   }
-                   // Location of var has to be appended as the location is not used in equals method for vars.
-                   // i.e. int x = 1; and func(int x);
-                   // Both x will be treated the same without location when they should be different inputs
-                   String varLocation;
-                   if (writtenVariable instanceof LocalVar) {
-                       varLocation = ((LocalVar) writtenVariable).getLocationClass();
-                   } else if (writtenVariable instanceof FieldVar) {
-                       varLocation = ((FieldVar) writtenVariable).getDeclaringType();
-                   } else {
-                       varLocation = "";
-                   }
-                   varToValMap.put(writtenVariable.toString() + varLocation, writtenVarVal);
-               }
+                setInputs(varToValMap, traceNode);
             }
         }
         return result;
@@ -170,6 +152,30 @@ public class TraceHelper {
         String varName = var.getName();
         return varName.equals("actual") || varName.equals("actuals") || varName.equals("condition") || varName.equals("object");
 
+    }
+
+    private static void setInputs(Map<String, VarValue> varToVarValMap, TraceNode traceNode) {
+        List<VarValue> writtenVarVals = traceNode.getWrittenVariables();
+        writtenVarVals.addAll(traceNode.getReadVariables());
+        for (VarValue writtenVarVal : writtenVarVals) {
+            Variable writtenVariable = writtenVarVal.getVariable();
+            // Ignore objects e.g. Object x = constructor(); x is not user defined input
+            if (writtenVarVal instanceof ReferenceValue && !(writtenVarVal instanceof ArrayValue)) {
+                continue;
+            }
+            // Location of var has to be appended as the location is not used in equals method for vars.
+            // i.e. int x = 1; and func(int x);
+            // Both x will be treated the same without location when they should be different inputs
+            String varLocation;
+            if (writtenVariable instanceof LocalVar) {
+                varLocation = ((LocalVar) writtenVariable).getLocationClass();
+            } else if (writtenVariable instanceof FieldVar) {
+                varLocation = ((FieldVar) writtenVariable).getDeclaringType();
+            } else {
+                varLocation = "";
+            }
+            varToVarValMap.put(writtenVariable.toString() + varLocation, writtenVarVal);
+        }
     }
 
 }

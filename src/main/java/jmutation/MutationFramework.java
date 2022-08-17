@@ -138,12 +138,14 @@ public class MutationFramework {
         for (TestIO testIO : testIOs) {
             testIO.setHasPassed(true);
         }
-        TestIO lastTestIO = testIOs.get(testIOs.size() - 1);
         boolean wasSuccessful = mutatedResult.isSuccessful();
-        if (mutatedResult.hasThrownException()) {
-            lastTestIO.setHasPassed(true);
-        } else {
-            lastTestIO.setHasPassed(wasSuccessful);
+        if (!testIOs.isEmpty()) {
+            TestIO lastTestIO = testIOs.get(testIOs.size() - 1);
+            if (mutatedResult.hasThrownException()) {
+                lastTestIO.setHasPassed(true);
+            } else {
+                lastTestIO.setHasPassed(wasSuccessful);
+            }
         }
 
         MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
