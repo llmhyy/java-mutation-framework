@@ -172,7 +172,7 @@ public class ProjectParser {
                 if (f.getName().contains(".java")) {
                     try {
                         String fileContent = Files.readString(f.toPath());
-                        if (fileContent.contains("package " + packageName) && fileContent.contains("class " + className)) {
+                        if (fileContent.contains("package " + packageName) && (fileContent.contains("class " + className) || fileContent.contains("enum " + className))) {
                             return f;
                         }
                     } catch (IOException e) {

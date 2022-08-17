@@ -1,5 +1,6 @@
 package jmutation.mutation;
 
+import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -102,7 +103,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
             return false;
         }
         if (isRandomRetrieval) {
-            boolean shouldNotAdd = Math.random() > mutationProbabilityCalculator.getProbability(node);
+            boolean shouldNotAdd = RandomSingleton.getSingleton().random() > mutationProbabilityCalculator.getProbability(node);
             if (shouldNotAdd) {
                 return false;
             }

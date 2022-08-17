@@ -130,6 +130,18 @@ public class TraceHelper {
                     }
                     current = current.getStepOverPrevious();
                 }
+                // TODO:
+                // Should not reach here, take some var val close to assertion's "actual" value so that output is not null.
+                // If reference values are correctly stored in writtenVariables, should not reach here.
+                // Remove once instrumentator fixed.
+                current = node;
+                while (current != null) {
+                    List<VarValue> readVarVals = current.getReadVariables();
+                    for (VarValue readVarVal : readVarVals) {
+                        return readVarVal;
+                    }
+                    current = current.getStepOverPrevious();
+                }
             }
         }
         return null;

@@ -11,6 +11,7 @@ import jmutation.model.TestCase;
 import jmutation.model.TestIO;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.parser.MutationParser;
+import jmutation.utils.RandomSingleton;
 import jmutation.utils.TraceHelper;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
@@ -53,6 +54,10 @@ public class MutationFramework {
 
     public void setMaxNumberOfMutations(int maxNumberOfMutations) {
         this.maxNumberOfMutations = maxNumberOfMutations;
+    }
+
+    public void setSeed(long seed) {
+        RandomSingleton.getSingleton().setSeed(seed);
     }
 
     public List<TestCase> getTestCases() {

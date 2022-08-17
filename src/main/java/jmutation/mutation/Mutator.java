@@ -5,6 +5,7 @@ import jmutation.model.Project;
 import jmutation.mutation.commands.MutationCommand;
 import jmutation.mutation.parser.MutationParser;
 import jmutation.parser.ProjectParser;
+import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.BadLocationException;
@@ -19,7 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,7 +46,7 @@ public class Mutator {
         List<MutationRange> ranges = coverage.getRanges();
         boolean isRandomRetrieval = true;
         for (int i = 0; i < 2; i++) {
-            Collections.shuffle(ranges);
+            RandomSingleton.getSingleton().shuffle(ranges);
             mutate(ranges, project, isRandomRetrieval);
             if (!mutationHistory.isEmpty()) {
                 break;
