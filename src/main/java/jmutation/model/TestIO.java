@@ -7,9 +7,16 @@ import java.util.List;
 public class TestIO {
     private List<VarValue> inputs;
     private VarValue output;
+
+    private boolean hasPassed;
+
     public TestIO(List<VarValue> inputs, VarValue output) {
         this.inputs = inputs;
         this.output = output;
+    }
+
+    public void setHasPassed(boolean hasPassed) {
+        this.hasPassed = hasPassed;
     }
 
     public List<VarValue> getInputs() {
@@ -18,5 +25,9 @@ public class TestIO {
 
     public VarValue getOutput() {
         return output;
+    }
+
+    public boolean hasPassed() {
+        return hasPassed;
     }
 }

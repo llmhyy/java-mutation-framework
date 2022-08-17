@@ -19,6 +19,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,68 +31,23 @@ public class Mutator {
     private MutationParser mutationParser;
     private List<MutationCommand> mutationHistory;
 
+    private int numberOfMutations;
+
     public Mutator(MutationParser mutationParser) {
         this.mutationParser = mutationParser;
         this.mutationHistory = new ArrayList<>();
+    }
+
+    public void setMaxNumberOfMutations(int numberOfMutations) {
+        this.numberOfMutations = numberOfMutations;
     }
 
     public Project mutate(Coverage coverage, Project project) {
         List<MutationRange> ranges = coverage.getRanges();
         boolean isRandomRetrieval = true;
         for (int i = 0; i < 2; i++) {
-            for (MutationRange range : ranges) {
-                String className = range.getClassName();
-
-                File file = retrieveFileFromClassName(className, project);
-                String fileContent;
-                try {
-                    fileContent = Files.readString(file.toPath());
-                } catch (IOException e) {
-                    throw new RuntimeException("Could not read file at " + file.toPath());
-                }
-
-                CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
-                // Attempt random retrieval.
-                List<ASTNode> nodes = parseRangeToNodes(unit, range, isRandomRetrieval);
-                if (nodes.isEmpty()) {
-                    // If mutation for node types in mutation range not implemented, skip to next mutation range
-                    continue;
-                }
-                List<MutationCommand> newMutationCommands = new ArrayList<>();
-                unit.recordModifications();
-                for (ASTNode node : nodes) {
-                    MutationCommand mutationCommand = mutationParser.parse(node);
-                    if (mutationCommand == null) {
-                        continue;
-                    }
-                    if (mutationCommand.canExecute()) {
-                        newMutationCommands.add(mutationCommand);
-                    }
-                }
-
-                for (MutationCommand mutationCommand : newMutationCommands) {
-                    ASTNode node = mutationCommand.getNode();
-                    ASTNode root = node.getRoot();
-                    if (!(root instanceof CompilationUnit)) {
-                        continue;
-                    }
-                    mutationCommand.executeMutation();
-                    mutationHistory.add(mutationCommand);
-
-                    /**
-                     * TODO:
-                     *
-                     * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
-                     * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
-                     * to rewrite the AST
-                     */
-
-                    // step 1: define mutation operator based on AST node
-                    // step 2: apply mutation on the AST node
-                    // step 3: rewrite the AST node back to Java doc
-                }
-                writeToFile(unit, file);
-            }
+            Collections.shuffle(ranges);
+            mutate(ranges, project, isRandomRetrieval);
             if (!mutationHistory.isEmpty()) {
                 break;
             }
@@ -99,6 +55,69 @@ public class Mutator {
         }
 
         return project;
+    }
+
+    private void mutate(List<MutationRange> ranges, Project project, boolean isRandomRetrieval) {
+        int numberOfExecutedMutations = 0;
+        for (MutationRange range : ranges) {
+            String className = range.getClassName();
+
+            File file = retrieveFileFromClassName(className, project);
+            String fileContent;
+            try {
+                fileContent = Files.readString(file.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException("Could not read file at " + file.toPath());
+            }
+
+            CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
+            // Attempt random retrieval.
+            List<ASTNode> nodes = parseRangeToNodes(unit, range, isRandomRetrieval);
+            if (nodes.isEmpty()) {
+                // If mutation for node types in mutation range not implemented, skip to next mutation range
+                continue;
+            }
+            List<MutationCommand> newMutationCommands = new ArrayList<>();
+            unit.recordModifications();
+            for (ASTNode node : nodes) {
+                MutationCommand mutationCommand = mutationParser.parse(node);
+                if (mutationCommand == null) {
+                    continue;
+                }
+                if (mutationCommand.canExecute()) {
+                    newMutationCommands.add(mutationCommand);
+                }
+            }
+
+            for (MutationCommand mutationCommand : newMutationCommands) {
+                ASTNode node = mutationCommand.getNode();
+                ASTNode root = node.getRoot();
+                if (!(root instanceof CompilationUnit)) {
+                    continue;
+                }
+                mutationCommand.executeMutation();
+                mutationHistory.add(mutationCommand);
+                numberOfExecutedMutations++;
+                if (numberOfMutations == numberOfExecutedMutations) {
+                    break;
+                }
+                /**
+                 * TODO:
+                 *
+                 * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
+                 * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
+                 * to rewrite the AST
+                 */
+
+                // step 1: define mutation operator based on AST node
+                // step 2: apply mutation on the AST node
+                // step 3: rewrite the AST node back to Java doc
+            }
+            writeToFile(unit, file);
+            if (numberOfMutations == numberOfExecutedMutations) {
+                return;
+            }
+        }
     }
 
     private File retrieveFileFromClassName(String className, Project newProject) {

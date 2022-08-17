@@ -20,6 +20,10 @@ public class ExecutionResult {
 
 	public boolean isSuccessful() { return !consoleOut.contains("is successful? false");}
 
+	public boolean hasThrownException() {
+		return !consoleOut.contains("expected:");
+	}
+
 	@Override
 	public String toString() {
 		 return this.consoleOut;

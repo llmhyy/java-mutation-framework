@@ -9,7 +9,6 @@ import jmutation.model.Project;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
 import jmutation.model.TestIO;
-import jmutation.model.microbat.PrecheckResult;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.parser.MutationParser;
 import jmutation.utils.TraceHelper;
@@ -34,6 +33,8 @@ public class MutationFramework {
 
     private MicrobatConfig microbatConfig;
 
+    private int maxNumberOfMutations = -1;
+
     public void setProjectPath(String projectPath) {
         this.projectPath = projectPath;
     }
@@ -48,6 +49,10 @@ public class MutationFramework {
 
     public void setTestCase(TestCase testCase) {
         this.testCase = testCase;
+    }
+
+    public void setMaxNumberOfMutations(int maxNumberOfMutations) {
+        this.maxNumberOfMutations = maxNumberOfMutations;
     }
 
     public List<TestCase> getTestCases() {
@@ -87,7 +92,7 @@ public class MutationFramework {
         }
 
         mutator = new Mutator(new MutationParser());
-
+        mutator.setMaxNumberOfMutations(maxNumberOfMutations);
         System.out.println(testCase);
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
@@ -129,9 +134,21 @@ public class MutationFramework {
         Trace mutatedTrace = mutatedResult.getCoverage().getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
         List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedTrace, mutatedResultWithAssertionsInTrace.getCoverage().getTrace(), testCase);
+
+        for (TestIO testIO : testIOs) {
+            testIO.setHasPassed(true);
+        }
+        TestIO lastTestIO = testIOs.get(testIOs.size() - 1);
+        boolean wasSuccessful = mutatedResult.isSuccessful();
+        if (mutatedResult.hasThrownException()) {
+            lastTestIO.setHasPassed(true);
+        } else {
+            lastTestIO.setHasPassed(wasSuccessful);
+        }
+
         MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
                 mutatedTrace, mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
-                testIOs, mutatedResult.isSuccessful());
+                testIOs, wasSuccessful);
 
         return mutationResult;
     }
