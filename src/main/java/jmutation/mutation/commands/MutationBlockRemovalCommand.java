@@ -38,8 +38,7 @@ public class MutationBlockRemovalCommand extends MutationCommand {
         Block block = (Block) node;
         List<Statement> stmts = block.statements();
         if (stmts.isEmpty() || hasInnerBlock(stmts) || hasTopLayerReturnStmt(stmts) ||
-                hasIrremovableAssignmentsInBlock(stmts) || hasThrowsStmt(stmts) ||
-        isTryBlock(block)) {
+                hasIrremovableAssignmentsInBlock(stmts) || isTryBlock(block)) {
             return false;
         }
         return true;
@@ -103,15 +102,6 @@ public class MutationBlockRemovalCommand extends MutationCommand {
                 if (stmt instanceof ReturnStatement) {
                     return true;
                 }
-            }
-        }
-        return false;
-    }
-
-    private boolean hasThrowsStmt(List<Statement> stmts) {
-        for (Statement stmt : stmts) {
-            if (stmt instanceof ThrowStatement) {
-                return true;
             }
         }
         return false;

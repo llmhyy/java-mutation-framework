@@ -81,6 +81,11 @@ public class TraceHelper {
             boolean shouldCallGetOutput = isOutputNode(traceNodeWithAssertion);
             if (shouldCallGetOutput) {
                 VarValue output = getOutput(traceNode, traceNodeWithAssertion);
+                // Output sometimes wrongly added as input if the output assignment line different from assertion call
+                String inputKey = formKeyForInputMap(output.getVariable());
+                if (varToValMap.containsKey(inputKey)) {
+                    varToValMap.remove(inputKey);
+                }
                 List<VarValue> inputs = new ArrayList<>();
                 inputs.addAll(varToValMap.values());
                 TestIO testIO = new TestIO(inputs, output);
@@ -109,11 +114,21 @@ public class TraceHelper {
         for (VarValue varValue : writtenVarValues) {
             Variable var = varValue.getVariable();
             if (getVarLocation(var).equals("org.junit.Assert") && varIsOutput(var)) {
-                List<VarValue> readVarVals = node.getReadVariables();
-                for (VarValue readVarVal : readVarVals) {
-                    if (readVarVal.getStringValue().equals(varValue.getStringValue())) {
-                        return readVarVal;
+                // Sometimes the assertion spans multiple lines, the output var may be in a diff line from the assertion call.
+                // Get step over previous node, until the output var is found.
+                // e.g.
+                // assertEquals(1,
+                // 2);
+                // 2nd line is called first before the assertion call at 1st line. Use stepOverPrevious from assertion call node to line 2.
+                TraceNode current = node;
+                while (current != null) {
+                    List<VarValue> readVarVals = current.getReadVariables();
+                    for (VarValue readVarVal : readVarVals) {
+                        if (readVarVal.getStringValue().equals(varValue.getStringValue())) {
+                            return readVarVal;
+                        }
                     }
+                    current = current.getStepOverPrevious();
                 }
             }
         }
@@ -151,31 +166,35 @@ public class TraceHelper {
     private static boolean varIsOutput(Variable var) {
         String varName = var.getName();
         return varName.equals("actual") || varName.equals("actuals") || varName.equals("condition") || varName.equals("object");
-
     }
 
     private static void setInputs(Map<String, VarValue> varToVarValMap, TraceNode traceNode) {
-        List<VarValue> writtenVarVals = traceNode.getWrittenVariables();
-        writtenVarVals.addAll(traceNode.getReadVariables());
-        for (VarValue writtenVarVal : writtenVarVals) {
+        List<VarValue> varVals = traceNode.getReadVariables();
+        varVals.addAll(traceNode.getWrittenVariables());
+        for (VarValue writtenVarVal : varVals) {
             Variable writtenVariable = writtenVarVal.getVariable();
             // Ignore objects e.g. Object x = constructor(); x is not user defined input
             if (writtenVarVal instanceof ReferenceValue && !(writtenVarVal instanceof ArrayValue)) {
                 continue;
             }
-            // Location of var has to be appended as the location is not used in equals method for vars.
-            // i.e. int x = 1; and func(int x);
-            // Both x will be treated the same without location when they should be different inputs
-            String varLocation;
-            if (writtenVariable instanceof LocalVar) {
-                varLocation = ((LocalVar) writtenVariable).getLocationClass();
-            } else if (writtenVariable instanceof FieldVar) {
-                varLocation = ((FieldVar) writtenVariable).getDeclaringType();
-            } else {
-                varLocation = "";
-            }
-            varToVarValMap.put(writtenVariable.toString() + varLocation, writtenVarVal);
+
+            varToVarValMap.put(formKeyForInputMap(writtenVariable), writtenVarVal);
         }
+    }
+
+    private static String formKeyForInputMap(Variable var) {
+        // Location of var has to be appended as the location is not used in equals method for vars.
+        // i.e. int x = 1; and func(int x);
+        // Both x will be treated the same without location when they should be different inputs
+        String varLocation;
+        if (var instanceof LocalVar) {
+            varLocation = ((LocalVar) var).getLocationClass();
+        } else if (var instanceof FieldVar) {
+            varLocation = ((FieldVar) var).getDeclaringType();
+        } else {
+            varLocation = "";
+        }
+        return var.toString() + varLocation;
     }
 
 }
