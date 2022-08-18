@@ -1,8 +1,10 @@
 package jmutation.utils;
 
+import jmutation.model.ExecutionResult;
 import jmutation.model.TestCase;
 import jmutation.model.TestIO;
 import jmutation.model.ast.ASTNodeParentRetriever;
+import jmutation.model.microbat.InstrumentationResult;
 import jmutation.mutation.commands.MutationCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
@@ -64,10 +66,15 @@ public class TraceHelper {
         return new ArrayList<>(result);
     }
 
-    public static List<TestIO> getTestInputOutputs(Trace trace, Trace traceWithAssertion, TestCase testCase) {
+    public static List<TestIO> getTestInputOutputs(ExecutionResult mutatedInstrumentationResult, ExecutionResult instrumentationResultWithAssertions, TestCase testCase) {
+        Trace trace = mutatedInstrumentationResult.getTrace();
+        Trace traceWithAssertion = instrumentationResultWithAssertions.getTrace();
         List<TraceNode> executionList = trace.getExecutionList();
         List<TraceNode> executionListWithAssertions = traceWithAssertion.getExecutionList();
         List<TestIO> result = new ArrayList<>();
+        if (executionList.isEmpty()) {
+            return result;
+        }
         String testCaseName = testCase.qualifiedName();
         Map<String, VarValue> varToValMap = new HashMap<>(); // Store the inputs
         for (int i = 0; i < executionList.size(); i++) {
@@ -98,6 +105,28 @@ public class TraceHelper {
             // Store the input values if not yet declared, otherwise, update the value
             if (fullMethodName.equals(testCaseName)) {
                 setInputs(varToValMap, traceNode);
+            }
+        }
+        // If crashed, obtain the last read/written var
+        if (mutatedInstrumentationResult.hasThrownException()) {
+            int idx = executionList.size() - 1;
+            while (idx >= 0) {
+                TraceNode current = executionList.get(idx);
+                List<VarValue> varValues = new ArrayList<>(current.getWrittenVariables());
+                varValues.addAll(current.getReadVariables());
+                String stringValOfOutput = mutatedInstrumentationResult.getInstrumentationResult().getProgramMsg();
+                stringValOfOutput = stringValOfOutput.substring(stringValOfOutput.indexOf(';') + 1);
+                for (VarValue varValue : varValues) {
+                    if (!stringValOfOutput.equals(varValue.getStringValue())) {
+                        continue;
+                    }
+                    List<VarValue> inputs = new ArrayList<>();
+                    inputs.addAll(varToValMap.values());
+                    TestIO testIO = new TestIO(inputs, varValue);
+                    result.add(testIO);
+                    return result;
+                }
+                idx--;
             }
         }
         return result;

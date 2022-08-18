@@ -18,8 +18,6 @@ import java.util.Set;
 public class Coverage {
     private List<MutationRange> ranges;
 
-    private Trace trace;
-
     public void formMutationRanges(Set<ClassLocation> classLocationSet, TestCase testCase) {
         Iterator<ClassLocation> classLocationIterator = classLocationSet.iterator();
         Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
@@ -38,7 +36,6 @@ public class Coverage {
     }
 
     public void formMutationRanges(Trace trace, TestCase testCase) {
-        this.trace = trace;
         List<TraceNode> traceNodes = trace.getExecutionList();
         Map<String, PriorityQueue<Integer>> classAndLineNumbersMap = new HashMap<>();
         String testCaseClassName = testCase.testClass;
@@ -54,6 +51,7 @@ public class Coverage {
         }
         ranges = formMutationRangesFromClassNameLineNumMap(classAndLineNumbersMap);
     }
+
     private void addClassNameAndLineNumToMap(Map<String, PriorityQueue<Integer>> classAndLineNumbersMap, String className, int lineNumber) {
         if (!classAndLineNumbersMap.containsKey(className)) {
             PriorityQueue<Integer> lineNumberQueue = new PriorityQueue<>();
@@ -103,13 +101,5 @@ public class Coverage {
 
     public void setRanges(List<MutationRange> ranges) {
         this.ranges = ranges;
-    }
-
-    public Trace getTrace() {
-        return trace;
-    }
-
-    public void setTrace(Trace trace) {
-        this.trace = trace;
     }
 }

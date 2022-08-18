@@ -7,6 +7,7 @@ import jmutation.model.MicrobatConfig;
 import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
+import jmutation.model.microbat.InstrumentationResult;
 import jmutation.model.microbat.PrecheckResult;
 import jmutation.parser.ProjectParser;
 import jmutation.trace.FileReader;
@@ -122,12 +123,10 @@ public class ProjectExecutor extends Executor {
         } catch (FileNotFoundException e) {
             throw new RuntimeException("File " + dumpFilePath + " not found");
         }
-        Trace trace = fileReader.readMainTrace();
-        setClassPathsToBreakpoints(trace);
-        Coverage coverage = new Coverage();
-        coverage.setTrace(trace);
+        InstrumentationResult instrumentationResult = fileReader.readInstrumentation();
+        setClassPathsToBreakpoints(instrumentationResult.getMainTrace());
         ExecutionResult executionResult = new ExecutionResult(executionResultStr);
-        executionResult.setCoverage(coverage);
+        executionResult.setInstrumentationResult(instrumentationResult);
         return executionResult;
     }
 

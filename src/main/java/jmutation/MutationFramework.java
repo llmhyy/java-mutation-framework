@@ -136,9 +136,9 @@ public class MutationFramework {
         mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
         ExecutionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
 
-        Trace mutatedTrace = mutatedResult.getCoverage().getTrace();
+        Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
-        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedTrace, mutatedResultWithAssertionsInTrace.getCoverage().getTrace(), testCase);
+        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedResult, mutatedResultWithAssertionsInTrace, testCase);
 
         for (TestIO testIO : testIOs) {
             testIO.setHasPassed(true);
@@ -146,14 +146,10 @@ public class MutationFramework {
         boolean wasSuccessful = mutatedResult.isSuccessful();
         if (!testIOs.isEmpty()) {
             TestIO lastTestIO = testIOs.get(testIOs.size() - 1);
-            if (mutatedResult.hasThrownException()) {
-                lastTestIO.setHasPassed(true);
-            } else {
-                lastTestIO.setHasPassed(wasSuccessful);
-            }
+            lastTestIO.setHasPassed(wasSuccessful);
         }
 
-        MutationResult mutationResult = new MutationResult(result.getCoverage().getTrace(),
+        MutationResult mutationResult = new MutationResult(result.getTrace(),
                 mutatedTrace, mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
                 testIOs, wasSuccessful);
 

@@ -1,10 +1,16 @@
 package jmutation.model;
 
 import jmutation.execution.Coverage;
+import jmutation.model.microbat.InstrumentationResult;
+import microbat.model.trace.Trace;
+
+import java.util.Optional;
 
 public class ExecutionResult {
 	private Coverage coverage;
 	private final String consoleOut;
+
+	private InstrumentationResult instrumentationResult;
 
 	public ExecutionResult(String consoleOut) {
 		this.consoleOut = consoleOut;
@@ -18,10 +24,22 @@ public class ExecutionResult {
 		this.coverage = coverage;
 	}
 
+	public InstrumentationResult getInstrumentationResult() {
+		return instrumentationResult;
+	}
+
+	public void setInstrumentationResult(InstrumentationResult instrumentationResult) {
+		this.instrumentationResult = instrumentationResult;
+	}
+
+	public Trace getTrace() {
+		return instrumentationResult.getMainTrace();
+	}
+
 	public boolean isSuccessful() { return !consoleOut.contains("is successful? false");}
 
 	public boolean hasThrownException() {
-		return !consoleOut.contains("expected:");
+		return !instrumentationResult.getProgramMsg().contains("expected:");
 	}
 
 	@Override

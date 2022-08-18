@@ -1,5 +1,6 @@
 package jmutation.trace;
 
+import jmutation.model.microbat.InstrumentationResult;
 import jmutation.model.microbat.PrecheckResult;
 import microbat.model.ClassLocation;
 import microbat.model.ControlScope;
@@ -69,12 +70,13 @@ public class TraceInputStream extends DataInputStream {
         }
     }
 
-    public List<Trace> readTraces() {
+    public InstrumentationResult readTraceCollection() {
         try {
             String header = readString();
             String programMsg;
             int expectedSteps = 0;
             int collectedSteps = 0;
+            InstrumentationResult result = new InstrumentationResult();
             if (TRACE_HEADER.equals(header)) {
                 programMsg = readString();
                 expectedSteps = readInt();
@@ -82,6 +84,7 @@ public class TraceInputStream extends DataInputStream {
             } else {
                 programMsg = header; // for compatible reason with old version. TO BE REMOVED.
             }
+            result.setProgramMsg(programMsg);
             int traceNo = readVarInt();
             if (traceNo == 0) {
                 return null;
@@ -103,7 +106,8 @@ public class TraceInputStream extends DataInputStream {
                 trace.setExecutionList(readSteps(trace, locationList));
                 traces.add(trace);
             }
-            return traces;
+            result.setTraces(traces);
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

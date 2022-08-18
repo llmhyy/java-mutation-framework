@@ -24,10 +24,7 @@ public class FileReader {
     }
 
     public InstrumentationResult readInstrumentation() {
-         List<Trace> traceList = fileStream.readTraces();
-         InstrumentationResult instrumentationResult = new InstrumentationResult();
-         instrumentationResult.setTraces(traceList);
-         return instrumentationResult;
+         return fileStream.readTraceCollection();
     }
 
     public Trace readMainTrace() {
