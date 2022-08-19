@@ -15,12 +15,14 @@ public class ComparisonOperator {
         put(Operator.LESS_EQUALS, Operator.LESS);
         put(Operator.GREATER, Operator.GREATER_EQUALS);
         put(Operator.GREATER_EQUALS, Operator.GREATER);
+        put(Operator.EQUALS, Operator.NOT_EQUALS);
+        put(Operator.NOT_EQUALS, Operator.EQUALS);
     }};
     public static Set<Operator> getOperatorSet() {
         return operatorSet;
     }
 
-    static Set<InfixExpression.Operator> operatorSet = new HashSet<>(Arrays.asList(Operator.LESS, Operator.LESS_EQUALS, Operator.GREATER, Operator.GREATER_EQUALS));
+    static Set<InfixExpression.Operator> operatorSet = new HashSet<>(Arrays.asList(Operator.LESS, Operator.LESS_EQUALS, Operator.GREATER, Operator.GREATER_EQUALS, Operator.EQUALS, Operator.NOT_EQUALS));
 
     public static Operator getReplacementOperator(Operator operator) {
         return replacementMap.get(operator);
