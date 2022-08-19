@@ -1,14 +1,10 @@
 package jmutation.mutation.parser;
 
 import jmutation.mutation.commands.MutationReturnStmtCommand;
-import jmutation.mutation.utils.ComparisonOperator;
-import jmutation.mutation.utils.MathOperator;
 import jmutation.mutation.commands.MutationBlockRemovalCommand;
 import jmutation.mutation.commands.MutationCommand;
-import jmutation.mutation.commands.MutationComparisonOperatorCommand;
 import jmutation.mutation.commands.MutationForLoopToIfCommand;
 import jmutation.mutation.commands.MutationIfCondToTrueCommand;
-import jmutation.mutation.commands.MutationMathOperatorCommand;
 import jmutation.mutation.commands.MutationWhileLoopToIfCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -16,30 +12,23 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
-import java.util.Set;
 
 public class MutationParser extends ASTVisitor {
     MutationCommand command;
 
-    private static boolean isMathOperator(InfixExpression e) {
-        Set<Operator> mathOperators = MathOperator.getOperatorSet();
-        InfixExpression.Operator currentOp = e.getOperator();
-        return mathOperators.contains(currentOp);
-    }
 
-    private static boolean isComparisonOperator(InfixExpression e) {
-        Set<Operator> comparisonOperators = ComparisonOperator.getOperatorSet();
-        InfixExpression.Operator currentOp = e.getOperator();
-        return comparisonOperators.contains(currentOp);
-    }
 
     public MutationCommand parse(ASTNode node) {
         node.accept(this);
-        return command;
+        if (command == null) {
+            return null;
+        }
+        if (command.canExecute()) {
+            return command;
+        }
+        return null;
     }
 
     @Override
@@ -49,12 +38,7 @@ public class MutationParser extends ASTVisitor {
 
     @Override
     public boolean visit(InfixExpression node) {
-        if (isMathOperator(node)) {
-            command = new MutationMathOperatorCommand(node);
-        }
-        if (isComparisonOperator(node)) {
-            command = new MutationComparisonOperatorCommand(node);
-        }
+        command = MutationInfixExpressionParser.parse(node);
         return false;
     }
 

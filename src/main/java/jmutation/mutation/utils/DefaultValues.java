@@ -33,6 +33,8 @@ public class DefaultValues {
                 CharacterLiteral characterLiteral = ast.newCharacterLiteral();
                 characterLiteral.setCharValue('\u0000');
                 return characterLiteral;
+            } else if (type instanceof SimpleType || type instanceof ArrayType) {
+                return ast.newNullLiteral();
             }
         }
         return null;

@@ -1,7 +1,7 @@
 package jmutation.mutation.command;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.MutationComparisonOperatorCommand;
+import jmutation.mutation.commands.MutationConditionalBoundaryCommand;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -34,7 +34,7 @@ public class MutationComparisonOperatorCommandTest {
         List<Statement> methodStmts = methodBody.statements();
         ForStatement forStatement = (ForStatement) methodStmts.get(0);
         InfixExpression infixExpression = (InfixExpression) forStatement.getExpression();
-        MutationComparisonOperatorCommand command = new MutationComparisonOperatorCommand(infixExpression);
+        MutationConditionalBoundaryCommand command = new MutationConditionalBoundaryCommand(infixExpression);
         assertFalse(command.canExecute());
     }
 

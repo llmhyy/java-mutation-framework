@@ -84,9 +84,7 @@ public class Mutator {
                 if (mutationCommand == null) {
                     continue;
                 }
-                if (mutationCommand.canExecute()) {
-                    newMutationCommands.add(mutationCommand);
-                }
+                newMutationCommands.add(mutationCommand);
             }
 
             for (MutationCommand mutationCommand : newMutationCommands) {
