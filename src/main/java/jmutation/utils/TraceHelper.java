@@ -12,6 +12,7 @@ import microbat.model.trace.TraceNode;
 import microbat.model.value.ArrayValue;
 import microbat.model.value.ReferenceValue;
 import microbat.model.value.VarValue;
+import microbat.model.variable.ArrayElementVar;
 import microbat.model.variable.FieldVar;
 import microbat.model.variable.LocalVar;
 import microbat.model.variable.Variable;
@@ -117,9 +118,24 @@ public class TraceHelper {
                 String stringValOfOutput = mutatedInstrumentationResult.getInstrumentationResult().getProgramMsg();
                 stringValOfOutput = stringValOfOutput.substring(stringValOfOutput.indexOf(';') + 1);
                 for (VarValue varValue : varValues) {
+                    // Array element, index out of bounds, can use varID to check idx.
+                    // e.g. varID = 1365008457[-1], check if [-1] inside varID
+                    boolean shouldSkip = true;
                     if (!stringValOfOutput.equals(varValue.getStringValue())) {
+                        shouldSkip = false;
+                    } else if (varValue instanceof ReferenceValue) {
+                        Variable var = varValue.getVariable();
+                        if (var instanceof ArrayElementVar) {
+                            if (var.getVarID().contains("[" + stringValOfOutput + "]")) {
+                                shouldSkip = false;
+                            }
+                        }
+                    }
+
+                    if (shouldSkip) {
                         continue;
                     }
+
                     List<VarValue> inputs = new ArrayList<>();
                     inputs.addAll(varToValMap.values());
                     TestIO testIO = new TestIO(inputs, varValue);
