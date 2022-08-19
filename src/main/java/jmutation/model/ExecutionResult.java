@@ -4,8 +4,6 @@ import jmutation.execution.Coverage;
 import jmutation.model.microbat.InstrumentationResult;
 import microbat.model.trace.Trace;
 
-import java.util.Optional;
-
 public class ExecutionResult {
 	private Coverage coverage;
 	private final String consoleOut;
@@ -36,7 +34,7 @@ public class ExecutionResult {
 		return instrumentationResult.getMainTrace();
 	}
 
-	public boolean isSuccessful() { return !consoleOut.contains("is successful? false");}
+	public boolean isSuccessful() { return instrumentationResult.getProgramMsg().startsWith("true;");}
 
 	public boolean hasThrownException() {
 		return !instrumentationResult.getProgramMsg().contains("expected:");
