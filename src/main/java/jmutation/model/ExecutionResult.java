@@ -34,7 +34,11 @@ public class ExecutionResult {
 		return instrumentationResult.getMainTrace();
 	}
 
-	public boolean isSuccessful() { return !consoleOut.contains("is successful? false") && !consoleOut.contains("FAIL");}
+	public boolean isSuccessful() {
+		if (instrumentationResult != null) {
+			return instrumentationResult.getProgramMsg().startsWith("true;");
+		}
+		return !consoleOut.contains("FAIL");}
 
 	public boolean hasThrownException() {
 		return !instrumentationResult.getProgramMsg().contains("expected:");
