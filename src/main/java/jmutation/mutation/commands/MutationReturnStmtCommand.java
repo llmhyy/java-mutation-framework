@@ -46,6 +46,9 @@ public class MutationReturnStmtCommand extends MutationCommand {
     public boolean canExecute() {
         ReturnStatement returnStatement = (ReturnStatement) node;
         Expression expression = returnStatement.getExpression();
+        if (expression == null) {
+            return false;
+        }
         if (expression instanceof MethodInvocation) {
             ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(MethodDeclaration.class);
             ASTNodeParentRetriever<TryStatement> tryStatementASTNodeParentRetriever = new ASTNodeParentRetriever<>(TryStatement.class);
