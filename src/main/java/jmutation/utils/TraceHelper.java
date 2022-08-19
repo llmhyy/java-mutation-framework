@@ -210,7 +210,8 @@ public class TraceHelper {
     }
 
     private static void setInputs(Map<String, VarValue> varToVarValMap, TraceNode traceNode) {
-        List<VarValue> varVals = traceNode.getReadVariables();
+        List<VarValue> varVals = new ArrayList<>();
+        varVals.addAll(traceNode.getReadVariables());
         varVals.addAll(traceNode.getWrittenVariables());
         for (VarValue writtenVarVal : varVals) {
             Variable writtenVariable = writtenVarVal.getVariable();
