@@ -8,32 +8,26 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 
-public class DefaultValues {
-    /**
-     *  Returns expression representing the default value for given type
-     *  i.e. 0 for int byte short long types, false for boolean, etc.
-     */
-    public static Expression getDefaultExpression(Type type) {
+public class DefaultValueReplacements {
+    public static Expression getDefaultReplacementExpression(Type type) {
         AST ast = type.getAST();
         if (type instanceof PrimitiveType) {
             PrimitiveType primitiveType = (PrimitiveType) type;
             PrimitiveType.Code primitiveTypeCode = primitiveType.getPrimitiveTypeCode();
             if (primitiveTypeCode.equals(PrimitiveType.BYTE) ||
-            primitiveTypeCode.equals(PrimitiveType.INT) ||
-            primitiveTypeCode.equals(PrimitiveType.SHORT) ||
-            primitiveTypeCode.equals(PrimitiveType.LONG)) {
-                return ast.newNumberLiteral("0");
+                    primitiveTypeCode.equals(PrimitiveType.INT) ||
+                    primitiveTypeCode.equals(PrimitiveType.SHORT) ||
+                    primitiveTypeCode.equals(PrimitiveType.LONG)) {
+                return ast.newNumberLiteral("1");
             } else if (primitiveTypeCode.equals(PrimitiveType.BOOLEAN)) {
-                return ast.newBooleanLiteral(false);
+                return ast.newBooleanLiteral(true);
             } else if (primitiveTypeCode.equals(PrimitiveType.FLOAT) ||
-            primitiveTypeCode.equals(PrimitiveType.DOUBLE)) {
-                return ast.newNumberLiteral("0.0");
+                    primitiveTypeCode.equals(PrimitiveType.DOUBLE)) {
+                return ast.newNumberLiteral("1.0");
             } else if (primitiveTypeCode.equals(PrimitiveType.CHAR)) {
                 CharacterLiteral characterLiteral = ast.newCharacterLiteral();
-                characterLiteral.setCharValue('\u0000');
+                characterLiteral.setCharValue('\u0001');
                 return characterLiteral;
-            } else if (type instanceof SimpleType || type instanceof ArrayType) {
-                return ast.newNullLiteral();
             }
         }
         return null;
