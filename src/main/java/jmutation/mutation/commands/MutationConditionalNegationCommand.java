@@ -36,7 +36,8 @@ public class MutationConditionalNegationCommand extends MutationCommand {
     @Override
     public boolean canExecute() {
         InfixExpression ieNode = (InfixExpression) node;
-        if (replacementMap.containsKey(ieNode)) {
+        Operator op = ieNode.getOperator();
+        if (replacementMap.containsKey(op)) {
             return true;
         }
         return false;

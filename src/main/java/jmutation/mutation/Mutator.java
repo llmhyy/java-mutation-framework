@@ -20,7 +20,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Given an arbitrary project (maven or gradle) and a region, we shall mutate the region into a compilable project.
@@ -59,9 +62,21 @@ public class Mutator {
 
     private void mutate(List<MutationRange> ranges, Project project, boolean isRandomRetrieval) {
         int numberOfExecutedMutations = 0;
+        Map<String, List<MutationRange>> classToRange = new HashMap<>();
         for (MutationRange range : ranges) {
             String className = range.getClassName();
-
+            List<MutationRange> rangesForClass;
+            if (classToRange.containsKey(className)) {
+                rangesForClass = classToRange.get(className);
+            } else {
+                rangesForClass = new ArrayList<>();
+            }
+            rangesForClass.add(range);
+            classToRange.put(className, rangesForClass);
+        }
+        for (Entry<String, List<MutationRange>> entry : classToRange.entrySet()) {
+            List<MutationRange> rangesForClass = entry.getValue();
+            String className = entry.getKey();
             File file = retrieveFileFromClassName(className, project);
             String fileContent;
             try {
@@ -71,50 +86,51 @@ public class Mutator {
             }
 
             CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
-            // Attempt random retrieval.
-            List<ASTNode> nodes = parseRangeToNodes(unit, range, isRandomRetrieval);
-            if (nodes.isEmpty()) {
-                // If mutation for node types in mutation range not implemented, skip to next mutation range
-                continue;
-            }
-            List<MutationCommand> newMutationCommands = new ArrayList<>();
+
             unit.recordModifications();
-            for (ASTNode node : nodes) {
-                MutationCommand mutationCommand = mutationParser.parse(node);
-                if (mutationCommand == null) {
+            for (MutationRange range : rangesForClass) {
+                // Attempt random retrieval.
+                List<ASTNode> nodes = parseRangeToNodes(unit, range, isRandomRetrieval);
+                if (nodes.isEmpty()) {
+                    // If mutation for node types in mutation range not implemented, skip to next mutation range
                     continue;
                 }
-                newMutationCommands.add(mutationCommand);
-            }
-
-            for (MutationCommand mutationCommand : newMutationCommands) {
-                ASTNode node = mutationCommand.getNode();
-                ASTNode root = node.getRoot();
-                if (!(root instanceof CompilationUnit)) {
-                    continue;
+                List<MutationCommand> newMutationCommands = new ArrayList<>();
+                for (ASTNode node : nodes) {
+                    MutationCommand mutationCommand = mutationParser.parse(node);
+                    if (mutationCommand == null) {
+                        continue;
+                    }
+                    newMutationCommands.add(mutationCommand);
                 }
-                mutationCommand.executeMutation();
-                mutationHistory.add(mutationCommand);
-                numberOfExecutedMutations++;
-                if (numberOfMutations == numberOfExecutedMutations) {
-                    break;
-                }
-                /**
-                 * TODO:
-                 *
-                 * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
-                 * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
-                 * to rewrite the AST
-                 */
 
-                // step 1: define mutation operator based on AST node
-                // step 2: apply mutation on the AST node
-                // step 3: rewrite the AST node back to Java doc
+                for (MutationCommand mutationCommand : newMutationCommands) {
+                    ASTNode node = mutationCommand.getNode();
+                    ASTNode root = node.getRoot();
+                    if (!(root instanceof CompilationUnit)) {
+                        continue;
+                    }
+                    mutationCommand.executeMutation();
+                    mutationHistory.add(mutationCommand);
+                    numberOfExecutedMutations++;
+                    if (numberOfMutations == numberOfExecutedMutations) {
+                        writeToFile(unit, file);
+                        return;
+                    }
+                    /**
+                     * TODO:
+                     *
+                     * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
+                     * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
+                     * to rewrite the AST
+                     */
+
+                    // step 1: define mutation operator based on AST node
+                    // step 2: apply mutation on the AST node
+                    // step 3: rewrite the AST node back to Java doc
+                }
             }
             writeToFile(unit, file);
-            if (numberOfMutations == numberOfExecutedMutations) {
-                return;
-            }
         }
     }
 
