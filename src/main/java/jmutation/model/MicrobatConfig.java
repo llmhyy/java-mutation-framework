@@ -101,7 +101,7 @@ public class MicrobatConfig {
         argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));
         argMap.put(OPT_STEP_LIMIT, List.of("400000"));
         argMap.put(OPT_TRACE_RECORDER, List.of("FILE"));
-        argMap.put(OPT_VARIABLE_LAYER, List.of("5"));
+        argMap.put(OPT_VARIABLE_LAYER, List.of("10"));
         argMap.put(OPT_LOG, List.of("printProgress", "error"));
         argMap.put(OPT_PRECHECK, List.of("false"));
         argMap.put(OPT_RUN_ID, List.of("1763794d-c0c2-4704-a483-20725cb39fd3"));

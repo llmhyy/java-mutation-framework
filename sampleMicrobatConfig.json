@@ -6,9 +6,6 @@
     "printProgress",
     "error"
   ],
-  "varLayer": [
-    "1"
-  ],
   "trace_recorder": [
     "FILE"
   ],

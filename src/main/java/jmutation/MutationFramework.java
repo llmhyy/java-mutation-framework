@@ -138,7 +138,7 @@ public class MutationFramework {
 
         Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
-        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedResult, mutatedResultWithAssertionsInTrace, testCase);
+        List<TestIO> testIOs = TraceHelper.getTestInputOutputs1(mutatedResult, mutatedResultWithAssertionsInTrace, testCase, mutatedProject);
 
         for (TestIO testIO : testIOs) {
             testIO.setHasPassed(true);

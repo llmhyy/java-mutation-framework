@@ -23,7 +23,7 @@ public class MicrobatConfigTest {
         expectedConfigMap.put("precheck", Arrays.asList("false"));
         expectedConfigMap.put("run_id", Arrays.asList("1763794d-c0c2-4704-a483-20725cb39fd3"));
         expectedConfigMap.put("log", Arrays.asList("printProgress", "error"));
-        expectedConfigMap.put("varLayer", Arrays.asList("5"));
+        expectedConfigMap.put("varLayer", Arrays.asList("10"));
         expectedConfigMap.put("working_dir", Arrays.asList(projectPath));
         expectedConfigMap.put("trace_recorder", Arrays.asList("FILE"));
         expectedConfigMap.put("dump_file_path", Arrays.asList(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
