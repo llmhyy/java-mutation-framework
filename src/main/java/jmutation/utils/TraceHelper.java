@@ -79,6 +79,7 @@ public class TraceHelper {
         List<TraceNode> executionList = trace.getExecutionList();
         List<TraceNode> executionListWithAssertions = traceWithAssertion.getExecutionList();
         List<TestIO> result = new ArrayList<>();
+        Set<TraceNode> pastOutputNodes = new HashSet<>();
         if (executionList.isEmpty()) {
             return result;
         }
@@ -101,97 +102,24 @@ public class TraceHelper {
                 if (primitiveVarToValMap.containsKey(inputKey)) {
                     primitiveVarToValMap.remove(inputKey);
                 }
-                List<VarValue> inputs = getInputs(executionList, traceNode, referenceVarToValMap, primitiveVarToValMap, project);
-                TestIO testIO = new TestIO(inputs, output);
-                result.add(testIO);
-                continue;
-            }
-            String fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + currentMethodName;
-            // Only take written vars in the test case (top layer) as inputs, not inner method calls
-            // e.g. int f = 1; int x = funcCall(2,3); Store 1, 2, 3 and written val to x
-            // Store the input values if not yet declared, otherwise, update the value
-            if (fullMethodName.equals(testCaseName)) {
-                setVarVals(primitiveVarToValMap, referenceVarToValMap, traceNode);
-            }
-        }
-        // If crashed, obtain the last read/written var
-        if (mutatedInstrumentationResult.hasThrownException()) {
-            int idx = executionList.size() - 1;
-            while (idx >= 0) {
-                TraceNode current = executionList.get(idx);
-                List<VarValue> varValues = new ArrayList<>(current.getWrittenVariables());
-                varValues.addAll(current.getReadVariables());
-                String stringValOfOutput = mutatedInstrumentationResult.getInstrumentationResult().getProgramMsg();
-                stringValOfOutput = stringValOfOutput.substring(stringValOfOutput.indexOf(';') + 1);
-                for (VarValue varValue : varValues) {
-                    // Array element, index out of bounds, can use varID to check idx.
-                    // e.g. varID = 1365008457[-1], check if [-1] inside varID
-                    boolean shouldSkip = true;
-                    if (!stringValOfOutput.equals(varValue.getStringValue())) {
-                        shouldSkip = false;
-                    } else if (varValue instanceof ReferenceValue) {
-                        Variable var = varValue.getVariable();
-                        if (var instanceof ArrayElementVar) {
-                            if (var.getVarID().contains("[" + stringValOfOutput + "]")) {
-                                shouldSkip = false;
-                            }
-                        }
-                    }
+//                Set<TraceNode> nodesToCheckForInput = getNodesToObtainInputs(trace, traceNode, pastOutputNodes);
 
-                    if (shouldSkip) {
-                        continue;
-                    }
+                Set<VarValue> inputSet = getInputsFromDataDep(output, traceNode, trace, new HashSet<>(), testCaseName, pastOutputNodes, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 
-                    List<VarValue> inputs = new ArrayList<>();
-                    inputs.addAll(primitiveVarToValMap.values());
-                    for (Entry<String, List<VarValue>> entry : referenceVarToValMap.entrySet()) {
-                        inputs.addAll(entry.getValue());
-                    }
-                    TestIO testIO = new TestIO(inputs, varValue);
-                    result.add(testIO);
-                    return result;
-                }
-                idx--;
-            }
-        }
-        return result;
-    }
+                int[] startAndEndLineNums = getLineNumsForAssertion(traceNode, project);
+                List<TraceNode> assertionTraceNodes = getTraceNodesBetweenLineNums(executionList, traceNode.getDeclaringCompilationUnitName(), startAndEndLineNums);
+                pastOutputNodes.addAll(assertionTraceNodes);
 
-    public static List<TestIO> getTestInputOutputs1(ExecutionResult mutatedInstrumentationResult, ExecutionResult instrumentationResultWithAssertions, TestCase testCase, Project project) {
-        Trace trace = mutatedInstrumentationResult.getTrace();
-        Trace traceWithAssertion = instrumentationResultWithAssertions.getTrace();
-        List<TraceNode> executionList = trace.getExecutionList();
-        List<TraceNode> executionListWithAssertions = traceWithAssertion.getExecutionList();
-        List<TestIO> result = new ArrayList<>();
-        if (executionList.isEmpty()) {
-            return result;
-        }
-        String testCaseName = testCase.qualifiedName();
-        Map<String, VarValue> primitiveVarToValMap = new HashMap<>(); // Store the inputs
-        Map<String, List<VarValue>> referenceVarToValMap = new HashMap<>(); // Store the inputs
-        for (int i = 0; i < executionList.size(); i++) {
-            TraceNode traceNode = executionList.get(i);
-            TraceNode traceNodeWithAssertion = executionListWithAssertions.get(i);
-            BreakPoint breakPoint = traceNode.getBreakPoint();
-            String currentMethodName = breakPoint.getMethodName();
-            if (currentMethodName.equals("<init>") || currentMethodName.equals("<clinit>")) {
-                continue;
-            }
-            boolean shouldCallGetOutput = isOutputNode(traceNodeWithAssertion);
-            String fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + currentMethodName;
-            if (shouldCallGetOutput) {
-                VarValue output = getOutput(traceNode, traceNodeWithAssertion);
-                // Output sometimes wrongly added as input if the output assignment line different from assertion call
-                String inputKey = formKeyForInputMap(output.getVariable());
-                if (primitiveVarToValMap.containsKey(inputKey)) {
-                    primitiveVarToValMap.remove(inputKey);
-                }
-                Set<VarValue> inputSet = getInputs1(output, traceNode, trace, new HashSet<>(), testCaseName);
                 List<VarValue> inputs = new ArrayList<>(inputSet);
+                // Data dep was broken, take inputs the greedy way. Go through trace and obtain all declared variables.
+                if (inputs.contains(output)) {
+                    inputs = getInputsFromTrace(executionList, traceNode, referenceVarToValMap, primitiveVarToValMap, project);
+                }
                 TestIO testIO = new TestIO(inputs, output);
                 result.add(testIO);
                 continue;
             }
+            String fullMethodName = breakPoint.getDeclaringCompilationUnitName() + "#" + currentMethodName;
             // Only take written vars in the test case (top layer) as inputs, not inner method calls
             // e.g. int f = 1; int x = funcCall(2,3); Store 1, 2, 3 and written val to x
             // Store the input values if not yet declared, otherwise, update the value
@@ -206,8 +134,8 @@ public class TraceHelper {
                 TraceNode current = executionList.get(idx);
                 List<VarValue> varValues = new ArrayList<>(current.getWrittenVariables());
                 varValues.addAll(current.getReadVariables());
-                String stringValOfOutput = mutatedInstrumentationResult.getInstrumentationResult().getProgramMsg();
-                stringValOfOutput = stringValOfOutput.substring(stringValOfOutput.indexOf(';') + 1);
+                String programMsg = mutatedInstrumentationResult.getInstrumentationResult().getProgramMsg();
+                String stringValOfOutput = programMsg.substring(programMsg.indexOf(';') + 1);
                 for (VarValue varValue : varValues) {
                     // Array element, index out of bounds, can use varID to check idx.
                     // e.g. varID = 1365008457[-1], check if [-1] inside varID
@@ -242,9 +170,23 @@ public class TraceHelper {
         return result;
     }
 
-    private static Set<VarValue> getInputs1(VarValue output, TraceNode outputNode, Trace trace, Set<String> encounteredVars, String testClassName) {
+
+    /**
+     * Gets inputs using data dependency.
+     * Has issues obtaining user-defined inputs when data dependency is broken midway. e.g. when "return 0;" encountered.
+     * @param output
+     * @param outputNode
+     * @param trace
+     * @param encounteredVars
+     * @param testClassName
+     * @return
+     */
+    private static Set<VarValue> getInputsFromDataDep(VarValue output, TraceNode outputNode, Trace trace, Set<Integer> encounteredVars, String testClassName, Set<TraceNode> nodesToIgnore, List<List<VarValue>> tracker, List<VarValue> currentTrack, List<List<TraceNode>> nodesTracker, List<TraceNode> currentNodesTrack) {
         Set<VarValue> result = new HashSet<>();
-        String varID = output.getVarID();
+        if (nodesToIgnore.contains(outputNode)) {
+            return result;
+        }
+        int varID = System.identityHashCode(output);
         if (encounteredVars.contains(varID)) {
             return result;
         }
@@ -254,22 +196,43 @@ public class TraceHelper {
             if (!(outputNode.getDeclaringCompilationUnitName() + "#" + outputNode.getMethodName()).equals(testClassName)) {
                 return result;
             }
+            List<VarValue> currentTrackCopy = new ArrayList<>(currentTrack);
+            currentTrackCopy.add(output);
+            tracker.add(currentTrackCopy);
+
+            List<TraceNode> currentNodesTrackCopy = new ArrayList<>(currentNodesTrack);
+            currentNodesTrackCopy.add(outputNode);
+            nodesTracker.add(currentNodesTrackCopy);
+
             result.add(output);
             return result;
         }
         if (dataDependency.getWrittenVariables().contains(output) &&
-                (dataDependency.getDeclaringCompilationUnitName() + "#" + dataDependency.getMethodName()).equals(testClassName)) {
+                (dataDependency.getDeclaringCompilationUnitName() + "#" + dataDependency.getMethodName()).equals(testClassName) && !nodesToIgnore.contains(dataDependency)) {
+            List<VarValue> currentTrackCopy = new ArrayList<>(currentTrack);
+            currentTrackCopy.add(output);
+            tracker.add(currentTrackCopy);
+            List<TraceNode> currentNodesTrackCopy = new ArrayList<>(currentNodesTrack);
+            currentNodesTrackCopy.add(outputNode);
+            nodesTracker.add(currentNodesTrackCopy);
+
             result.add(output);
         }
         for (VarValue readVarValue : dataDependency.getReadVariables()) {
-            result.addAll(getInputs1(readVarValue, dataDependency, trace, encounteredVars, testClassName));
+            List<VarValue> currentTrackCopy = new ArrayList<>(currentTrack);
+            currentTrackCopy.add(readVarValue);
+
+            List<TraceNode> currentNodesTrackCopy = new ArrayList<>(currentNodesTrack);
+            currentNodesTrackCopy.add(outputNode);
+
+            result.addAll(getInputsFromDataDep(readVarValue, dataDependency, trace, encounteredVars, testClassName, nodesToIgnore, tracker, currentTrackCopy, nodesTracker, currentNodesTrackCopy));
         }
         return result;
     }
 
-    private static List<VarValue> getInputs(List<TraceNode> executionList, TraceNode node, Map<String, List<VarValue>> referenceVarToValMap, Map<String, VarValue> primitiveVarToValMap, Project project) {
-        int[] startAndEndLineNums = getLineNumsForAssertion(node, project);
-        List<TraceNode> assertionTraceNodes = getTraceNodesBetweenLineNums(executionList, node.getDeclaringCompilationUnitName(), startAndEndLineNums);
+    private static List<VarValue> getInputsFromTrace(List<TraceNode> executionList, TraceNode assertionNode, Map<String, List<VarValue>> referenceVarToValMap, Map<String, VarValue> primitiveVarToValMap, Project project) {
+        int[] startAndEndLineNums = getLineNumsForAssertion(assertionNode, project);
+        List<TraceNode> assertionTraceNodes = getTraceNodesBetweenLineNums(executionList, assertionNode.getDeclaringCompilationUnitName(), startAndEndLineNums);
         List<VarValue> inputs = new ArrayList<>();
         Set<String> alreadyAddedInputs = new HashSet<>();
         for (TraceNode assertionTraceNode : assertionTraceNodes) {
@@ -491,6 +454,115 @@ public class TraceHelper {
                 result.add(traceNode);
             }
         }
+        return result;
+    }
+
+    /**
+     * This method is used to fix the error that the instrumentator failed
+     * to recognized the write variable in method call statement
+     * @param trace Trace of target program
+     */
+    private static void fillMethodCallVariables(Trace trace) {
+        List<TraceNode> executionList = trace.getExecutionList();
+        for (TraceNode node : executionList) {
+
+            // We only focus on method call node
+            if (node.getInvocationChildren().isEmpty()) {
+                continue;
+            }
+
+            // We only focus on the case that instrumentator failed to recognized the writen variable
+            if (!node.getReadVariables().isEmpty() && node.getWrittenVariables().isEmpty()) {
+
+                // Deep copy the required parameters of the method call
+                List<VarValue> parameters = new ArrayList<>();
+                parameters.addAll(node.getReadVariables());
+
+                // Try to find the read variable whose data dominator is out of scope of the method
+                Set<Integer> childrenOrder = new HashSet<>();
+                for (TraceNode childNode : node.getInvocationChildren()) {
+                    childrenOrder.add(childNode.getOrder());
+
+                    for (VarValue readVar : childNode.getReadVariables()) {
+                        TraceNode dataDominator = trace.findDataDependency(childNode, readVar);
+                        if (dataDominator != null) {
+                            /*
+                             * If the data dominator is out of scope, that mean
+                             * it may be the parameter of the method.
+                             */
+                            if (!childrenOrder.contains(dataDominator.getOrder())) {
+
+                                // We need to make sure that the variables are correspondence.
+                                for (VarValue writeVar : dataDominator.getWrittenVariables()) {
+
+                                    // Double check the data dependency relation
+                                    if (!writeVar.getType().equals(readVar.getType())) {
+                                        continue;
+                                    }
+
+                                    if (trace.findDataDependentee(dataDominator, writeVar).contains(childNode)) {
+                                        for (int idx=0; idx<parameters.size(); idx++) {
+                                            /*
+                                             * If the data dominator is one of the parameter of method,
+                                             * then add the variable into the method call.
+                                             */
+                                            VarValue parameter = parameters.get(idx);
+                                            if (parameter.equals(writeVar)) {
+                                                node.addWrittenVariable(readVar);
+                                                parameters.remove(idx);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static Set<TraceNode> getNodesToObtainInputs(Trace trace, TraceNode outputNode, Set<TraceNode> pastOutputNodes) {
+        Set<TraceNode> result = new HashSet(trace.getExecutionList());
+//        TraceNode currentNode;
+//        boolean pastOutputNodeEncountered = false;
+//        int currentOrder = outputNode.getOrder();
+//        while (currentOrder >= 1) {
+//            currentNode = trace.getTraceNode(currentOrder);
+//            if (pastOutputNodes.contains(currentNode)) {
+//                pastOutputNodeEncountered = true;
+//            }
+//            if (!pastOutputNodeEncountered) {
+//                result.add(currentNode);
+//                currentOrder--;
+//                continue;
+//            }
+//            if (currentNode.getInvocationParent() == null) {
+//                result.add(currentNode);
+//            }
+//            currentOrder--;
+
+//            TraceNode parentNode = currentNode.getInvocationParent();
+//            List<TraceNode> sameLayerNodes;
+//            if (parentNode == null) {
+//                sameLayerNodes = new ArrayList<>();
+//                for (TraceNode node : trace.getExecutionList()) {
+//                    if (node.getInvocationParent() == null) {
+//                        sameLayerNodes.add(node);
+//                    }
+//                }
+//            } else {
+//                sameLayerNodes = parentNode.getInvocationChildren();
+//            }
+//            for (TraceNode sameLayerNode : sameLayerNodes) {
+//                result.add(sameLayerNode);
+//                if (sameLayerNode.equals(currentNode)) {
+//                    break;
+//                }
+//            }
+//            currentNode = currentNode.getInvocationParent();
+//        }
         return result;
     }
 }

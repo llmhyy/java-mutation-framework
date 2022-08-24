@@ -1,6 +1,7 @@
 package jmutation.mutation.parser;
 
-import jmutation.mutation.commands.MutationReturnStmtCommand;
+import jmutation.mutation.commands.MutationMathLibCommand;
+import jmutation.mutation.commands.MutationReturnReplaceArgCommand;
 import jmutation.mutation.commands.MutationBlockRemovalCommand;
 import jmutation.mutation.commands.MutationCommand;
 import jmutation.mutation.commands.MutationForLoopToIfCommand;
@@ -12,6 +13,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
@@ -68,7 +70,15 @@ public class MutationParser extends ASTVisitor {
 
     @Override
     public boolean visit(ReturnStatement node) {
-        command = new MutationReturnStmtCommand(node);
+        command = new MutationReturnReplaceArgCommand(node);
+        return false;
+    }
+
+    @Override
+    public boolean visit(MethodInvocation node) {
+        if (node.getName().toString().contains("Math")) {
+            command = new MutationMathLibCommand(node);
+        }
         return false;
     }
 }
