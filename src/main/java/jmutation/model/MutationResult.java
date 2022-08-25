@@ -3,12 +3,17 @@ package jmutation.model;
 import jmutation.mutation.commands.MutationCommand;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
+import tracecollection.model.InstrumentationResult;
 
 import java.util.List;
 
 public class MutationResult {
-    Trace originalTrace;
-    Trace mutatedTrace;
+    InstrumentationResult originalResult;
+    InstrumentationResult mutatedResult;
+
+    InstrumentationResult originalResultWithAssertions;
+
+    InstrumentationResult mutatedResultWithAssertions;
 
     List<MutationCommand> mutationHistory;
 
@@ -17,26 +22,50 @@ public class MutationResult {
     Project originalProject;
     Project mutatedProject;
 
-    List<TestIO> testIOs;
+    String testClass;
+    String testSimpleName;
 
     boolean testCasePassed;
-    public MutationResult(Trace originalTrace, Trace mutatedTrace, List<MutationCommand> mutationHistory, Project originalProject, Project mutatedProject, List<TraceNode> rootCauses, List<TestIO> testIOs, boolean testCasePassed) {
-        this.originalTrace = originalTrace;
-        this.mutatedTrace = mutatedTrace;
+
+    public MutationResult(InstrumentationResult originalResult, InstrumentationResult mutatedResult,
+                          InstrumentationResult originalResultWithAssertions, InstrumentationResult mutatedResultWithAssertions,
+                          List<MutationCommand> mutationHistory, Project originalProject,
+                          Project mutatedProject, List<TraceNode> rootCauses, boolean testCasePassed, TestCase testCase) {
+        this.originalResult = originalResult;
+        this.mutatedResult = mutatedResult;
+        this.originalResultWithAssertions = originalResultWithAssertions;
+        this.mutatedResultWithAssertions = mutatedResultWithAssertions;
         this.mutationHistory = mutationHistory;
         this.originalProject = originalProject;
         this.mutatedProject = mutatedProject;
         this.rootCauses = rootCauses;
-        this.testIOs = testIOs;
         this.testCasePassed = testCasePassed;
+        testClass = testCase.testClass;
+        testSimpleName = testCase.simpleName;
+    }
+
+    public InstrumentationResult getOriginalResult() {
+        return originalResult;
+    }
+
+    public InstrumentationResult getMutatedResult() {
+        return mutatedResult;
+    }
+
+    public InstrumentationResult getOriginalResultWithAssertions() {
+        return originalResultWithAssertions;
+    }
+
+    public InstrumentationResult getMutatedResultWithAssertions() {
+        return mutatedResultWithAssertions;
     }
 
     public Trace getOriginalTrace() {
-        return originalTrace;
+        return originalResult.getMainTrace();
     }
 
     public Trace getMutatedTrace() {
-        return mutatedTrace;
+        return mutatedResult.getMainTrace();
     }
 
     public List<MutationCommand> getMutationHistory() {
@@ -55,11 +84,19 @@ public class MutationResult {
         return rootCauses;
     }
 
-    public List<TestIO> getTestIOs() {
-        return testIOs;
+    public boolean mutatedTestCasePassed() {
+        return testCasePassed;
     }
 
-    public boolean mutatedTestCasePassed() {
+    public String getTestClass() {
+        return testClass;
+    }
+
+    public String getTestSimpleName() {
+        return testSimpleName;
+    }
+
+    public boolean isTestCasePassed() {
         return testCasePassed;
     }
 }

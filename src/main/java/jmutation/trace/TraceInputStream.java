@@ -1,7 +1,5 @@
 package jmutation.trace;
 
-import jmutation.model.microbat.InstrumentationResult;
-import jmutation.model.microbat.PrecheckResult;
 import microbat.model.ClassLocation;
 import microbat.model.ControlScope;
 import microbat.model.SourceScope;
@@ -11,6 +9,8 @@ import microbat.model.trace.TraceNode;
 import microbat.model.value.VarValue;
 import microbat.util.ByteConverterUtil;
 import microbat.util.FileUtils;
+import tracecollection.model.InstrumentationResult;
+import tracecollection.model.PrecheckResult;
 
 import java.io.DataInputStream;
 import java.io.File;

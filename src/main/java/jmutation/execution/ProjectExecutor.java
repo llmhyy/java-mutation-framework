@@ -7,8 +7,8 @@ import jmutation.model.MicrobatConfig;
 import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
-import jmutation.model.microbat.InstrumentationResult;
-import jmutation.model.microbat.PrecheckResult;
+import tracecollection.model.InstrumentationResult;
+import tracecollection.model.PrecheckResult;
 import jmutation.parser.ProjectParser;
 import jmutation.trace.FileReader;
 import microbat.model.BreakPoint;
@@ -197,7 +197,7 @@ public class ProjectExecutor extends Executor {
         }
         // include microbat details to instrument run
         InstrumentationCommandBuilder ib = new InstrumentationCommandBuilder(updatedMicrobatConfig, projectConfig.getDropInsDir());
-        ib.setTestCase(testCase); // set class and method name
+        ib.setTestCase(testCase.testClass, testCase.simpleName); // set class and method name
         ib.addClassPath(projectConfig.getCompiledTestFolder()); // add target/test-classes
         ib.addClassPath(projectConfig.getCompiledClassFolder()); // add target/classes
         ib.setWorkingDirectory(projectConfig.getProjectRoot());

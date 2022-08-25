@@ -1,13 +1,12 @@
 package jmutation.model;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MicrobatConfigTest {
     @Test
@@ -29,6 +28,6 @@ public class MicrobatConfigTest {
         expectedConfigMap.put("dump_file_path", Arrays.asList(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
         expectedConfigMap.put("stepLimit", Arrays.asList("400000"));
         MicrobatConfig expectedConfig = new MicrobatConfig(expectedConfigMap);
-        assertEquals(expectedConfig, actualConfig);
+        Assertions.assertEquals(expectedConfig, actualConfig);
     }
 }

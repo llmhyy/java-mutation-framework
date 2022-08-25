@@ -1,7 +1,6 @@
 package jmutation.execution;
 
 import jmutation.model.MicrobatConfig;
-import jmutation.model.TestCase;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -26,9 +25,9 @@ public class InstrumentationCommandBuilder {
         this.dropInsDir = dropInsDir;
     }
 
-    public void setTestCase(TestCase testCase) {
-        this.testClass = Optional.of(testCase.testClass);
-        this.testMethod = Optional.of(testCase.simpleName);
+    public void setTestCase(String testClass, String testMethod) {
+        this.testClass = Optional.of(testClass);
+        this.testMethod = Optional.of(testMethod);
     }
 
     /**

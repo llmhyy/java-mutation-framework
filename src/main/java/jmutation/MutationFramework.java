@@ -2,17 +2,16 @@ package jmutation;
 
 import jmutation.execution.ProjectExecutor;
 import jmutation.model.ExecutionResult;
+import jmutation.utils.TraceHelper;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.MutationResult;
 import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.Project;
 import jmutation.model.ProjectConfig;
 import jmutation.model.TestCase;
-import jmutation.model.TestIO;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.parser.MutationParser;
 import jmutation.utils.RandomSingleton;
-import jmutation.utils.TraceHelper;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
@@ -132,26 +131,24 @@ public class MutationFramework {
         System.out.println("Mutated trace done");
 
         // Trace with assertions to get output of test case
+        MicrobatConfig includeAssertionsMicrobatConfig = updatedMicrobatConfig.setIncludes(Arrays.asList("org.junit.Assert"));
+        projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
+        ExecutionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase);
+
         MicrobatConfig includeAssertionsMutationMicrobatConfig = updatedMutationMicrobatConfig.setIncludes(Arrays.asList("org.junit.Assert"));
         mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
         ExecutionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
 
         Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
-        List<TestIO> testIOs = TraceHelper.getTestInputOutputs(mutatedResult, mutatedResultWithAssertionsInTrace, testCase, mutatedProject);
 
-        for (TestIO testIO : testIOs) {
-            testIO.setHasPassed(true);
-        }
         boolean wasSuccessful = mutatedResult.isSuccessful();
-        if (!testIOs.isEmpty()) {
-            TestIO lastTestIO = testIOs.get(testIOs.size() - 1);
-            lastTestIO.setHasPassed(wasSuccessful);
-        }
 
-        MutationResult mutationResult = new MutationResult(result.getTrace(),
-                mutatedTrace, mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
-                testIOs, wasSuccessful);
+
+        MutationResult mutationResult = new MutationResult(result.getInstrumentationResult(),
+                mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(), mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
+                mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
+                wasSuccessful, testCase);
 
         return mutationResult;
     }

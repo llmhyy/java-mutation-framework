@@ -1,8 +1,5 @@
 package jmutation.utils;
 
-import jmutation.MutationFramework;
-import jmutation.model.ExecutionResult;
-import jmutation.model.TestCase;
 import jmutation.mutation.MutationTestHelper;
 import jmutation.mutation.commands.MutationBlockRemovalCommand;
 import jmutation.mutation.commands.MutationCommand;
@@ -11,6 +8,7 @@ import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -20,12 +18,16 @@ public class TraceHelperTest {
     MutationTestHelper helper = new MutationTestHelper();
     @Test
     public void getMutatedTraceNodes_validMutationCommand_findsCorrectTraceNode() {
+        List<TraceNode> executionList = new ArrayList<>();
         String className = "main.Main";
         String methodSignature = "methodSignature";
         int lineNum = 1;
         BreakPoint breakPoint = new BreakPoint(className, methodSignature, lineNum);
         TraceNode traceNode = new TraceNode(breakPoint, null, 1, null, "");
-        List<TraceNode> executionList = new ArrayList<>();
+        executionList.add(traceNode);
+        lineNum = 3;
+        breakPoint = new BreakPoint(className, methodSignature, lineNum);
+        traceNode = new TraceNode(breakPoint, null, 1, null, "");
         executionList.add(traceNode);
         Trace trace = new Trace("1");
         trace.setExecutionList(executionList);
@@ -47,5 +49,7 @@ public class TraceHelperTest {
         List<MutationCommand> mutationHistory = new ArrayList<>();
         mutationHistory.add(command);
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(trace, mutationHistory);
+        Assertions.assertEquals(rootCauses.size(), 1);
+        Assertions.assertEquals(traceNode, rootCauses.get(0));
     }
 }

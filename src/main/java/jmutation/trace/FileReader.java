@@ -1,8 +1,8 @@
 package jmutation.trace;
 
-import jmutation.model.microbat.PrecheckResult;
-import jmutation.model.microbat.InstrumentationResult;
 import microbat.model.trace.Trace;
+import tracecollection.model.InstrumentationResult;
+import tracecollection.model.PrecheckResult;
 
 import java.io.File;
 import java.io.FileNotFoundException;

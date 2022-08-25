@@ -1,6 +1,6 @@
 package jmutation.trace;
 
-import jmutation.model.microbat.PrecheckResult;
+import tracecollection.model.PrecheckResult;
 import microbat.model.ClassLocation;
 import org.junit.jupiter.api.Test;
 

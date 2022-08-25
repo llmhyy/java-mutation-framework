@@ -1,7 +1,7 @@
 package jmutation.model;
 
 import jmutation.execution.Coverage;
-import jmutation.model.microbat.InstrumentationResult;
+import tracecollection.model.InstrumentationResult;
 import microbat.model.trace.Trace;
 
 public class ExecutionResult {

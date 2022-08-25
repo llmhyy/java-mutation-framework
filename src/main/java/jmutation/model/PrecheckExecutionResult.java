@@ -1,6 +1,6 @@
 package jmutation.model;
 
-import jmutation.model.microbat.PrecheckResult;
+import tracecollection.model.PrecheckResult;
 
 public class PrecheckExecutionResult extends ExecutionResult {
     private PrecheckResult precheckResult;
