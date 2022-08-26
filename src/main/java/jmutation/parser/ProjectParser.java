@@ -1,5 +1,6 @@
 package jmutation.parser;
 
+import jmutation.constants.ProjectType;
 import jmutation.model.*;
 import jmutation.model.ast.JdtMethodRetriever;
 import org.eclipse.jdt.core.JavaCore;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Given a maven or gradle project path, we parse it into a project
@@ -16,9 +18,9 @@ import java.util.*;
  * @author Yun Lin
  */
 public class ProjectParser {
-    private final File root;
-    private Project project;
-    private ProjectType projectType = ProjectType.MAVEN;
+    protected final File root;
+    protected Project project;
+    protected ProjectType projectType = ProjectType.MAVEN;
 
     public ProjectParser(File root) {
         // TODO: Determine project type (gradle or maven or none from project structure)
@@ -35,13 +37,30 @@ public class ProjectParser {
             // assume Maven project by default for now
             switch (projectType) {
                 case MAVEN:
-                    this.project = new MavenProject(root, walk(root));
+                    MavenProjectParser mavenProjectParser = new MavenProjectParser(root);
+                    this.project = new MavenProject(mavenProjectParser.getProjectName(), root, walk(root),
+                            mavenProjectParser.getSrcFolderPath(), mavenProjectParser.getTestFolderPath(),
+                            mavenProjectParser.getCompiledSrcFolderPath(), mavenProjectParser.getCompiledTestFolderPath());
                     break;
                 default:
                     throw new RuntimeException("Unrecognized Project Type");
             }
         }
         return this.project;
+    }
+
+    protected List<File> walk(File start, Predicate<File> predicate) {
+        File[] list = start.listFiles();
+        List<File> result = new ArrayList<>();
+
+        for (File f : list) {
+            if (f.isDirectory()) {
+                result.addAll(walk(f, predicate));
+            } else if (predicate.test(f)) {
+                result.add(f);
+            }
+        }
+        return result;
     }
 
     private static List<TestCase> walk(File start) {
