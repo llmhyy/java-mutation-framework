@@ -17,25 +17,12 @@ public abstract class Project {
     private final File root;
     private List<TestCase> testCases;
 
-    protected final File srcFolder;
 
-    protected final File testFolder;
+    protected String COMPILE_SRC_FOLDER_PATH;
+    protected String COMPILE_TEST_FOLDER_PATH;
+    protected String SRC_FOLDER_PATH;
+    protected String TEST_FOLDER_PATH;
 
-    protected final File compiledSrcFolder;
-
-    protected final File compiledTestFolder;
-
-    public Project(String name, File root, List<TestCase> testCases,
-                   File srcFolder, File testFolder,
-                   File compiledSrcFolder, File compiledTestFolder) {
-        this.name = name;
-        this.root = root;
-        this.testCases = testCases;
-        this.srcFolder = srcFolder;
-        this.testFolder = testFolder;
-        this.compiledSrcFolder = compiledSrcFolder;
-        this.compiledTestFolder = compiledTestFolder;
-    }
 
     public Project(String name, File root, List<TestCase> testCases,
                    String srcFolderPath, String testFolderPath,
@@ -43,11 +30,12 @@ public abstract class Project {
         this.name = name;
         this.root = root;
         this.testCases = testCases;
-        this.srcFolder = new File(srcFolderPath);
-        this.testFolder = new File(testFolderPath);
-        this.compiledSrcFolder = new File(compiledSrcFolderPath);
-        this.compiledTestFolder = new File(compiledTestFolderPath);
+        this.SRC_FOLDER_PATH = srcFolderPath;
+        this.TEST_FOLDER_PATH = testFolderPath;
+        this.COMPILE_SRC_FOLDER_PATH = compiledSrcFolderPath;
+        this.COMPILE_TEST_FOLDER_PATH = compiledTestFolderPath;
     }
+
 
     public List<TestCase> getTestCases() {
         return this.testCases;

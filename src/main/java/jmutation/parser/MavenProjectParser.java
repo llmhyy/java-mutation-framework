@@ -33,7 +33,7 @@ public class MavenProjectParser extends ProjectParser {
     }
 
     public String getSrcFolderPath() {
-        String srcFolderPath = new File(root, MavenConstants.SRC_FOLDER).getAbsolutePath();
+        String srcFolderPath = MavenConstants.SRC_FOLDER;
         if (build == null) {
             return srcFolderPath;
         }
@@ -41,11 +41,11 @@ public class MavenProjectParser extends ProjectParser {
         if (pomPath == null) {
             return srcFolderPath;
         }
-        return new File(root, pomPath).getAbsolutePath();
+        return pomPath;
     }
 
     public String getTestFolderPath() {
-        String testFolderPath = new File(root, MavenConstants.TEST_FOLDER).getAbsolutePath();
+        String testFolderPath = MavenConstants.TEST_FOLDER;
         if (build == null) {
             return testFolderPath;
         }
@@ -53,12 +53,12 @@ public class MavenProjectParser extends ProjectParser {
         if (pomPath == null) {
             return testFolderPath;
         }
-        return new File(root, pomPath).getAbsolutePath();
+        return pomPath;
     }
 
     public String getCompiledSrcFolderPath() {
-        String outputPath = new File(root, MavenConstants.COMPILATION_FOLDER + File.separator +
-                MavenConstants.COMPILED_CLASS_FOLDER).getAbsolutePath();
+        String outputPath = MavenConstants.COMPILATION_FOLDER + File.separator +
+                MavenConstants.COMPILED_CLASS_FOLDER;
         if (build == null) {
             return outputPath;
         }
@@ -66,12 +66,12 @@ public class MavenProjectParser extends ProjectParser {
         if (pomPath == null) {
             return outputPath;
         }
-        return new File(root, pomPath).getAbsolutePath();
+        return pomPath;
     }
 
     public String getCompiledTestFolderPath() {
-        String testOutputPath = new File(root, MavenConstants.COMPILATION_FOLDER + File.separator +
-                MavenConstants.TEST_CLASS_FOLDER).getAbsolutePath();
+        String testOutputPath = MavenConstants.COMPILATION_FOLDER + File.separator +
+                MavenConstants.TEST_CLASS_FOLDER;
         if (build == null) {
             return testOutputPath;
         }
@@ -79,7 +79,7 @@ public class MavenProjectParser extends ProjectParser {
         if (pomPath == null) {
             return testOutputPath;
         }
-        return new File(root, pomPath).getAbsolutePath();
+        return pomPath;
     }
 
     private File getPomFile() {

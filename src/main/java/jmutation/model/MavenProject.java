@@ -1,6 +1,7 @@
 package jmutation.model;
 
 import jmutation.constants.ProjectType;
+import jmutation.parser.MavenProjectParser;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -15,16 +16,11 @@ public class MavenProject extends Project {
     private static final String PACKAGE_ALL_FMT = "%s package";
     private static final String COMPILE_NO_RUN_TEST_FMT = "%s install -DskipTests";
 
+
     public MavenProject(String name, File root, List<TestCase> testCases,
                         String srcFolderPath, String testFolderPath,
                         String compiledSrcFolderPath, String compiledTestFolderPath) {
         super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath);
-    }
-
-    public MavenProject(String name, File root, List<TestCase> testCases,
-                   File srcFolder, File testFolder,
-                   File compiledSrcFolder, File compiledTestFolder) {
-        super(name, root, testCases, srcFolder, testFolder, compiledSrcFolder, compiledTestFolder);
     }
 
     @Override
@@ -52,12 +48,12 @@ public class MavenProject extends Project {
 
     @Override
     public File getSrcFolder() {
-        return srcFolder;
+        return new File(getRoot(), SRC_FOLDER_PATH);
     }
 
     @Override
     public File getTestFolder() {
-        return testFolder;
+        return new File(getRoot(), TEST_FOLDER_PATH);
     }
 
     @Override
@@ -67,18 +63,17 @@ public class MavenProject extends Project {
 
     @Override
     public File getCompiledTestFolder() {
-        return compiledTestFolder;
+        return new File(getRoot(), COMPILE_TEST_FOLDER_PATH);
     }
 
     @Override
     public File getCompiledClassFolder() {
-        return compiledSrcFolder;
+        return new File(getRoot(), COMPILE_SRC_FOLDER_PATH);
     }
 
     public File getCompiledFolder() {
         return new File(getRoot(), COMPILATION_FOLDER);
     }
-
 
     @Override
     public Project cloneToOtherPath() {
@@ -90,8 +85,8 @@ public class MavenProject extends Project {
             e.printStackTrace();
             throw new RuntimeException("Failed to clone project to " + dest.getAbsolutePath());
         } finally {
-            return new MavenProject(getProjectName(), dest, getTestCases(), getSrcFolder(), getTestFolder(),
-                    getCompiledClassFolder(), getCompiledTestFolder());
+            return new MavenProject(getProjectName(), dest, getTestCases(), SRC_FOLDER_PATH, TEST_FOLDER_PATH,
+                    COMPILE_SRC_FOLDER_PATH, COMPILE_TEST_FOLDER_PATH);
         }
     }
 }
