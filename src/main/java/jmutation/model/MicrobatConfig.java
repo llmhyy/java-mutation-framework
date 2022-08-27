@@ -98,7 +98,9 @@ public class MicrobatConfig {
     public static MicrobatConfig defaultConfig(String projectPath) {
         Map<String, List<String>> argMap = new HashMap<>();
         argMap.put(OPT_DUMP_FILE, List.of(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
-        argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));
+        if (System.getenv("JAVA_HOME") != null) {
+            argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));
+        }
         argMap.put(OPT_STEP_LIMIT, List.of("400000"));
         argMap.put(OPT_TRACE_RECORDER, List.of("FILE"));
         argMap.put(OPT_VARIABLE_LAYER, List.of("10"));
