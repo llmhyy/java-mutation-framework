@@ -1,7 +1,6 @@
 package jmutation.model;
 
 import jmutation.constants.ProjectType;
-import jmutation.parser.MavenProjectParser;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -80,6 +79,7 @@ public class MavenProject extends Project {
         String tmpdir = System.getProperty("java.io.tmpdir");
         File dest = new File(tmpdir + "/mutation");
         try {
+            FileUtils.deleteDirectory(dest);
             FileUtils.copyDirectory(getRoot(), dest);
         } catch (IOException e) {
             e.printStackTrace();
