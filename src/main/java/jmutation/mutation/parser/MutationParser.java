@@ -76,7 +76,7 @@ public class MutationParser extends ASTVisitor {
 
     @Override
     public boolean visit(MethodInvocation node) {
-        if (node.getName().toString().contains("Math")) {
+        if (node.getExpression() != null && node.getExpression().toString().equals("Math")) {
             command = new MutationMathLibCommand(node);
         }
         return false;
