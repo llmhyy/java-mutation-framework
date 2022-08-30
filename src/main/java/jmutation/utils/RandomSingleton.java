@@ -19,15 +19,15 @@ public class RandomSingleton {
         return LazyLoader.INSTANCE;
     }
 
-    public static void setSeed(long seed) {
+    public void setSeed(long seed) {
         random.setSeed(seed);
     }
 
-    public static double random() {
+    public double random() {
        return random.nextDouble();
     }
 
-    public static void shuffle(List list) {
+    public void shuffle(List list) {
         Collections.shuffle(list, random);
     }
 }

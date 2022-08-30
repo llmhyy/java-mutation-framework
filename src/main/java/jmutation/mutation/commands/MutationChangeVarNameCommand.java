@@ -1,6 +1,7 @@
 package jmutation.mutation.commands;
 
 import jmutation.model.ast.ASTNodeRetriever;
+import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -57,7 +58,7 @@ public class MutationChangeVarNameCommand extends MutationCommand {
         }
         ASTNode parent = simpleName.getParent();
         StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
-        int randIdx = (int) Math.round(Math.random() * (possibleReplacements.size() - 1));
+        int randIdx = (int) Math.round(RandomSingleton.getSingleton().random() * (possibleReplacements.size() - 1));
         SimpleName replacement = possibleReplacements.get(randIdx);
         SimpleName replacementClone = ast.newSimpleName(replacement.getIdentifier());
         parent.setStructuralProperty(locationInParent, replacementClone);
