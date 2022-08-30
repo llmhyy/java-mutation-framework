@@ -16,7 +16,10 @@ import java.util.Map;
 
 public class MutationMathLibCommand extends MutationCommand {
     private Map<String, List<String>> replacementMap = new HashMap<>(){{
-        put("pow", Arrays.asList("addExact"));}
+        put("pow", Arrays.asList("addExact"));
+        put("min", Arrays.asList("max"));
+        put("max", Arrays.asList("min"));
+    }
     };
     public MutationMathLibCommand(ASTNode node) {
         super(node);
