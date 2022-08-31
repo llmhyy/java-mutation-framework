@@ -60,7 +60,7 @@ public class MutationFramework {
     }
 
     public List<TestCase> getTestCases() {
-        ProjectConfig config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
+        config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
         Project proj = config.getProject();
         return proj.getTestCases();
     }
