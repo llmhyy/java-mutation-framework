@@ -1,6 +1,7 @@
-package jmutation.model;
+package jmutation.model.project;
 
 import jmutation.constants.ProjectType;
+import jmutation.model.TestCase;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static jmutation.constants.MavenConstants.COMPILATION_FOLDER;
+import static jmutation.constants.MavenConstants.MVN_CMD;
 
 public class MavenProject extends Project {
     private static final String COMPILE_ALL_FMT = "%s test-compile";
@@ -24,25 +26,22 @@ public class MavenProject extends Project {
 
     @Override
     public String singleTestCommand(TestCase testCase) {
-        return String.format("mvn test -Dtest=%s", testCase.qualifiedName());
+        return String.format("%s test -Dtest=%s", MVN_CMD, testCase.qualifiedName());
     }
 
     @Override
     public String compileCommand() {
-        String mavenCmd = "mvn";
-        return String.format(COMPILE_ALL_FMT, mavenCmd);
+        return String.format(COMPILE_ALL_FMT, MVN_CMD);
     }
 
     @Override
     public String packageCommand() {
-        String mavenCmd = "mvn";
-        return String.format(PACKAGE_ALL_FMT, mavenCmd);
+        return String.format(PACKAGE_ALL_FMT, MVN_CMD);
     }
 
     @Override
     public String cleanCommand() {
-        String mavenCmd = "mvn";
-        return String.format(CLEAN_FMT, mavenCmd);
+        return String.format(CLEAN_FMT, MVN_CMD);
     }
 
     @Override
@@ -84,9 +83,8 @@ public class MavenProject extends Project {
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to clone project to " + dest.getAbsolutePath());
-        } finally {
-            return new MavenProject(getProjectName(), dest, getTestCases(), SRC_FOLDER_PATH, TEST_FOLDER_PATH,
-                    COMPILE_SRC_FOLDER_PATH, COMPILE_TEST_FOLDER_PATH);
         }
+        return new MavenProject(getProjectName(), dest, getTestCases(), SRC_FOLDER_PATH, TEST_FOLDER_PATH,
+                COMPILE_SRC_FOLDER_PATH, COMPILE_TEST_FOLDER_PATH);
     }
 }
