@@ -1,5 +1,6 @@
 package jmutation.model;
 
+import jmutation.model.project.Project;
 import jmutation.mutation.commands.MutationCommand;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;

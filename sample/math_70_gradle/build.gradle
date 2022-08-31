@@ -12,7 +12,7 @@ repositories {
     maven {
         url = uri('http://repository.apache.org/snapshots')
 
-        // allowInsecureProtocol = true
+        allowInsecureProtocol = true
     }
 
     maven {

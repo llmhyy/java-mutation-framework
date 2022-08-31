@@ -1,6 +1,7 @@
-package jmutation.model;
+package jmutation.model.project;
 
 import jmutation.constants.ProjectType;
+import jmutation.model.TestCase;
 
 import java.io.File;
 import java.util.List;
