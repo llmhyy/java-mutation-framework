@@ -1,5 +1,6 @@
 package jmutation.utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -27,7 +28,10 @@ public class RandomSingleton {
        return random.nextDouble();
     }
 
-    public void shuffle(List list) {
-        Collections.shuffle(list, random);
+    public List shuffle(List list) {
+        List shuffledList = new ArrayList<>();
+        shuffledList.addAll(list);
+        Collections.shuffle(shuffledList, random);
+        return shuffledList;
     }
 }

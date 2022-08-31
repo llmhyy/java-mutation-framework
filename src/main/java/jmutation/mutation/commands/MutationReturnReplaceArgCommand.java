@@ -23,6 +23,7 @@ public class MutationReturnReplaceArgCommand extends MutationCommand {
 
     @Override
     public ASTNode executeMutation() {
+        ReturnStatement returnStatement = (ReturnStatement) node;
         ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(MethodDeclaration.class);
         MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
         Type returnType = methodDeclaration.getReturnType2();
@@ -32,8 +33,8 @@ public class MutationReturnReplaceArgCommand extends MutationCommand {
         for (SingleVariableDeclaration parameter : parameters) {
             Type parameterType = parameter.getType();
             String parameterTypeIdentifier = typeIdentifier.getTypeIdentifier(parameterType);
-            if (parameterTypeIdentifier != null && parameterTypeIdentifier.equals(returnTypeIdentifier)) {
-                ReturnStatement returnStatement = (ReturnStatement) node;
+            if (parameterTypeIdentifier != null && parameterTypeIdentifier.equals(returnTypeIdentifier) &&
+                    !parameter.getName().toString().equals(returnStatement.getExpression().toString())) {
                 Name replacement = ast.newName(parameter.getName().toString());
                 returnStatement.setExpression(replacement);
                 return returnStatement;
@@ -65,7 +66,8 @@ public class MutationReturnReplaceArgCommand extends MutationCommand {
         for (SingleVariableDeclaration parameter : parameters) {
             Type parameterType = parameter.getType();
             String parameterTypeIdentifier = typeIdentifier.getTypeIdentifier(parameterType);
-            if (parameterTypeIdentifier != null && parameterTypeIdentifier.equals(returnTypeIdentifier)) {
+            if (parameterTypeIdentifier != null && parameterTypeIdentifier.equals(returnTypeIdentifier) &&
+                    !parameter.getName().toString().equals(returnStatement.getExpression().toString())) {
                 return true;
             }
         }

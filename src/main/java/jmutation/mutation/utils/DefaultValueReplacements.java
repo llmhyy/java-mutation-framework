@@ -1,11 +1,9 @@
 package jmutation.mutation.utils;
 
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 
 public class DefaultValueReplacements {

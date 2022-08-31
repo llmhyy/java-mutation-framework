@@ -1,12 +1,7 @@
 package jmutation.mutation.parser;
 
-import jmutation.mutation.commands.MutationMathLibCommand;
-import jmutation.mutation.commands.MutationReturnReplaceArgCommand;
-import jmutation.mutation.commands.MutationBlockRemovalCommand;
-import jmutation.mutation.commands.MutationCommand;
-import jmutation.mutation.commands.MutationForLoopToIfCommand;
-import jmutation.mutation.commands.MutationIfCondToTrueCommand;
-import jmutation.mutation.commands.MutationWhileLoopToIfCommand;
+import jmutation.mutation.commands.*;
+import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
@@ -17,10 +12,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MutationParser extends ASTVisitor {
     MutationCommand command;
-
-
 
     public MutationCommand parse(ASTNode node) {
         node.accept(this);
@@ -70,7 +66,20 @@ public class MutationParser extends ASTVisitor {
 
     @Override
     public boolean visit(ReturnStatement node) {
-        command = new MutationReturnReplaceArgCommand(node);
+        List<MutationCommand> possibleCommands = new ArrayList<>();
+        MutationCommand temporaryCommand = new MutationReturnReplaceArgCommand(node);
+        if (temporaryCommand.canExecute())  {
+            possibleCommands.add(temporaryCommand);
+        }
+        temporaryCommand = new MutationReturnMathCommand(node);
+        if (temporaryCommand.canExecute())  {
+            possibleCommands.add(temporaryCommand);
+        }
+        if (possibleCommands.isEmpty()) {
+            return true;
+        }
+        possibleCommands = RandomSingleton.getSingleton().shuffle(possibleCommands);
+        command = possibleCommands.get(0);
         return false;
     }
 

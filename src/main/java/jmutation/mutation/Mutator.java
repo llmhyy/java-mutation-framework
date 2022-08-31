@@ -49,7 +49,7 @@ public class Mutator {
         List<MutationRange> ranges = coverage.getRanges();
         boolean isRandomRetrieval = true;
         for (int i = 0; i < 2; i++) {
-            RandomSingleton.getSingleton().shuffle(ranges);
+            ranges = RandomSingleton.getSingleton().shuffle(ranges);
             mutate(ranges, project, isRandomRetrieval);
             if (!mutationHistory.isEmpty()) {
                 break;
