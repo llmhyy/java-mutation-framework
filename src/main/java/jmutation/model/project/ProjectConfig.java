@@ -1,4 +1,4 @@
-package jmutation.model;
+package jmutation.model.project;
 
 import jmutation.parser.ProjectParser;
 
