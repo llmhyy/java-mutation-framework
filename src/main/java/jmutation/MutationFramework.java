@@ -6,8 +6,8 @@ import jmutation.utils.TraceHelper;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.MutationResult;
 import jmutation.model.PrecheckExecutionResult;
-import jmutation.model.Project;
-import jmutation.model.ProjectConfig;
+import jmutation.model.project.Project;
+import jmutation.model.project.ProjectConfig;
 import jmutation.model.TestCase;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.parser.MutationParser;
@@ -60,7 +60,7 @@ public class MutationFramework {
     }
 
     public List<TestCase> getTestCases() {
-        ProjectConfig config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
+        config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
         Project proj = config.getProject();
         return proj.getTestCases();
     }

@@ -3,6 +3,9 @@ package jmutation.parser;
 import jmutation.constants.ProjectType;
 import jmutation.model.*;
 import jmutation.model.ast.JdtMethodRetriever;
+import jmutation.model.project.GradleProject;
+import jmutation.model.project.MavenProject;
+import jmutation.model.project.Project;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 
@@ -20,13 +23,21 @@ import java.util.function.Predicate;
 public class ProjectParser {
     protected final File root;
     protected Project project;
-    protected ProjectType projectType = ProjectType.MAVEN;
+    protected ProjectType projectType;
 
     public ProjectParser(File root) {
         // TODO: Determine project type (gradle or maven or none from project structure)
         // Currently assume project type is maven
         if (!root.exists()) {
             throw new RuntimeException("Project " + root.getAbsolutePath() + " does not exist");
+        }
+
+        Predicate<File> isGradleFilePredicate = file -> file.getName().endsWith("gradle");
+        List<File> gradleFiles = walk(root, isGradleFilePredicate, false);
+        if (gradleFiles.isEmpty()) {
+            projectType = ProjectType.MAVEN;
+        } else {
+            projectType = ProjectType.GRADLE;
         }
         this.root = root;
     }
@@ -42,25 +53,17 @@ public class ProjectParser {
                             mavenProjectParser.getSrcFolderPath(), mavenProjectParser.getTestFolderPath(),
                             mavenProjectParser.getCompiledSrcFolderPath(), mavenProjectParser.getCompiledTestFolderPath());
                     break;
+                case GRADLE:
+                    GradleProjectParser gradleProjectParser = new GradleProjectParser(root);
+                    this.project = new GradleProject(gradleProjectParser.getProjectName(), root, walk(root),
+                            gradleProjectParser.getSrcFolderPath(), gradleProjectParser.getTestFolderPath(),
+                            gradleProjectParser.getCompiledSrcFolderPath(), gradleProjectParser.getCompiledTestFolderPath());
+                    break;
                 default:
                     throw new RuntimeException("Unrecognized Project Type");
             }
         }
         return this.project;
-    }
-
-    protected List<File> walk(File start, Predicate<File> predicate) {
-        File[] list = start.listFiles();
-        List<File> result = new ArrayList<>();
-
-        for (File f : list) {
-            if (f.isDirectory()) {
-                result.addAll(walk(f, predicate));
-            } else if (predicate.test(f)) {
-                result.add(f);
-            }
-        }
-        return result;
     }
 
     private static List<TestCase> walk(File start) {
@@ -88,6 +91,21 @@ public class ProjectParser {
             }
         }
         return testCases;
+    }
+
+
+    static List<File> walk(File start, Predicate<File> predicate, boolean recursive) {
+        File[] list = start.listFiles();
+        List<File> result = new ArrayList<>();
+
+        for (File f : list) {
+            if (recursive && f.isDirectory()) {
+                result.addAll(walk(f, predicate, true));
+            } else if (predicate.test(f)) {
+                result.add(f);
+            }
+        }
+        return result;
     }
 
     private static boolean isTestSuite(String code) {
@@ -139,7 +157,7 @@ public class ProjectParser {
 
             String simpleName = node.getName().toString();
             StringJoiner sj = new StringJoiner(",", simpleName + "(", ")");
-            node.parameters().stream().forEach(param -> sj.add(param.toString()));
+            node.parameters().forEach(param -> sj.add(param.toString()));
             String signature = sj.toString();
 
             int startLine = unit.getLineNumber(node.getStartPosition()) - 1;
@@ -164,16 +182,16 @@ public class ProjectParser {
     public static File getFileOfClass(String classCanonicalName, File start) {
         String[] packagePartsArr = classCanonicalName.split("[.]", -1);
         Set<String> packageParts = new HashSet<>(Arrays.asList(packagePartsArr));
-        String packageName = "";
+        StringBuilder packageName = new StringBuilder();
         for (int i = 0; i < packagePartsArr.length - 1; i++) {
-            packageName += packagePartsArr[i];
+            packageName.append(packagePartsArr[i]);
             if (i == packagePartsArr.length - 2) {
                 continue;
             }
-            packageName += ".";
+            packageName.append(".");
         }
         String className = packagePartsArr[packagePartsArr.length - 1].split("[$]", 2)[0];
-        return getFileOfClassHelper(packageParts, packageName, className, start);
+        return getFileOfClassHelper(packageParts, packageName.toString(), className, start);
     }
 
     private static File getFileOfClassHelper(Set<String> packageParts, String packageName, String className, File start) {

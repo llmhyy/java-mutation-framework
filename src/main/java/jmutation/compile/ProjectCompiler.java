@@ -1,7 +1,7 @@
 package jmutation.compile;
 
 import jmutation.execution.Executor;
-import jmutation.model.Project;
+import jmutation.model.project.Project;
 
 /**
  * 

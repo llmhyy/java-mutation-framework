@@ -19,7 +19,7 @@ public class MutationMathLibCommandTest {
         String documentStr = "import java.lang.Math;" +
                 "public class Main {" +
                 "public static void main(String[] args) {" +
-                "int a = Math.pow(1,2);" +
+                "double a = Math.pow(1,2);" +
                 "while(a != 20) {" +
                 "a++;" +
                 "a = 0;" +
@@ -41,7 +41,7 @@ public class MutationMathLibCommandTest {
         String expectedDoc = "import java.lang.Math;" +
                 "public class Main {" +
                 "public static void main(String[] args) {" +
-                "int a = Math.addExact(1,2);" +
+                "double a = Math.addExact(1,2);" +
                 "while(a != 20) {" +
                 "a++;" +
                 "a = 0;" +
@@ -101,5 +101,12 @@ public class MutationMathLibCommandTest {
         MethodInvocation mathPowInvocation = (MethodInvocation) frag.getInitializer();
         MutationMathLibCommand command = new MutationMathLibCommand(mathPowInvocation);
         assertFalse(command.canExecute());
+    }
+
+    double tets() {
+        double a = Math.addExact(1, 2);
+
+        a += 1;
+        return a;
     }
 }

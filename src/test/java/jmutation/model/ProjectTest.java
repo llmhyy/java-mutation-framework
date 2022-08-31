@@ -1,5 +1,7 @@
 package jmutation.model;
 
+import jmutation.model.project.Project;
+import jmutation.model.project.ProjectConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

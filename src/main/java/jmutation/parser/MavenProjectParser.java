@@ -12,7 +12,9 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
-public class MavenProjectParser extends ProjectParser {
+import static jmutation.parser.ProjectParser.walk;
+
+class MavenProjectParser extends ProjectInfoParser {
     Model model;
     Build build;
 
@@ -28,11 +30,16 @@ public class MavenProjectParser extends ProjectParser {
         }
     }
 
-    public String getProjectName() {
-        return model.getName();
+    @Override
+    String getProjectName() {
+        String projName = model.getName();
+        if (projName == null) {
+            return super.getProjectName();
+        }
+        return projName;
     }
 
-    public String getSrcFolderPath() {
+    String getSrcFolderPath() {
         String srcFolderPath = MavenConstants.SRC_FOLDER;
         if (build == null) {
             return srcFolderPath;
@@ -44,7 +51,7 @@ public class MavenProjectParser extends ProjectParser {
         return pomPath;
     }
 
-    public String getTestFolderPath() {
+    String getTestFolderPath() {
         String testFolderPath = MavenConstants.TEST_FOLDER;
         if (build == null) {
             return testFolderPath;
@@ -56,7 +63,7 @@ public class MavenProjectParser extends ProjectParser {
         return pomPath;
     }
 
-    public String getCompiledSrcFolderPath() {
+    String getCompiledSrcFolderPath() {
         String outputPath = MavenConstants.COMPILATION_FOLDER + File.separator +
                 MavenConstants.COMPILED_CLASS_FOLDER;
         if (build == null) {
@@ -69,7 +76,7 @@ public class MavenProjectParser extends ProjectParser {
         return pomPath;
     }
 
-    public String getCompiledTestFolderPath() {
+    String getCompiledTestFolderPath() {
         String testOutputPath = MavenConstants.COMPILATION_FOLDER + File.separator +
                 MavenConstants.TEST_CLASS_FOLDER;
         if (build == null) {
@@ -84,7 +91,7 @@ public class MavenProjectParser extends ProjectParser {
 
     private File getPomFile() {
         Predicate<File> isPomPredicate = file -> file.getName().equals("pom.xml");
-        List<File> pomFiles = walk(root, isPomPredicate);
+        List<File> pomFiles = walk(getRoot(), isPomPredicate, false);
         return pomFiles.get(0);
     }
 }

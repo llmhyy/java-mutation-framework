@@ -1,7 +1,7 @@
 package jmutation.execution;
 
 import jmutation.model.MicrobatConfig;
-import jmutation.model.ProjectConfig;
+import jmutation.model.project.ProjectConfig;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -5,7 +5,7 @@ import jmutation.execution.output.OutputHandler;
 import jmutation.model.ExecutionResult;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.PrecheckExecutionResult;
-import jmutation.model.ProjectConfig;
+import jmutation.model.project.ProjectConfig;
 import jmutation.model.TestCase;
 import tracecollection.model.InstrumentationResult;
 import tracecollection.model.PrecheckResult;
@@ -202,7 +202,7 @@ public class ProjectExecutor extends Executor {
         ib.addClassPath(projectConfig.getCompiledClassFolder()); // add target/classes
         ib.setWorkingDirectory(projectConfig.getProjectRoot());
 
-        findJars().stream().forEach(file -> { // add jar files
+        findJars().forEach(file -> { // add jar files
             ib.addClassPath(file);
             ib.addExternalLibPath(file);
         });
