@@ -19,10 +19,10 @@ public abstract class Project {
     private List<TestCase> testCases;
 
 
-    protected String COMPILE_SRC_FOLDER_PATH;
-    protected String COMPILE_TEST_FOLDER_PATH;
-    protected String SRC_FOLDER_PATH;
-    protected String TEST_FOLDER_PATH;
+    protected String compileSrcFolderPath;
+    protected String compileTestFolderPath;
+    protected String srcFolderPath;
+    protected String testFolderPath;
 
 
     public Project(String name, File root, List<TestCase> testCases,
@@ -31,10 +31,10 @@ public abstract class Project {
         this.name = name;
         this.root = root;
         this.testCases = testCases;
-        this.SRC_FOLDER_PATH = srcFolderPath;
-        this.TEST_FOLDER_PATH = testFolderPath;
-        this.COMPILE_SRC_FOLDER_PATH = compiledSrcFolderPath;
-        this.COMPILE_TEST_FOLDER_PATH = compiledTestFolderPath;
+        this.srcFolderPath = srcFolderPath;
+        this.testFolderPath = testFolderPath;
+        this.compileSrcFolderPath = compiledSrcFolderPath;
+        this.compileTestFolderPath = compiledTestFolderPath;
     }
 
 

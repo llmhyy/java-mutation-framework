@@ -98,10 +98,18 @@
             <artifactId>maven-model</artifactId>
             <version>3.8.6</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.gradle/gradle-tooling-api -->
         <dependency>
             <groupId>org.gradle</groupId>
-            <artifactId>gradle-core-api</artifactId>
-            <version>6.1.1</version>
+            <artifactId>gradle-tooling-api</artifactId>
+            <version>7.3-20210825160000+0000</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.3</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 </project>

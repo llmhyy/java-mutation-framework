@@ -46,12 +46,12 @@ public class MavenProject extends Project {
 
     @Override
     public File getSrcFolder() {
-        return new File(getRoot(), SRC_FOLDER_PATH);
+        return new File(getRoot(), srcFolderPath);
     }
 
     @Override
     public File getTestFolder() {
-        return new File(getRoot(), TEST_FOLDER_PATH);
+        return new File(getRoot(), testFolderPath);
     }
 
     @Override
@@ -61,12 +61,12 @@ public class MavenProject extends Project {
 
     @Override
     public File getCompiledTestFolder() {
-        return new File(getRoot(), COMPILE_TEST_FOLDER_PATH);
+        return new File(getRoot(), compileTestFolderPath);
     }
 
     @Override
     public File getCompiledClassFolder() {
-        return new File(getRoot(), COMPILE_SRC_FOLDER_PATH);
+        return new File(getRoot(), compileSrcFolderPath);
     }
 
     public File getCompiledFolder() {
@@ -84,7 +84,7 @@ public class MavenProject extends Project {
             e.printStackTrace();
             throw new RuntimeException("Failed to clone project to " + dest.getAbsolutePath());
         }
-        return new MavenProject(getProjectName(), dest, getTestCases(), SRC_FOLDER_PATH, TEST_FOLDER_PATH,
-                COMPILE_SRC_FOLDER_PATH, COMPILE_TEST_FOLDER_PATH);
+        return new MavenProject(getProjectName(), dest, getTestCases(), srcFolderPath, testFolderPath,
+                compileSrcFolderPath, compileTestFolderPath);
     }
 }
