@@ -10,7 +10,7 @@ import java.util.Set;
 public class FileReaderTest {
     @Test
     public void readTrace_validTrace_formsCorrectTrace() throws FileNotFoundException {
-        String traceFilePath = "./src/test/files/jmutation/trace/dumpFile.exec";
+        String traceFilePath = "./src/test/files/jmutation/trace/precheckFile.exec";
         FileReader fileReader = new FileReader(traceFilePath);
         PrecheckResult precheckResult = fileReader.readPrecheck();
         Set<ClassLocation> classLocationSet = precheckResult.getVisitedClassLocations();

@@ -288,6 +288,7 @@ public class TraceInputStream extends DataInputStream {
                 loopParent.addLoopChild(step);
             }
             step.setException(readBoolean());
+            step.setBytecode(readString());
         }
         readRWVarValues(allSteps, false);
         readRWVarValues(allSteps, true);
