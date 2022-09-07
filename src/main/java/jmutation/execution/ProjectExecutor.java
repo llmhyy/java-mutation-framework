@@ -2,11 +2,8 @@ package jmutation.execution;
 
 import jmutation.execution.output.MicrobatOutputHandler;
 import jmutation.execution.output.OutputHandler;
-import jmutation.model.ExecutionResult;
-import jmutation.model.MicrobatConfig;
-import jmutation.model.PrecheckExecutionResult;
+import jmutation.model.*;
 import jmutation.model.project.ProjectConfig;
-import jmutation.model.TestCase;
 import tracecollection.model.InstrumentationResult;
 import tracecollection.model.PrecheckResult;
 import jmutation.parser.ProjectParser;
@@ -80,9 +77,9 @@ public class ProjectExecutor extends Executor {
         return exec(projectConfig.getPackageCommand());
     }
 
-    public ExecutionResult exec(TestCase testCase) {
+    public TraceCollectionResult exec(TestCase testCase) {
         if (!compiled) {
-            ExecutionResult out = new ExecutionResult(compile());
+            TraceCollectionResult out = new TraceCollectionResult(compile(), null);
             if (!out.isSuccessful()) {
                 return out;
             }
@@ -91,7 +88,7 @@ public class ProjectExecutor extends Executor {
 
         InstrumentationCommandBuilder ib = setUpForInstrumentation(testCase, false);
 
-        return instrumentationExec(ib, testCase);
+        return instrumentationExec(ib);
     }
 
     public List<File> findJars() {
@@ -111,7 +108,7 @@ public class ProjectExecutor extends Executor {
         return precheckExec(ib, testCase);
     }
 
-    private ExecutionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder, TestCase testCase) {
+    private TraceCollectionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
         String commandStr = instrumentationCommandBuilder.generateCommand();
         setOutputHandler(new MicrobatOutputHandler());
         String executionResultStr = exec(commandStr);
@@ -125,7 +122,7 @@ public class ProjectExecutor extends Executor {
         }
         InstrumentationResult instrumentationResult = fileReader.readInstrumentation();
         setClassPathsToBreakpoints(instrumentationResult.getMainTrace());
-        ExecutionResult executionResult = new ExecutionResult(executionResultStr);
+        TraceCollectionResult executionResult = new TraceCollectionResult(executionResultStr, instrumentationResult);
         executionResult.setInstrumentationResult(instrumentationResult);
         return executionResult;
     }
