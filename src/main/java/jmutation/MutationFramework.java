@@ -1,14 +1,10 @@
 package jmutation;
 
 import jmutation.execution.ProjectExecutor;
-import jmutation.model.ExecutionResult;
+import jmutation.model.*;
 import jmutation.utils.TraceHelper;
-import jmutation.model.MicrobatConfig;
-import jmutation.model.MutationResult;
-import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
-import jmutation.model.TestCase;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.parser.MutationParser;
 import jmutation.utils.RandomSingleton;
@@ -29,11 +25,14 @@ public class MutationFramework {
 
     private ProjectConfig config;
 
-    private Mutator mutator;
-
     private MicrobatConfig microbatConfig;
 
     private int maxNumberOfMutations = -1;
+
+    private int startSeed = 1;
+    private int endSeed = 1;
+
+    private boolean isAutoSeed = false;
 
     public void setProjectPath(String projectPath) {
         this.projectPath = projectPath;
@@ -51,12 +50,27 @@ public class MutationFramework {
         this.testCase = testCase;
     }
 
+    /**
+     * Sets max number of mutations. If it is 0 or less, there is no limit.
+     * @param maxNumberOfMutations Maximum number of mutations allowed
+     */
     public void setMaxNumberOfMutations(int maxNumberOfMutations) {
         this.maxNumberOfMutations = maxNumberOfMutations;
     }
 
     public void setSeed(long seed) {
         RandomSingleton.getSingleton().setSeed(seed);
+        isAutoSeed = false;
+    }
+
+    /**
+     * Automate changing of seed until the mutation fails the test case
+     * Attempts seeds from startSeed to endSeed
+     */
+    public void autoSeed(int startSeed, int endSeed) {
+        this.startSeed = startSeed;
+        this.endSeed = endSeed;
+        isAutoSeed = true;
     }
 
     public List<TestCase> getTestCases() {
@@ -95,7 +109,7 @@ public class MutationFramework {
             generateMicrobatConfiguration();
         }
 
-        mutator = new Mutator(new MutationParser());
+        Mutator mutator = new Mutator(new MutationParser());
         mutator.setMaxNumberOfMutations(maxNumberOfMutations);
         System.out.println(testCase);
         // Do precheck for normal + mutation to catch issues
@@ -103,41 +117,63 @@ public class MutationFramework {
 
         ProjectExecutor projectExecutor = new ProjectExecutor(microbatConfig, config);
         // Precheck
-        PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase);
-        if (precheckExecutionResult.isOverLong()) {
-            throw new RuntimeException("Precheck for test case " + testCase + " was over long as step limit was " + microbatConfig.getStepLimit() + " but had " + precheckExecutionResult.getTotalSteps() + " steps");
-        }
+        PrecheckExecutionResult precheckExecutionResult = executePrecheck(projectExecutor);
         System.out.println("Normal precheck done");
 
-        Project clonedProject = proj.cloneToOtherPath();
-        Project mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
-        ProjectConfig mutatedProjConfig = new ProjectConfig(config, mutatedProject);
+        PrecheckExecutionResult mutatedPrecheckExecutionResult = null;
+        ProjectExecutor mutatedProjectExecutor = null;
+        Project mutatedProject = null;
+        Project clonedProject;
+        ProjectConfig mutatedProjConfig;
+        if (isAutoSeed) {
+            boolean hasFailed = false;
+            for (int i = startSeed; i <= endSeed; i++) {
+                this.setSeed(i);
+                clonedProject = proj.cloneToOtherPath();
+                mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
+                mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
-        ProjectExecutor mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-        PrecheckExecutionResult mutatedPrecheckExecutionResult = mutatedProjectExecutor.execPrecheck(testCase);
-        if (mutatedPrecheckExecutionResult.isOverLong()) {
-            throw new RuntimeException("Precheck for mutated test case " + testCase + " was over long as step limit was " + microbatConfig.getStepLimit() + " but had " + mutatedPrecheckExecutionResult.getTotalSteps() + " steps");
+                mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+                mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+                if (!mutatedPrecheckExecutionResult.testCasePassed()) {
+                    System.out.println("Mutated test case failed with seed " + i);
+                    hasFailed = true;
+                    break;
+                }
+                System.out.println("Mutation did not fail with seed " + i + ", re-attempting with different seed");
+                mutator.clearHistory();
+            }
+            if (!hasFailed) {
+                throw new RuntimeException("Test case " + testCase + " could not fail after attempting seeds from " + startSeed + " to " + endSeed);
+            }
+        } else {
+            clonedProject = proj.cloneToOtherPath();
+            mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
+            mutatedProjConfig = new ProjectConfig(config, mutatedProject);
+
+            mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+            mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
         }
         System.out.println("Mutated precheck done");
 
         // Actual trace
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setExpectedSteps(precheckExecutionResult.getTotalSteps());
         projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
-        ExecutionResult result = projectExecutor.exec(testCase);
+        TraceCollectionResult result = projectExecutor.exec(testCase);
         System.out.println("Normal trace done");
         MicrobatConfig updatedMutationMicrobatConfig = microbatConfig.setExpectedSteps(mutatedPrecheckExecutionResult.getTotalSteps());
         mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
-        ExecutionResult mutatedResult = mutatedProjectExecutor.exec(testCase);
+        TraceCollectionResult mutatedResult = mutatedProjectExecutor.exec(testCase);
         System.out.println("Mutated trace done");
 
         // Trace with assertions to get output of test case
         MicrobatConfig includeAssertionsMicrobatConfig = updatedMicrobatConfig.setIncludes(Arrays.asList("org.junit.Assert"));
         projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
-        ExecutionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase);
+        TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase);
 
         MicrobatConfig includeAssertionsMutationMicrobatConfig = updatedMutationMicrobatConfig.setIncludes(Arrays.asList("org.junit.Assert"));
         mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
-        ExecutionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
+        TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
 
         Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
@@ -145,11 +181,18 @@ public class MutationFramework {
         boolean wasSuccessful = mutatedResult.isSuccessful();
 
 
-        MutationResult mutationResult = new MutationResult(result.getInstrumentationResult(),
+        return new MutationResult(result.getInstrumentationResult(),
                 mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(), mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
                 mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
                 wasSuccessful, testCase);
-
-        return mutationResult;
     }
+
+    private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) {
+        PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(testCase);
+        if (precheckExecutionResult.isOverLong()) {
+            throw new RuntimeException("Precheck for test case " + testCase + " was over long as step limit was " + microbatConfig.getStepLimit() + " but had " + precheckExecutionResult.getTotalSteps() + " steps");
+        }
+        return precheckExecutionResult;
+    }
+
 }
