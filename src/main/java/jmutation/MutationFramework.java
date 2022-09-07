@@ -29,8 +29,8 @@ public class MutationFramework {
 
     private int maxNumberOfMutations = -1;
 
-    private int startSeed = 1;
-    private int endSeed = 1;
+    private long startSeed = 1;
+    private long endSeed = 1;
 
     private boolean isAutoSeed = false;
 
@@ -67,7 +67,7 @@ public class MutationFramework {
      * Automate changing of seed until the mutation fails the test case
      * Attempts seeds from startSeed to endSeed
      */
-    public void autoSeed(int startSeed, int endSeed) {
+    public void autoSeed(long startSeed, long endSeed) {
         this.startSeed = startSeed;
         this.endSeed = endSeed;
         isAutoSeed = true;
