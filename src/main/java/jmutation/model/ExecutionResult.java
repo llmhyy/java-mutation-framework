@@ -1,47 +1,14 @@
 package jmutation.model;
 
-import jmutation.execution.Coverage;
-import tracecollection.model.InstrumentationResult;
-import microbat.model.trace.Trace;
-
 public class ExecutionResult {
-	private Coverage coverage;
 	private final String consoleOut;
-
-	private InstrumentationResult instrumentationResult;
 
 	public ExecutionResult(String consoleOut) {
 		this.consoleOut = consoleOut;
 	}
 
-	public Coverage getCoverage() {
-		return coverage;
-	}
-
-	public void setCoverage(Coverage coverage) {
-		this.coverage = coverage;
-	}
-
-	public InstrumentationResult getInstrumentationResult() {
-		return instrumentationResult;
-	}
-
-	public void setInstrumentationResult(InstrumentationResult instrumentationResult) {
-		this.instrumentationResult = instrumentationResult;
-	}
-
-	public Trace getTrace() {
-		return instrumentationResult.getMainTrace();
-	}
-
 	public boolean isSuccessful() {
-		if (instrumentationResult != null) {
-			return instrumentationResult.getProgramMsg().startsWith("true;");
-		}
-		return !consoleOut.contains("FAIL");}
-
-	public boolean hasThrownException() {
-		return !instrumentationResult.getProgramMsg().contains("expected:");
+		return !consoleOut.contains("FAIL");
 	}
 
 	@Override
