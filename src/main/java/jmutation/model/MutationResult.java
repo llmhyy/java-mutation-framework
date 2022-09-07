@@ -85,10 +85,6 @@ public class MutationResult {
         return rootCauses;
     }
 
-    public boolean mutatedTestCasePassed() {
-        return testCasePassed;
-    }
-
     public String getTestClass() {
         return testClass;
     }

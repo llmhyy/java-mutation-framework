@@ -12,12 +12,18 @@ import java.util.List;
 
 /**
  * Converts for loop to if statement.
- * for (int i = 0; i < n; i++) {body}
- * ->
+ * <pre>
+ * for (int i = 0; i &lt; n; i++) {
+ *     body
+ * }
+ *
+ * becomes
+ *
  * if (true) {
  *     int i = 0;
- *     if (i < n) {body}
+ *     if (i &lt; n) {body}
  * }
+ * </pre>
  */
 public class MutationForLoopToIfCommand extends MutationCommand {
 

@@ -30,21 +30,6 @@ public class InstrumentationCommandBuilder {
         this.testMethod = Optional.of(testMethod);
     }
 
-    /**
-     * Sets up microbat config from command line instead of json file.
-     *
-     * @return Microbat configuration object
-     */
-    private MicrobatConfig setupMicrobatConfig() {
-        // TODO: add all classpath and lib collections to the immutable MicrobatConfig Class.
-        String tmpDir = System.getProperty("java.io.tmpdir");
-        String dumpFilePath = tmpDir + File.pathSeparator + "trace.exec";
-        MicrobatConfig updatedMicrobatConfig = microbatConfig.setDumpFilePath(dumpFilePath);
-        updatedMicrobatConfig = updatedMicrobatConfig.setTraceRecorder("FILE");
-        updatedMicrobatConfig = updatedMicrobatConfig.setClassPaths(this.classPaths);
-        return updatedMicrobatConfig;
-    }
-
     public String generateCommand() {
         // Project paths are added to classPaths by project executor.
         generateSystemJars(dropInsDir);

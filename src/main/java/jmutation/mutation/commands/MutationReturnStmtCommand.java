@@ -30,14 +30,15 @@ public class MutationReturnStmtCommand extends MutationCommand {
     }
 
     /**
+     * <pre>
      * try {
      *     return methodCall();
      * } catch (Exception e) {}
-     * ->
+     * -&gt;
      * try {
      *     return 0.0;
      * } catch (Exception e) {}
-
+     * </pre>
      * Can lead to compilation errors. Check for those cases.
      * @return
      */

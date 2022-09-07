@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import java.util.List;
 
 /**
- * Not complete. Only works for var declaration method invocations e.g. int x = bar(); -> int x = 0;
+ * Not complete. Only works for var declaration method invocations e.g. int x = bar(); -&gt; int x = 0;
  * Difficulty obtaining return types of methods for method invocations.
  * (Need turn on bindings on ASTParser, but incurs large overhead)
  */

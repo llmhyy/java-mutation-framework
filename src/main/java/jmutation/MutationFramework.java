@@ -14,7 +14,9 @@ import microbat.model.trace.TraceNode;
 import java.util.Arrays;
 import java.util.List;
 
-// API class for other projects to call
+/**
+ * API class for usage as an external library
+ */
 public class MutationFramework {
     private String projectPath = "./sample/math70";
     private String dropInsDir = "./lib";
@@ -34,18 +36,34 @@ public class MutationFramework {
 
     private boolean isAutoSeed = false;
 
+    /**
+     * Set path to project
+     * @param projectPath path to the project to mutate
+     */
     public void setProjectPath(String projectPath) {
         this.projectPath = projectPath;
     }
 
+    /**
+     * Path to directory that contains microbat jar files. ./lib can be used.
+     * @param dropInsDir path to microbat jar files.
+     */
     public void setDropInsDir(String dropInsDir) {
         this.dropInsDir = dropInsDir;
     }
 
+    /**
+     * Path to microbat configuration json file. If not specified, default configurations are used. Otherwise, please reference ./sampleMicrobatConfig.json for the format.
+     * @param microbatConfigPath path to a microbat configuration file
+     */
     public void setMicrobatConfigPath(String microbatConfigPath) {
         this.microbatConfigPath = microbatConfigPath;
     }
 
+    /**
+     * Sets the test case to run mutation on.
+     * @param testCase Test case to run mutation on.
+     */
     public void setTestCase(TestCase testCase) {
         this.testCase = testCase;
     }
@@ -58,14 +76,20 @@ public class MutationFramework {
         this.maxNumberOfMutations = maxNumberOfMutations;
     }
 
+    /**
+     * Sets the seed to use during mutation. This makes the mutation deterministic between each run.
+     * @param seed Seed for the java.util.random
+     */
     public void setSeed(long seed) {
         RandomSingleton.getSingleton().setSeed(seed);
         isAutoSeed = false;
     }
 
     /**
-     * Automate changing of seed until the mutation fails the test case
-     * Attempts seeds from startSeed to endSeed
+     * Automate changing of seed until the mutation fails the test case.
+     * Attempt seeds from startSeed to endSeed.
+     * @param startSeed First seed to use
+     * @param endSeed Last seed to use
      */
     public void autoSeed(long startSeed, long endSeed) {
         this.startSeed = startSeed;
@@ -73,21 +97,37 @@ public class MutationFramework {
         isAutoSeed = true;
     }
 
+    /**
+     * Gets the test cases found in the project.
+     * @return A list of test case objects.
+     */
     public List<TestCase> getTestCases() {
         config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
         Project proj = config.getProject();
         return proj.getTestCases();
     }
 
+    /**
+     * Generates ProjectConfig for use by mutation framework.
+     * This method should be called after updating the project path or drop ins directory.
+     */
     public void generateProjectConfiguration() {
         config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
     }
 
+    /**
+     * Generates MicrobatConfig for use by mutation framework.
+     * This method should be called when the microbat configuration file is updated or path is changed
+     */
     public void generateMicrobatConfiguration() {
         microbatConfig = microbatConfigPath == null ? MicrobatConfig.defaultConfig(projectPath) :
                 MicrobatConfig.parse(microbatConfigPath, projectPath);
     }
 
+    /**
+     * Starts trace collection on the chosen test case, mutates the covered code, and runs trace collection on the mutated test case.
+     * @return MutationResult object.
+     */
     public MutationResult startMutationFramework() {
         if (projectPath == null || dropInsDir == null) {
             System.out.println("Project path or drop ins directory not specified");
