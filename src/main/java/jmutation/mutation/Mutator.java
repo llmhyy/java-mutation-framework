@@ -13,7 +13,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.UndoEdit;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -31,7 +30,7 @@ import java.util.Map.Entry;
  * @author Yun Lin
  */
 public class Mutator {
-    private MutationParser mutationParser;
+    private final MutationParser mutationParser;
     private List<MutationCommand> mutationHistory;
 
     private int numberOfMutations;
@@ -41,6 +40,10 @@ public class Mutator {
         this.mutationHistory = new ArrayList<>();
     }
 
+    /**
+     * if max number of mutations is 0 or less, there is no limit
+     * @param numberOfMutations Maximum number of mutations allowed
+     */
     public void setMaxNumberOfMutations(int numberOfMutations) {
         this.numberOfMutations = numberOfMutations;
     }
@@ -119,7 +122,6 @@ public class Mutator {
                     }
                     /**
                      * TODO:
-                     *
                      * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
                      * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
                      * to rewrite the AST
@@ -142,9 +144,10 @@ public class Mutator {
     /**
      * Gets an AST node for the portion of code to be mutated
      *
-     * @param unit
-     * @param range
-     * @return
+     * @param unit Compilation unit to parse
+     * @param range line number range to mutate in the compilation unit
+     * @param isRandomRetrieval whether to randomly retrieve the nodes to mutate or get all that is encountered
+     * @return The list of ASTNodes to mutate
      */
     private List<ASTNode> parseRangeToNodes(CompilationUnit unit, MutationRange range, boolean isRandomRetrieval) {
         MutationASTNodeRetriever retriever = new MutationASTNodeRetriever(unit, range);
@@ -163,12 +166,9 @@ public class Mutator {
         }
         IDocument document = new Document(fileContent);
         TextEdit edits = unit.rewrite(document, null);
-        UndoEdit undo;
         try {
-            undo = edits.apply(document);
-        } catch (MalformedTreeException e) {
-            e.printStackTrace();
-        } catch (BadLocationException e) {
+            edits.apply(document);
+        } catch (MalformedTreeException | BadLocationException e) {
             e.printStackTrace();
         }
         try {
@@ -182,5 +182,9 @@ public class Mutator {
 
     public List<MutationCommand> getMutationHistory() {
         return mutationHistory;
+    }
+
+    public void clearHistory() {
+        mutationHistory = new ArrayList<>();
     }
 }
