@@ -26,7 +26,7 @@ public class TraceInputStream extends DataInputStream {
 
     private static final String PRECHECK_HEADER = "Precheck";
     private static final String TRACE_HEADER = "TracingResult";
-    private String traceExecFolder;
+    private final String traceExecFolder;
 
     TraceInputStream(File traceFile) throws FileNotFoundException {
         super(new FileInputStream(traceFile));
@@ -40,8 +40,8 @@ public class TraceInputStream extends DataInputStream {
                 throw new RuntimeException("Invalid Precheck file result!");
             }
             PrecheckResult precheckResult = new PrecheckResult();
-            String programMessage = readString();
-            int threadNum = readVarInt();
+            precheckResult.setProgramMessage(readString());
+            precheckResult.setThreadNumber(readVarInt());
             precheckResult.setOverLong(readBoolean());
             precheckResult.setTotalSteps(readVarInt());
             int exceedingMethodsSize = readVarInt();
@@ -167,7 +167,7 @@ public class TraceInputStream extends DataInputStream {
         if (size == -1) {
             return null;
         }
-        List<Integer> list = new ArrayList<Integer>(size);
+        List<Integer> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             list.add(readVarInt());
         }
@@ -242,9 +242,7 @@ public class TraceInputStream extends DataInputStream {
         String className = readString();
         int startLine = readVarInt();
         int endLine = readVarInt();
-        SourceScope scope = new SourceScope(className, startLine, endLine);
-
-        return scope;
+        return new SourceScope(className, startLine, endLine);
     }
 
     private List<TraceNode> readSteps(Trace trace, List<BreakPoint> locationList) throws IOException {
