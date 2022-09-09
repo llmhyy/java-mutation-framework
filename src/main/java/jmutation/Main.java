@@ -45,7 +45,6 @@ public class Main {
                 mutationFramework.startMutationFramework();
             } catch (RuntimeException e) {
                 System.out.println(e);
-                continue;
             }
         }
     }

@@ -218,7 +218,7 @@ public class MutationFramework {
         Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
 
-        boolean wasSuccessful = mutatedResult.isSuccessful();
+        boolean wasSuccessful = mutatedPrecheckExecutionResult.testCasePassed();
 
 
         return new MutationResult(result.getInstrumentationResult(),
