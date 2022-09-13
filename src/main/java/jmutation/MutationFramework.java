@@ -168,7 +168,7 @@ public class MutationFramework {
         if (isAutoSeed) {
             boolean hasFailed = false;
             for (long i = startSeed; i <= endSeed; i++) {
-                this.setSeed(i);
+                RandomSingleton.getSingleton().setSeed(i);
                 clonedProject = proj.cloneToOtherPath();
                 mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
                 mutatedProjConfig = new ProjectConfig(config, mutatedProject);
