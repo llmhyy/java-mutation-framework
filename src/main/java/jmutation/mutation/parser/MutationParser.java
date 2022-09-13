@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MutationParser extends ASTVisitor {
     MutationCommand command;
@@ -67,14 +68,10 @@ public class MutationParser extends ASTVisitor {
     @Override
     public boolean visit(ReturnStatement node) {
         List<MutationCommand> possibleCommands = new ArrayList<>();
-        MutationCommand temporaryCommand = new MutationReturnReplaceArgCommand(node);
-        if (temporaryCommand.canExecute())  {
-            possibleCommands.add(temporaryCommand);
-        }
-        temporaryCommand = new MutationReturnMathCommand(node);
-        if (temporaryCommand.canExecute())  {
-            possibleCommands.add(temporaryCommand);
-        }
+        possibleCommands.add(new MutationReturnReplaceArgCommand(node));
+        possibleCommands.add(new MutationReturnMathCommand(node));
+        possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
+        possibleCommands = possibleCommands.stream().filter(command -> command.canExecute()).collect(Collectors.toList());
         if (possibleCommands.isEmpty()) {
             return true;
         }

@@ -15,7 +15,9 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 
-
+/**
+ * Replace return value with some default value
+ */
 public class MutationReturnStmtCommand extends MutationCommand {
     public MutationReturnStmtCommand(ASTNode node) {
         super(node);
@@ -63,14 +65,13 @@ public class MutationReturnStmtCommand extends MutationCommand {
         return true;
     }
 
-    private Expression getReplacementExpression() {
+    protected Expression getReplacementExpression() {
         ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(MethodDeclaration.class);
         MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
         Type returnType = methodDeclaration.getReturnType2();
         ReturnStatement returnStatement = (ReturnStatement) node;
         Expression expression = returnStatement.getExpression();
-        DefaultExpressionChecker defaultExpressionChecker = new DefaultExpressionChecker();
-        boolean isDefaultExpression = defaultExpressionChecker.check(expression);
+        boolean isDefaultExpression = DefaultValues.isDefaultExpression(expression);
         Expression replacement;
         if (isDefaultExpression) {
             replacement = DefaultValueReplacements.getDefaultReplacementExpression(returnType);
@@ -79,58 +80,4 @@ public class MutationReturnStmtCommand extends MutationCommand {
         }
         return replacement;
     }
-
-    private class DefaultExpressionChecker extends ASTVisitor {
-        private boolean isDefault = false;
-        private boolean visited = false;
-        @Override
-        public void preVisit(ASTNode node) {
-            isDefault = false;
-        }
-        @Override
-        public boolean preVisit2(ASTNode node) {
-            if (visited) {
-                return false;
-            }
-            return super.preVisit2(node);
-        }
-        @Override
-        public boolean visit(NumberLiteral numberLiteral) {
-            String token = numberLiteral.getToken();
-            int idxOfDot = token.indexOf('.');
-            isDefault = true;
-            for (int i = 0; i < token.length(); i++) {
-                if (i == idxOfDot) {
-                    continue;
-                }
-                char current = token.charAt(i);
-                if (current != '0') {
-                    isDefault = false;
-                    break;
-                }
-            }
-            return false;
-        }
-        @Override
-        public boolean visit(CharacterLiteral characterLiteral) {
-            isDefault = characterLiteral.getEscapedValue().equals('\u0000');
-            return false;
-        }
-        @Override
-        public boolean visit(BooleanLiteral booleanLiteral) {
-            isDefault = !booleanLiteral.booleanValue();
-            return false;
-        }
-
-        @Override
-        public void postVisit(ASTNode node) {
-            visited = true;
-        }
-
-        public boolean check(ASTNode node) {
-            node.accept(this);
-            return isDefault;
-        }
-    }
-
 }

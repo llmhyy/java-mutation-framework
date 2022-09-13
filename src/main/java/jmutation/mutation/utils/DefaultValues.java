@@ -1,12 +1,6 @@
 package jmutation.mutation.utils;
 
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.*;
 
 public class DefaultValues {
     /**
@@ -37,5 +31,63 @@ public class DefaultValues {
             }
         }
         return null;
+    }
+
+    public static boolean isDefaultExpression(Expression expression) {
+        DefaultExpressionChecker defaultExpressionChecker = new DefaultExpressionChecker();
+        return defaultExpressionChecker.check(expression);
+    }
+
+    private static class DefaultExpressionChecker extends ASTVisitor {
+        private boolean isDefault = false;
+        private boolean visited = false;
+        @Override
+        public void preVisit(ASTNode node) {
+            isDefault = false;
+        }
+        @Override
+        public boolean preVisit2(ASTNode node) {
+            if (visited) {
+                return false;
+            }
+            return super.preVisit2(node);
+        }
+        @Override
+        public boolean visit(NumberLiteral numberLiteral) {
+            String token = numberLiteral.getToken();
+            int idxOfDot = token.indexOf('.');
+            isDefault = true;
+            for (int i = 0; i < token.length(); i++) {
+                if (i == idxOfDot) {
+                    continue;
+                }
+                char current = token.charAt(i);
+                if (current != '0') {
+                    isDefault = false;
+                    break;
+                }
+            }
+            return false;
+        }
+        @Override
+        public boolean visit(CharacterLiteral characterLiteral) {
+            isDefault = characterLiteral.getEscapedValue().equals('\u0000');
+            return false;
+        }
+        @Override
+        public boolean visit(BooleanLiteral booleanLiteral) {
+            isDefault = !booleanLiteral.booleanValue();
+            return false;
+        }
+
+        @Override
+        public void postVisit(ASTNode node) {
+            visited = true;
+        }
+
+        public boolean check(ASTNode node) {
+            node.accept(this);
+            return isDefault;
+        }
     }
 }

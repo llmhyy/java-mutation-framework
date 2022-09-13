@@ -20,19 +20,19 @@ public class MutationProbabilityCalculator extends ASTVisitor {
 
     @Override
     public boolean visit(InfixExpression node) {
-        probability = 0.95;
+        probability = 0.5;
         return false;
     }
 
     @Override
     public boolean visit(WhileStatement node) {
-        probability = 0.9;
+        probability = 0.5;
         return false;
     }
 
     @Override
     public boolean visit(ForStatement node) {
-        probability = 0.9;
+        probability = 0.5;
         return false;
     }
 
@@ -44,14 +44,13 @@ public class MutationProbabilityCalculator extends ASTVisitor {
 
     @Override
     public boolean visit(IfStatement node) {
-        probability = 0.9;
+        probability = 0.5;
         return false;
     }
 
     @Override
     public boolean visit(ReturnStatement node) {
-        // Not good for debugging testing as it breaks connection between input and output
-        probability = 0;
+        probability = 0.5;
         return false;
     }
 
