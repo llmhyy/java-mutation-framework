@@ -1,14 +1,10 @@
 package jmutation.mutation;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.*;
 
+/**
+ * Returns how likely a given ASTNode should be mutated, if a mutation for the node exists
+ */
 public class MutationProbabilityCalculator extends ASTVisitor {
     private double probability = 1;
 
@@ -38,7 +34,7 @@ public class MutationProbabilityCalculator extends ASTVisitor {
 
     @Override
     public boolean visit(Block node) {
-        probability = 0;
+        probability = 0.1;
         return false;
     }
 
@@ -50,6 +46,12 @@ public class MutationProbabilityCalculator extends ASTVisitor {
 
     @Override
     public boolean visit(ReturnStatement node) {
+        probability = 0.5;
+        return false;
+    }
+
+    @Override
+    public boolean visit(VariableDeclarationStatement node) {
         probability = 0.5;
         return false;
     }
