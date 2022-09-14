@@ -13,22 +13,22 @@ public class DefaultValues {
             PrimitiveType primitiveType = (PrimitiveType) type;
             PrimitiveType.Code primitiveTypeCode = primitiveType.getPrimitiveTypeCode();
             if (primitiveTypeCode.equals(PrimitiveType.BYTE) ||
-            primitiveTypeCode.equals(PrimitiveType.INT) ||
-            primitiveTypeCode.equals(PrimitiveType.SHORT) ||
-            primitiveTypeCode.equals(PrimitiveType.LONG)) {
+                    primitiveTypeCode.equals(PrimitiveType.INT) ||
+                    primitiveTypeCode.equals(PrimitiveType.SHORT) ||
+                    primitiveTypeCode.equals(PrimitiveType.LONG)) {
                 return ast.newNumberLiteral("0");
             } else if (primitiveTypeCode.equals(PrimitiveType.BOOLEAN)) {
                 return ast.newBooleanLiteral(false);
             } else if (primitiveTypeCode.equals(PrimitiveType.FLOAT) ||
-            primitiveTypeCode.equals(PrimitiveType.DOUBLE)) {
+                    primitiveTypeCode.equals(PrimitiveType.DOUBLE)) {
                 return ast.newNumberLiteral("0.0");
             } else if (primitiveTypeCode.equals(PrimitiveType.CHAR)) {
                 CharacterLiteral characterLiteral = ast.newCharacterLiteral();
                 characterLiteral.setCharValue('\u0000');
                 return characterLiteral;
-            } else if (type instanceof SimpleType || type instanceof ArrayType) {
-                return ast.newNullLiteral();
             }
+        } else if (type instanceof SimpleType || type instanceof ArrayType) {
+                return ast.newNullLiteral();
         }
         return null;
     }
