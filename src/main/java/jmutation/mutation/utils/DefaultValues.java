@@ -86,6 +86,9 @@ public class DefaultValues {
         }
 
         public boolean check(ASTNode node) {
+            if (node == null) {
+                return false;
+            }
             node.accept(this);
             return isDefault;
         }

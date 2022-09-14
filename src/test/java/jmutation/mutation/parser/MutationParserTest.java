@@ -15,22 +15,6 @@ public class MutationParserTest {
     MutationTestHelper helper = new MutationTestHelper();
 
     @Test
-    public void createMutationCommand_blockNode_createsCommand() {
-        String documentStr = "public class Main {" +
-                "public static void main(String[] args) {" +
-                "int a = 0;" +
-                "}" +
-                "}";
-
-        helper.parseDocStr(documentStr);
-        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
-        ASTNode methodBody = (ASTNode) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
-        MutationParser parser = new MutationParser();
-        MutationCommand command = parser.parse(methodBody);
-        assertTrue(command instanceof MutationBlockRemovalCommand);
-    }
-
-    @Test
     public void createMutationCommand_mathMethodInvocation_createsCommand() {
         String documentStr = "import java.lang.Math;" +
                 "public class Main {" +
