@@ -163,8 +163,7 @@ public class MutationFramework {
             generateMicrobatConfiguration();
         }
 
-        mutator = new Mutator(new MutationParser());
-        mutator.setMaxNumberOfMutations(maxNumberOfMutations);
+        setupMutator(new MutationParser());
         System.out.println(testCase);
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
@@ -259,7 +258,8 @@ public class MutationFramework {
     private void runWithStrongMutations(Project proj, PrecheckExecutionResult precheckExecutionResult) {
         for (int i = 0; i < 2; i++) {
             boolean useStrongMutations = i != 0;
-            mutator = useStrongMutations ? new Mutator(new StrongMutationParser()) : new Mutator(new MutationParser());
+            MutationParser mutationParser = useStrongMutations ? new StrongMutationParser() : new MutationParser();
+            setupMutator(mutationParser);
             runMutation(proj, precheckExecutionResult);
             if (!mutatedPrecheckExecutionResult.testCasePassed()) {
                 break;
@@ -270,5 +270,10 @@ public class MutationFramework {
                     testCase, mutationType, endOfMsg);
             System.out.println(message);
         }
+    }
+
+    private void setupMutator(MutationParser mutationParser) {
+        mutator = new Mutator(mutationParser);
+        mutator.setMaxNumberOfMutations(maxNumberOfMutations);
     }
 }
