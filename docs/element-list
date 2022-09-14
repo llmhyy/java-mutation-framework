@@ -9,6 +9,7 @@ jmutation.model.error
 jmutation.model.project
 jmutation.mutation
 jmutation.mutation.commands
+jmutation.mutation.commands.strong
 jmutation.mutation.parser
 jmutation.mutation.utils
 jmutation.parser

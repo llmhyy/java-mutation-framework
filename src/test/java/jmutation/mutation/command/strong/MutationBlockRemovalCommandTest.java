@@ -1,7 +1,7 @@
 package jmutation.mutation.command;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.MutationBlockRemovalCommand;
+import jmutation.mutation.commands.strong.MutationBlockRemovalCommand;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
