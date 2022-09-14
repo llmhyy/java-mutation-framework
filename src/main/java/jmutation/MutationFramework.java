@@ -2,6 +2,7 @@ package jmutation;
 
 import jmutation.execution.ProjectExecutor;
 import jmutation.model.*;
+import jmutation.mutation.parser.StrongMutationParser;
 import jmutation.utils.TraceHelper;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
@@ -35,6 +36,15 @@ public class MutationFramework {
     private long endSeed = 1;
 
     private boolean isAutoSeed = false;
+
+    private boolean strongMutationsEnabled = false;
+    private PrecheckExecutionResult mutatedPrecheckExecutionResult = null;
+    private ProjectExecutor mutatedProjectExecutor = null;
+    private Project mutatedProject = null;
+    private Project clonedProject;
+    private ProjectConfig mutatedProjConfig;
+    private Mutator mutator;
+
 
     /**
      * Set path to project
@@ -124,6 +134,10 @@ public class MutationFramework {
                 MicrobatConfig.parse(microbatConfigPath, projectPath);
     }
 
+    public void toggleStrongMutations(boolean strongMutationsEnabled) {
+        this.strongMutationsEnabled = strongMutationsEnabled;
+    }
+
     /**
      * Starts trace collection on the chosen test case, mutates the covered code, and runs trace collection on the mutated test case.
      * @return MutationResult object.
@@ -149,7 +163,7 @@ public class MutationFramework {
             generateMicrobatConfiguration();
         }
 
-        Mutator mutator = new Mutator(new MutationParser());
+        mutator = new Mutator(new MutationParser());
         mutator.setMaxNumberOfMutations(maxNumberOfMutations);
         System.out.println(testCase);
         // Do precheck for normal + mutation to catch issues
@@ -160,39 +174,15 @@ public class MutationFramework {
         PrecheckExecutionResult precheckExecutionResult = executePrecheck(projectExecutor);
         System.out.println("Normal precheck done");
 
-        PrecheckExecutionResult mutatedPrecheckExecutionResult = null;
-        ProjectExecutor mutatedProjectExecutor = null;
-        Project mutatedProject = null;
-        Project clonedProject;
-        ProjectConfig mutatedProjConfig;
+;
         if (isAutoSeed) {
-            boolean hasFailed = false;
-            for (long i = startSeed; i <= endSeed; i++) {
-                RandomSingleton.getSingleton().setSeed(i);
-                clonedProject = proj.cloneToOtherPath();
-                mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
-                mutatedProjConfig = new ProjectConfig(config, mutatedProject);
-
-                mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-                mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
-                if (!mutatedPrecheckExecutionResult.testCasePassed()) {
-                    System.out.println("Mutated test case failed with seed " + i);
-                    hasFailed = true;
-                    break;
-                }
-                System.out.println("Mutation did not fail with seed " + i + ", re-attempting with different seed");
-                mutator.clearHistory();
-            }
-            if (!hasFailed) {
-                throw new RuntimeException("Test case " + testCase + " could not fail after attempting seeds from " + startSeed + " to " + endSeed);
-            }
+            runWithAutoSeed(proj, precheckExecutionResult);
         } else {
-            clonedProject = proj.cloneToOtherPath();
-            mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
-            mutatedProjConfig = new ProjectConfig(config, mutatedProject);
-
-            mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-            mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+            if (strongMutationsEnabled) {
+                runWithStrongMutations(proj, precheckExecutionResult);
+            } else {
+                runMutation(proj, precheckExecutionResult);
+            }
         }
         System.out.println("Mutated precheck done");
 
@@ -235,4 +225,50 @@ public class MutationFramework {
         return precheckExecutionResult;
     }
 
+    private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
+        clonedProject = proj.cloneToOtherPath();
+        mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
+        mutatedProjConfig = new ProjectConfig(config, mutatedProject);
+
+        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+        mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+    }
+
+    private void runWithAutoSeed(Project proj, PrecheckExecutionResult precheckExecutionResult) {
+        boolean hasFailed = false;
+        for (long i = startSeed; i <= endSeed; i++) {
+            RandomSingleton.getSingleton().setSeed(i);
+            if (strongMutationsEnabled) {
+                runWithStrongMutations(proj, precheckExecutionResult);
+            } else {
+                runMutation(proj, precheckExecutionResult);
+            }
+            if (!mutatedPrecheckExecutionResult.testCasePassed()) {
+                System.out.println("Mutated test case failed with seed " + i);
+                hasFailed = true;
+                break;
+            }
+            mutator.clearHistory();
+            System.out.println("Mutation with seed " + i + " failed, re-attempting with different seed");
+        }
+        if (!hasFailed) {
+            throw new RuntimeException("Test case " + testCase + " could not fail after attempting seeds from " + startSeed + " to " + endSeed);
+        }
+    }
+
+    private void runWithStrongMutations(Project proj, PrecheckExecutionResult precheckExecutionResult) {
+        for (int i = 0; i < 2; i++) {
+            boolean useStrongMutations = i != 0;
+            mutator = useStrongMutations ? new Mutator(new StrongMutationParser()) : new Mutator(new MutationParser());
+            runMutation(proj, precheckExecutionResult);
+            if (!mutatedPrecheckExecutionResult.testCasePassed()) {
+                break;
+            }
+            String mutationType = useStrongMutations ? "strong" : "normal";
+            String endOfMsg = useStrongMutations ? "" : " Re-attempting with strong mutations.";
+            String message = String.format("Test case %s did not fail with %s mutations.%s",
+                    testCase, mutationType, endOfMsg);
+            System.out.println(message);
+        }
+    }
 }
