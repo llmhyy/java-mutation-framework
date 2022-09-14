@@ -1,4 +1,4 @@
-package jmutation.mutation.command;
+package jmutation.mutation.command.strong;
 
 import jmutation.mutation.MutationTestHelper;
 import jmutation.mutation.commands.strong.MutationReturnStmtCommand;

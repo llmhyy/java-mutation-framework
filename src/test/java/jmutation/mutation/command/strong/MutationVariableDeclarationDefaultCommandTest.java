@@ -1,32 +1,26 @@
 package jmutation.mutation.command.strong;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.strong.MutationBlockRemovalCommand;
+import jmutation.mutation.commands.strong.MutationVariableDeclarationDefaultCommand;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.WhileStatement;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class MutationBlockRemovalCommandTest {
+public class MutationVariableDeclarationDefaultCommandTest {
+
     MutationTestHelper helper = new MutationTestHelper();
 
     @Test
     public void executeMutation_validASTNode_mutatesCorrectly() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
-                "int a = 0;" +
-                "while(a != 20) {" +
-                "a++;" +
-                "a = 0;" +
-                "int b = 0;" +
-                "}" +
+                "int a = 2;" +
                 "}" +
                 "}";
 
@@ -35,15 +29,11 @@ public class MutationBlockRemovalCommandTest {
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> methodStmts = methodBody.statements();
-        WhileStatement whileStatement = (WhileStatement) methodStmts.get(1);
-        Block whileStmtBody = (Block) whileStatement.getBody();
-        MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(whileStmtBody);
+        MutationVariableDeclarationDefaultCommand command = new MutationVariableDeclarationDefaultCommand(methodStmts.get(0));
         command.executeMutation();
         String expectedDoc = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "int a = 0;" +
-                "while(a != 20) {" +
-                "}" +
                 "}" +
                 "}";
         helper.parseDocStr(expectedDoc);
@@ -52,15 +42,10 @@ public class MutationBlockRemovalCommandTest {
     }
 
     @Test
-    public void canExecute_containsAssignment_doesNotClearBlock() {
+    public void executeMutation_defaultValue_mutatesCorrectly() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
-                "int a;" +
-                "int b = 0;" +
-                "while(a != 20) {" +
-                "a = 0;" +
-                "int c = 0;" +
-                "}" +
+                "int a = 0;" +
                 "}" +
                 "}";
 
@@ -69,49 +54,65 @@ public class MutationBlockRemovalCommandTest {
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> methodStmts = methodBody.statements();
-        WhileStatement whileStatement = (WhileStatement) methodStmts.get(2);
-        Block whileStmtBody = (Block) whileStatement.getBody();
-        MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(whileStmtBody);
-        assertFalse(command.canExecute());
+        MutationVariableDeclarationDefaultCommand command = new MutationVariableDeclarationDefaultCommand(methodStmts.get(0));
+        command.executeMutation();
+        String expectedDoc = "public class Main {" +
+                "public static void main(String[] args) {" +
+                "int a = 1;" +
+                "}" +
+                "}";
+        helper.parseDocStr(expectedDoc);
+
+        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
     }
 
     @Test
-    public void canExecute_containsInnerBlock_doesNotClearBlock() {
+    public void executeMutation_validObjectAssignment_mutatesCorrectly() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
-                "int a;" +
-                "int b = 0;" +
-                "while(a != 20) {" +
-                "a = 0;" +
-                "int c = 0;" +
-                "}" +
+                "ClassName a = new ClassName();" +
                 "}" +
                 "}";
-
 
         helper.parseDocStr(documentStr);
         CompilationUnit cu = helper.getCompilationUnit();
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
-        MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(methodBody);
-        assertFalse(command.canExecute());
+        List<Statement> methodStmts = methodBody.statements();
+        MutationVariableDeclarationDefaultCommand command = new MutationVariableDeclarationDefaultCommand(methodStmts.get(0));
+        command.executeMutation();
+        String expectedDoc = "public class Main {" +
+                "public static void main(String[] args) {" +
+                "ClassName a = null;" +
+                "}" +
+                "}";
+        helper.parseDocStr(expectedDoc);
+
+        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
     }
 
     @Test
-    public void canExecute_constructorAssignments_doesNotClearBlock() {
-        String documentStr = "public class A {" +
+    public void executeMutation_noDeclaration_mutatesCorrectly() {
+        String documentStr = "public class Main {" +
+                "public static void main(String[] args) {" +
                 "int a;" +
-                "public A(int a) {" +
-                "this.a = a;" +
                 "}" +
                 "}";
 
-
         helper.parseDocStr(documentStr);
         CompilationUnit cu = helper.getCompilationUnit();
-        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(1);
+        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
-        MutationBlockRemovalCommand command = new MutationBlockRemovalCommand(methodBody);
-        assertFalse(command.canExecute());
+        List<Statement> methodStmts = methodBody.statements();
+        MutationVariableDeclarationDefaultCommand command = new MutationVariableDeclarationDefaultCommand(methodStmts.get(0));
+        command.executeMutation();
+        String expectedDoc = "public class Main {" +
+                "public static void main(String[] args) {" +
+                "int a = 0;" +
+                "}" +
+                "}";
+        helper.parseDocStr(expectedDoc);
+
+        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
     }
 }
