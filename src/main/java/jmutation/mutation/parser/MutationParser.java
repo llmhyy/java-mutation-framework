@@ -4,7 +4,6 @@ import jmutation.mutation.commands.*;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -16,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Returns a mutation command to execute for a given ASTNode
+ */
 public class MutationParser extends ASTVisitor {
     MutationCommand command;
 
@@ -50,12 +52,6 @@ public class MutationParser extends ASTVisitor {
     @Override
     public boolean visit(ForStatement node) {
         command = new MutationForLoopToIfCommand(node);
-        return false;
-    }
-
-    @Override
-    public boolean visit(Block node) {
-        command = new MutationBlockRemovalCommand(node);
         return false;
     }
 

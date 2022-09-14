@@ -1,7 +1,7 @@
 package jmutation.mutation.parser;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.MutationBlockRemovalCommand;
+import jmutation.mutation.commands.strong.MutationBlockRemovalCommand;
 import jmutation.mutation.commands.MutationCommand;
 import jmutation.mutation.commands.MutationMathLibCommand;
 import org.eclipse.jdt.core.dom.*;

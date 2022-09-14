@@ -12,6 +12,9 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
 import java.util.Set;
 
+/**
+ * Helper for MutationParser for the various cases for InfixExpression mutations
+ */
 public class MutationInfixExpressionParser {
     private static boolean isMathOperator(InfixExpression e) {
         Set<Operator> mathOperators = MathOperator.getOperatorSet();
