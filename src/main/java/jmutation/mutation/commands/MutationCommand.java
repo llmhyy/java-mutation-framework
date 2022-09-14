@@ -10,14 +10,14 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import java.util.List;
 
 public abstract class MutationCommand {
-    ASTNode node;
-    ASTRewrite rewriter;
-    AST ast;
-    CompilationUnit cu;
+    protected ASTNode node;
+    protected ASTRewrite rewriter;
+    protected AST ast;
+    protected CompilationUnit cu;
 
-    int startLine;
-    int endLine;
-    MutationCommand(ASTNode node) {
+    protected int startLine;
+    protected int endLine;
+    protected MutationCommand(ASTNode node) {
         this.node = node;
         ast = node.getAST();
         rewriter = ASTRewrite.create(ast);

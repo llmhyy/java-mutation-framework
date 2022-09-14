@@ -1,5 +1,6 @@
 package jmutation.mutation.commands;
 
+import jmutation.mutation.commands.strong.MutationReturnStmtCommand;
 import org.eclipse.jdt.core.dom.*;
 
 /**
