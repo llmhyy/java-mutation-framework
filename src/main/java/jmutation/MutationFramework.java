@@ -196,11 +196,11 @@ public class MutationFramework {
         System.out.println("Mutated trace done");
 
         // Trace with assertions to get output of test case
-        MicrobatConfig includeAssertionsMicrobatConfig = updatedMicrobatConfig.setIncludes(Arrays.asList("org.junit.Assert"));
+        MicrobatConfig includeAssertionsMicrobatConfig = addAssertionsToMicrobatConfig(updatedMicrobatConfig);
         projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
         TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase);
 
-        MicrobatConfig includeAssertionsMutationMicrobatConfig = updatedMutationMicrobatConfig.setIncludes(Arrays.asList("org.junit.Assert"));
+        MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
         mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
         TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
 
@@ -275,5 +275,10 @@ public class MutationFramework {
     private void setupMutator(MutationParser mutationParser) {
         mutator = new Mutator(mutationParser);
         mutator.setMaxNumberOfMutations(maxNumberOfMutations);
+    }
+
+    private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {
+        String[] assertionsArr = new String[] {"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
+        return config.setIncludes(Arrays.asList(assertionsArr));
     }
 }
