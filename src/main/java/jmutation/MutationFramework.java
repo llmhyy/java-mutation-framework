@@ -142,6 +142,11 @@ public class MutationFramework {
         this.strongMutationsEnabled = strongMutationsEnabled;
     }
 
+    public void setMicrobatConfig(MicrobatConfig microbatConfig) {
+        this.microbatConfig = microbatConfig;
+        projectPath = microbatConfig.getWorkingDir();
+    }
+
     /**
      * Starts trace collection on the chosen test case, mutates the covered code, and runs trace collection on the mutated test case.
      * @return MutationResult object.
@@ -166,6 +171,8 @@ public class MutationFramework {
         if (microbatConfig == null) {
             generateMicrobatConfiguration();
         }
+
+        microbatConfig = microbatConfig.setWorkingDir(projectPath);
 
         setupMutator(new MutationParser());
         System.out.println(testCase);

@@ -96,6 +96,11 @@ public class MicrobatConfig {
     }
 
     public static MicrobatConfig defaultConfig(String projectPath) {
+        MicrobatConfig microbatConfig = MicrobatConfig.defaultConfig();
+        return microbatConfig.setWorkingDir(projectPath);
+    }
+
+    public static MicrobatConfig defaultConfig() {
         Map<String, List<String>> argMap = new HashMap<>();
         argMap.put(OPT_DUMP_FILE, List.of(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
         if (System.getenv("JAVA_HOME") != null) {
@@ -107,7 +112,6 @@ public class MicrobatConfig {
         argMap.put(OPT_LOG, List.of("printProgress", "error"));
         argMap.put(OPT_PRECHECK, List.of("false"));
         argMap.put(OPT_RUN_ID, List.of("1763794d-c0c2-4704-a483-20725cb39fd3"));
-        argMap.put(OPT_WORKING_DIR, List.of(projectPath));
         return new MicrobatConfig(argMap);
     }
 
@@ -123,11 +127,6 @@ public class MicrobatConfig {
     public MicrobatConfig setPrecheck(boolean usePrecheck) {
         return updateEntry(OPT_PRECHECK, Arrays.asList(valueOf(usePrecheck)));
     }
-
-    public boolean getPrecheck() {
-        return Boolean.parseBoolean(argMap.get(OPT_PRECHECK).get(0));
-    }
-
     public MicrobatConfig setClassPaths(List<String> classPaths) {
         return updateEntry(OPT_CLASS_PATH, classPaths);
     }
@@ -144,12 +143,36 @@ public class MicrobatConfig {
         return updateEntry(OPT_INCLUDES, includedClasses);
     }
 
-    public String getDumpFilePath() {
-        return argMap.get(OPT_DUMP_FILE).get(0);
+    public MicrobatConfig setWorkingDir(String workingDir) {
+        return updateEntry(OPT_WORKING_DIR, Arrays.asList(workingDir));
+    }
+
+    public MicrobatConfig setExpectedSteps(int expectedSteps) {
+        return updateEntry(OPT_EXPECTED_STEP, Arrays.asList(String.valueOf(expectedSteps)));
+    }
+
+    public MicrobatConfig setStepLimit(int stepLimit) {
+        return updateEntry(OPT_STEP_LIMIT, Arrays.asList(String.valueOf(stepLimit)));
+    }
+
+    public MicrobatConfig setJavaHome(String javaHome) {
+        return updateEntry(OPT_JAVA_HOME, Arrays.asList(javaHome));
     }
 
     public MicrobatConfig setDumpFilePath(String dumpFilePath) {
         return updateEntry(OPT_DUMP_FILE, Arrays.asList(dumpFilePath));
+    }
+
+    public MicrobatConfig setVariableLayer(int variableLayer) {
+        return updateEntry(OPT_VARIABLE_LAYER, Arrays.asList(String.valueOf(variableLayer)));
+    }
+
+    public String getDumpFilePath() {
+        return argMap.get(OPT_DUMP_FILE).get(0);
+    }
+
+    public boolean getPrecheck() {
+        return Boolean.parseBoolean(argMap.get(OPT_PRECHECK).get(0));
     }
 
     public String getJavaHome() {
@@ -173,13 +196,6 @@ public class MicrobatConfig {
         return "";
     }
 
-    public MicrobatConfig setWorkingDir(String workingDir) {
-        return updateEntry(OPT_WORKING_DIR, Arrays.asList(workingDir));
-    }
-
-    public MicrobatConfig setExpectedSteps(int expectedSteps) {
-        return updateEntry(OPT_EXPECTED_STEP, Arrays.asList(String.valueOf(expectedSteps)));
-    }
 
     public int getStepLimit() {
         return Integer.parseInt(argMap.get(OPT_STEP_LIMIT).get(0));
