@@ -11,11 +11,8 @@ public class Main {
     @Parameter(names = "-projectPath", description = "Path to project directory", required = true)
     private String projectPath;
 
-    @Parameter(names = "-dropInsDir", description = "Path to instrumentation dependencies", required = true)
+    @Parameter(names = "-dropInsDir", description = "Path to instrumentation dependencies")
     private String dropInsDir;
-
-    @Parameter(names = "-project", description = "Maven or Gradle")
-    private String projectType;
 
     @Parameter(names = "-microbatConfig", description = "Path to JSON settings for Microbat")
     private String microbatConfigPath;
@@ -35,8 +32,12 @@ public class Main {
         JCommander.newBuilder().addObject(params).build().parse(args);
 
         MutationFramework mutationFramework = new MutationFramework();
-        mutationFramework.setDropInsDir(params.dropInsDir);
-        mutationFramework.setMicrobatConfigPath(params.microbatConfigPath);
+        if (!params.dropInsDir.isEmpty()) {
+            mutationFramework.setDropInsDir(params.dropInsDir);
+        }
+        if (!params.microbatConfigPath.isEmpty()) {
+            mutationFramework.setMicrobatConfigPath(params.microbatConfigPath);
+        }
         mutationFramework.setProjectPath(params.projectPath);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         for (TestCase testCase : testCaseList) {
