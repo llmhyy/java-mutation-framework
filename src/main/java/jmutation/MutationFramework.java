@@ -285,8 +285,4 @@ public class MutationFramework {
         String[] assertionsArr = new String[] {"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
         return config.setIncludes(Arrays.asList(assertionsArr));
     }
-
-    private String mutationFrameworkResourcesPath() {
-        return String.join(File.separator, System.getenv("USERPROFILE") ,"lib", "resources");
-    }
 }
