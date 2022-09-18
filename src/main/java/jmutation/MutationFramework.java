@@ -12,6 +12,7 @@ import jmutation.utils.RandomSingleton;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,10 +20,13 @@ import java.util.List;
  * API class for usage as an external library
  */
 public class MutationFramework {
-    private String projectPath = "./sample/math70";
-    private String dropInsDir = "./lib";
+    final private String mutationFrameworkResourcesPath = String.join(File.separator,
+            System.getenv("USERPROFILE"), "lib", "resources", "java-mutation-framework");
+    private String projectPath;
+    private String dropInsDir = String.join(File.separator, mutationFrameworkResourcesPath, "lib");
 
-    private String microbatConfigPath;
+    private String microbatConfigPath = String.join(File.separator, mutationFrameworkResourcesPath,
+            "microbatConfig.json");
 
     private TestCase testCase;
 
@@ -63,7 +67,7 @@ public class MutationFramework {
     }
 
     /**
-     * Path to microbat configuration json file. If not specified, default configurations are used. Otherwise, please reference ./sampleMicrobatConfig.json for the format.
+     * Path to microbat configuration json file. If not specified, default configurations are used. Otherwise, please reference ./microbatConfig.json for the format.
      * @param microbatConfigPath path to a microbat configuration file
      */
     public void setMicrobatConfigPath(String microbatConfigPath) {
@@ -280,5 +284,9 @@ public class MutationFramework {
     private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {
         String[] assertionsArr = new String[] {"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
         return config.setIncludes(Arrays.asList(assertionsArr));
+    }
+
+    private String mutationFrameworkResourcesPath() {
+        return String.join(File.separator, System.getenv("USERPROFILE") ,"lib", "resources");
     }
 }
