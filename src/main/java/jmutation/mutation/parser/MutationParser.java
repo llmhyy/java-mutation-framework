@@ -64,7 +64,6 @@ public class MutationParser extends ASTVisitor {
     @Override
     public boolean visit(ReturnStatement node) {
         List<MutationCommand> possibleCommands = new ArrayList<>();
-        possibleCommands.add(new MutationReturnReplaceArgCommand(node));
         possibleCommands.add(new MutationReturnMathCommand(node));
         possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
         possibleCommands = possibleCommands.stream().filter(command -> command.canExecute()).collect(Collectors.toList());

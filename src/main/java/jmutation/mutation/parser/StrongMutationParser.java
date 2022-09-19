@@ -1,6 +1,7 @@
 package jmutation.mutation.parser;
 
 import jmutation.mutation.commands.*;
+import jmutation.mutation.commands.strong.MutationReturnReplaceArgCommand;
 import jmutation.mutation.commands.strong.MutationVariableDeclarationDefaultCommand;
 import jmutation.mutation.commands.strong.MutationBlockRemovalCommand;
 import jmutation.mutation.commands.strong.MutationReturnStmtCommand;

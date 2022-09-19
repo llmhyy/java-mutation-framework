@@ -1,6 +1,7 @@
-package jmutation.mutation.commands;
+package jmutation.mutation.commands.strong;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
+import jmutation.mutation.commands.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayType;

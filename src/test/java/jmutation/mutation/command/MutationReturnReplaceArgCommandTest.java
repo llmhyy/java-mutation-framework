@@ -1,7 +1,7 @@
 package jmutation.mutation.command;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.MutationReturnReplaceArgCommand;
+import jmutation.mutation.commands.strong.MutationReturnReplaceArgCommand;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
