@@ -8,6 +8,8 @@ jmutation.model.ast
 jmutation.model.error
 jmutation.model.project
 jmutation.mutation
+jmutation.mutation.command
+jmutation.mutation.command.strong
 jmutation.mutation.commands
 jmutation.mutation.commands.strong
 jmutation.mutation.parser
