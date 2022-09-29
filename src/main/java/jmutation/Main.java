@@ -32,10 +32,10 @@ public class Main {
         JCommander.newBuilder().addObject(params).build().parse(args);
 
         MutationFramework mutationFramework = new MutationFramework();
-        if (!params.dropInsDir.isEmpty()) {
+        if (params.dropInsDir != null) {
             mutationFramework.setDropInsDir(params.dropInsDir);
         }
-        if (!params.microbatConfigPath.isEmpty()) {
+        if (params.microbatConfigPath != null) {
             mutationFramework.setMicrobatConfigPath(params.microbatConfigPath);
         }
         mutationFramework.setProjectPath(params.projectPath);
