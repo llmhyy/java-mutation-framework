@@ -1,3 +1,3 @@
 set resourcesPath=%userprofile%\lib\resources\java-mutation-framework
-xcopy /S /Y /I .\lib %resourcesPath%\lib
-xcopy /S /Y .\microbatConfig.json %resourcesPath%
+xcopy /S /Y /I .\resources\lib %resourcesPath%\lib
+xcopy /S /Y .\resources\microbatConfig.json %resourcesPath%
