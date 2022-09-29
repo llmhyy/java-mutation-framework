@@ -157,7 +157,7 @@ public class MutationFramework {
 
     public void extractResources(String path) throws IOException {
         for (ExternalLibrary externalLibrary : ExternalLibrary.values()) {
-            ResourceExtractor.extractFile(externalLibrary.getName() + ".jar", path + File.separator + "lib");
+            ResourceExtractor.extractFile("lib" + File.separator + externalLibrary.getName() + ".jar", path);
         }
         ResourceExtractor.extractFile("microbatConfig.json", path);
     }
