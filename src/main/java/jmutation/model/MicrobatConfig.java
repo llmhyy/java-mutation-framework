@@ -167,6 +167,10 @@ public class MicrobatConfig {
         return updateEntry(OPT_VARIABLE_LAYER, Arrays.asList(String.valueOf(variableLayer)));
     }
 
+    public MicrobatConfig setRequireMethodSplitting(boolean requireMethodSplit) {
+        return updateEntry(OPT_REQUIRE_METHOD_SPLITTING, Arrays.asList(String.valueOf(requireMethodSplit)));
+    }
+
     public String getDumpFilePath() {
         return argMap.get(OPT_DUMP_FILE).get(0);
     }
@@ -199,6 +203,10 @@ public class MicrobatConfig {
 
     public int getStepLimit() {
         return Integer.parseInt(argMap.get(OPT_STEP_LIMIT).get(0));
+    }
+
+    public boolean getRequireMethodSplitting() {
+        return Boolean.parseBoolean(argMap.get(OPT_REQUIRE_METHOD_SPLITTING).get(0));
     }
 
     @Override
