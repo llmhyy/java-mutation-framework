@@ -6,11 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ResourceExtractor {
-    public static void extractFile(String name) throws IOException {
-        File target = new File(name);
+    public static void extractFile(String name, String outputPath) throws IOException {
+        File target = new File(outputPath, name);
         if (target.exists())
             return;
 
+        target.getParentFile().mkdirs();
         FileOutputStream out = new FileOutputStream(target);
         ClassLoader cl = ResourceExtractor.class.getClassLoader();
         InputStream in = cl.getResourceAsStream(name);
