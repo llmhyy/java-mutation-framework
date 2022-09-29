@@ -60,9 +60,10 @@ public class InstrumentationCommandBuilder {
     }
 
     private void generateSystemJars(String dropInsDir) {
-        assert SYSTEM_JARS.stream().allMatch(jar -> (new File(dropInsDir, jar + ".jar")).exists());
         for (ExternalLibrary extLib : ExternalLibrary.values()) {
-            addClassPath(new File(dropInsDir, extLib.getName() + ".jar"));
+            File extLibFile = new File(dropInsDir, extLib.getName() + ".jar");
+            assert extLibFile.exists();
+            addClassPath(extLibFile);
         }
     }
 

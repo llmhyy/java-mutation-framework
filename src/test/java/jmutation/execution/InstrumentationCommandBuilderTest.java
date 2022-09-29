@@ -13,7 +13,7 @@ public class InstrumentationCommandBuilderTest {
         String validConfigFilePath = "src/test/files/jmutation/execution/validMicrobatConfigTest.json";
         String projectPath = "./project";
         MicrobatConfig microbatConfig = MicrobatConfig.parse(validConfigFilePath, projectPath);
-        String dropInsDir = "./lib";
+        String dropInsDir = "./resources/lib";
         InstrumentationCommandBuilder instrumentationCommandBuilder = new InstrumentationCommandBuilder(microbatConfig, dropInsDir);
         String actualCommand = instrumentationCommandBuilder.generateCommand();
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(instrumentationCommandBuilder.classPaths);
