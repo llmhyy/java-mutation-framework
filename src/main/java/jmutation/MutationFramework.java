@@ -1,8 +1,10 @@
 package jmutation;
 
+import jmutation.constants.ExternalLibrary;
 import jmutation.execution.ProjectExecutor;
 import jmutation.model.*;
 import jmutation.mutation.parser.StrongMutationParser;
+import jmutation.utils.ResourceExtractor;
 import jmutation.utils.TraceHelper;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
@@ -11,8 +13,10 @@ import jmutation.mutation.parser.MutationParser;
 import jmutation.utils.RandomSingleton;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
+import org.osgi.resource.Resource;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,7 +63,7 @@ public class MutationFramework {
     }
 
     /**
-     * Path to directory that contains microbat jar files. ./lib can be used.
+     * Path to directory that contains microbat jar files. If not specified, the default is used. (%userprofile%\lib\resources\java-mutation-framework)
      * @param dropInsDir path to microbat jar files.
      */
     public void setDropInsDir(String dropInsDir) {
@@ -145,6 +149,17 @@ public class MutationFramework {
     public void setMicrobatConfig(MicrobatConfig microbatConfig) {
         this.microbatConfig = microbatConfig;
         projectPath = microbatConfig.getWorkingDir();
+    }
+
+    public void extractResources() throws IOException {
+        extractResources(mutationFrameworkResourcesPath);
+    }
+
+    public void extractResources(String path) throws IOException {
+        for (ExternalLibrary externalLibrary : ExternalLibrary.values()) {
+            ResourceExtractor.extractFile(externalLibrary.getName() + ".jar", path + File.separator + "lib");
+        }
+        ResourceExtractor.extractFile("microbatConfig.json", path);
     }
 
     /**
