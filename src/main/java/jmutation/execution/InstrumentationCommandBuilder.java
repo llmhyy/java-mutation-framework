@@ -1,5 +1,6 @@
 package jmutation.execution;
 
+import jmutation.constants.ExternalLibrary;
 import jmutation.model.MicrobatConfig;
 import org.apache.commons.io.FilenameUtils;
 
@@ -60,7 +61,9 @@ public class InstrumentationCommandBuilder {
 
     private void generateSystemJars(String dropInsDir) {
         assert SYSTEM_JARS.stream().allMatch(jar -> (new File(dropInsDir, jar + ".jar")).exists());
-        SYSTEM_JARS.stream().forEach(jar -> addClassPath(new File(dropInsDir, jar + ".jar")));
+        for (ExternalLibrary extLib : ExternalLibrary.values()) {
+            addClassPath(new File(dropInsDir, extLib.getName() + ".jar"));
+        }
     }
 
     public void addClassPath(File classPath) {
