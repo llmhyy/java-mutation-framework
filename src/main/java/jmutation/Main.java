@@ -33,7 +33,7 @@ public class Main {
 
         MutationFramework mutationFramework = new MutationFramework();
         if (params.dropInsDir != null) {
-            mutationFramework.setDropInsDir(params.dropInsDir);
+            mutationFramework.setDropInsPath(params.dropInsDir);
         }
         if (params.microbatConfigPath != null) {
             mutationFramework.setMicrobatConfigPath(params.microbatConfigPath);

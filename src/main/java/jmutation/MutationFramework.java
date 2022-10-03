@@ -25,8 +25,9 @@ import java.util.List;
 public class MutationFramework {
     final public static String DEFAULT_RESOURCES_PATH = String.join(File.separator,
             System.getenv("USERPROFILE"), "lib", "resources", "java-mutation-framework");
+    final public static String DEFAULT_DROP_INS_DIR = "lib";
     private String projectPath;
-    public static String dropInsDir = String.join(File.separator, DEFAULT_RESOURCES_PATH, "lib");
+    private String dropInsPath = String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_DROP_INS_DIR);
 
     private String microbatConfigPath = String.join(File.separator, DEFAULT_RESOURCES_PATH,
             "microbatConfig.json");
@@ -63,10 +64,10 @@ public class MutationFramework {
 
     /**
      * Path to directory that contains microbat jar files. If not specified, the default is used. (%userprofile%\lib\resources\java-mutation-framework)
-     * @param dropInsDir path to microbat jar files.
+     * @param dropInsPath path to microbat jar files.
      */
-    public void setDropInsDir(String dropInsDir) {
-        this.dropInsDir = dropInsDir;
+    public void setDropInsPath(String dropInsPath) {
+        this.dropInsPath = dropInsPath;
     }
 
     /**
@@ -119,7 +120,7 @@ public class MutationFramework {
      * @return A list of test case objects.
      */
     public List<TestCase> getTestCases() {
-        config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
+        config = new ProjectConfig(projectPath, dropInsPath); // Contains class paths
         Project proj = config.getProject();
         return proj.getTestCases();
     }
@@ -129,7 +130,7 @@ public class MutationFramework {
      * This method should be called after updating the project path or drop ins directory.
      */
     public void generateProjectConfiguration() {
-        config = new ProjectConfig(projectPath, dropInsDir); // Contains class paths
+        config = new ProjectConfig(projectPath, dropInsPath); // Contains class paths
     }
 
     /**
@@ -166,7 +167,7 @@ public class MutationFramework {
      * @return MutationResult object.
      */
     public MutationResult startMutationFramework() {
-        if (projectPath == null || dropInsDir == null) {
+        if (projectPath == null || dropInsPath == null) {
             System.out.println("Project path or drop ins directory not specified");
             return null;
         }
