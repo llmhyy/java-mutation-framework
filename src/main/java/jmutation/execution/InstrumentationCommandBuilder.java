@@ -55,7 +55,7 @@ public class InstrumentationCommandBuilder {
         if (testClass.isEmpty() && testMethod.isEmpty()) {
             return commandStrBuilder.toString();
         }
-        commandStrBuilder.append(" microbat.evaluation.MicroBatTestRunner " + testClass.get() + " " + testMethod.get());
+        commandStrBuilder.append(" microbat.evaluation.junit.MicroBatTestRunner " + testClass.get() + " " + testMethod.get());
         return commandStrBuilder.toString();
     }
 
