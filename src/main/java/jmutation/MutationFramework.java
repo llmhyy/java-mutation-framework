@@ -13,7 +13,6 @@ import jmutation.mutation.parser.MutationParser;
 import jmutation.utils.RandomSingleton;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
-import org.osgi.resource.Resource;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,12 +23,12 @@ import java.util.List;
  * API class for usage as an external library
  */
 public class MutationFramework {
-    final private String mutationFrameworkResourcesPath = String.join(File.separator,
+    final public static String DEFAULT_RESOURCES_PATH = String.join(File.separator,
             System.getenv("USERPROFILE"), "lib", "resources", "java-mutation-framework");
     private String projectPath;
-    private String dropInsDir = String.join(File.separator, mutationFrameworkResourcesPath, "lib");
+    private String dropInsDir = String.join(File.separator, DEFAULT_RESOURCES_PATH, "lib");
 
-    private String microbatConfigPath = String.join(File.separator, mutationFrameworkResourcesPath,
+    private String microbatConfigPath = String.join(File.separator, DEFAULT_RESOURCES_PATH,
             "microbatConfig.json");
 
     private TestCase testCase;
@@ -152,7 +151,7 @@ public class MutationFramework {
     }
 
     public void extractResources() throws IOException {
-        extractResources(mutationFrameworkResourcesPath);
+        extractResources(DEFAULT_RESOURCES_PATH);
     }
 
     public void extractResources(String path) throws IOException {
