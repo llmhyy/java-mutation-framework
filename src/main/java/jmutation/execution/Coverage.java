@@ -1,7 +1,7 @@
 package jmutation.execution;
 
 import jmutation.model.TestCase;
-import jmutation.mutation.MutationRange;
+import jmutation.model.MutationRange;
 import microbat.model.ClassLocation;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;

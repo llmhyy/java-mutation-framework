@@ -123,7 +123,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>jmutation.mutation.Mutator</li>
+<li>jmutation.mutation.heuristic.HeuristicMutator</li>
 </ul>
 </li>
 </ul>
@@ -154,7 +154,7 @@ extends java.lang.Object</pre>
 <th class="colLast" scope="col">Description</th>
 </tr>
 <tr class="altColor">
-<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(jmutation.mutation.parser.MutationParser)">Mutator</a></span>&#8203;(<a href="parser/MutationParser.html" title="class in jmutation.mutation.parser">MutationParser</a>&nbsp;mutationParser)</code></th>
+<th class="colConstructorName" scope="row"><code><span class="memberNameLink"><a href="#%3Cinit%3E(jmutation.mutation.heuristic.parser.MutationParser)">Mutator</a></span>&#8203;(<a href="parser/MutationParser.html" title="class in jmutation.mutation.heuristic.parser">MutationParser</a>&nbsp;mutationParser)</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
 </table>
@@ -181,7 +181,7 @@ extends java.lang.Object</pre>
 <td class="colLast">&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>java.util.List&lt;<a href="commands/MutationCommand.html" title="class in jmutation.mutation.commands">MutationCommand</a>&gt;</code></td>
+<td class="colFirst"><code>java.util.List&lt;<a href="commands/MutationCommand.html" title="class in jmutation.mutation.heuristic.commands">MutationCommand</a>&gt;</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#getMutationHistory()">getMutationHistory</a></span>()</code></th>
 <td class="colLast">&nbsp;</td>
 </tr>
@@ -222,13 +222,13 @@ extends java.lang.Object</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a id="&lt;init&gt;(jmutation.mutation.parser.MutationParser)">
+<a id="&lt;init&gt;(jmutation.mutation.heuristic.parser.MutationParser)">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>Mutator</h4>
-<pre>public&nbsp;Mutator&#8203;(<a href="parser/MutationParser.html" title="class in jmutation.mutation.parser">MutationParser</a>&nbsp;mutationParser)</pre>
+<pre>public&nbsp;Mutator&#8203;(<a href="parser/MutationParser.html" title="class in jmutation.mutation.heuristic.parser">MutationParser</a>&nbsp;mutationParser)</pre>
 </li>
 </ul>
 </li>
@@ -271,7 +271,7 @@ extends java.lang.Object</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>getMutationHistory</h4>
-<pre class="methodSignature">public&nbsp;java.util.List&lt;<a href="commands/MutationCommand.html" title="class in jmutation.mutation.commands">MutationCommand</a>&gt;&nbsp;getMutationHistory()</pre>
+<pre class="methodSignature">public&nbsp;java.util.List&lt;<a href="commands/MutationCommand.html" title="class in jmutation.mutation.heuristic.commands">MutationCommand</a>&gt;&nbsp;getMutationHistory()</pre>
 </li>
 </ul>
 <a id="clearHistory()">

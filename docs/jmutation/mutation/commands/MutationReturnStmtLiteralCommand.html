@@ -115,7 +115,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <!-- ======== START OF CLASS DATA ======== -->
 <main role="main">
 <div class="header">
-<div class="subTitle"><span class="packageLabelInType">Package</span>&nbsp;<a href="package-summary.html">jmutation.mutation.commands</a></div>
+<div class="subTitle"><span class="packageLabelInType">Package</span>&nbsp;<a href="package-summary.html">jmutation.mutation.heuristic.commands</a></div>
 <h2 title="Class MutationReturnStmtLiteralCommand" class="title">Class MutationReturnStmtLiteralCommand</h2>
 </div>
 <div class="contentContainer">
@@ -123,13 +123,13 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li><a href="MutationCommand.html" title="class in jmutation.mutation.commands">jmutation.mutation.commands.MutationCommand</a></li>
+<li><a href="MutationCommand.html" title="class in jmutation.mutation.heuristic.commands">jmutation.mutation.heuristic.commands.HeuristicMutationCommand</a></li>
 <li>
 <ul class="inheritance">
-<li><a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.commands.strong">jmutation.mutation.commands.strong.MutationReturnStmtCommand</a></li>
+<li><a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.heuristic.commands.strong">jmutation.mutation.heuristic.commands.strong.MutationReturnStmtCommand</a></li>
 <li>
 <ul class="inheritance">
-<li>jmutation.mutation.commands.MutationReturnStmtLiteralCommand</li>
+<li>jmutation.mutation.heuristic.commands.MutationReturnStmtLiteralCommand</li>
 </ul>
 </li>
 </ul>
@@ -142,7 +142,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="blockList">
 <hr>
 <pre>public class <span class="typeNameLabel">MutationReturnStmtLiteralCommand</span>
-extends <a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.commands.strong">MutationReturnStmtCommand</a></pre>
+extends <a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.heuristic.commands.strong">MutationReturnStmtCommand</a></pre>
 <div class="block">Similar to replacing return statement with default values. Except, it checks if the return statement is a primitive value (integer contants, boolean and character literals).
  The data dependency is already broken, as compared to in MutationReturnStmtCommand, where the mutation may break the data dependencies.</div>
 </li>
@@ -202,17 +202,17 @@ extends <a href="strong/MutationReturnStmtCommand.html" title="class in jmutatio
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.jmutation.mutation.commands.strong.MutationReturnStmtCommand">
+<li class="blockList"><a id="methods.inherited.from.class.jmutation.mutation.heuristic.commands.strong.MutationReturnStmtCommand">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;jmutation.mutation.commands.strong.<a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.commands.strong">MutationReturnStmtCommand</a></h3>
+<h3>Methods inherited from class&nbsp;jmutation.mutation.heuristic.commands.strong.<a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.heuristic.commands.strong">MutationReturnStmtCommand</a></h3>
 <code><a href="strong/MutationReturnStmtCommand.html#executeMutation()">executeMutation</a></code></li>
 </ul>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.jmutation.mutation.commands.MutationCommand">
+<li class="blockList"><a id="methods.inherited.from.class.jmutation.mutation.heuristic.commands.HeuristicMutationCommand">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;jmutation.mutation.commands.<a href="MutationCommand.html" title="class in jmutation.mutation.commands">MutationCommand</a></h3>
+<h3>Methods inherited from class&nbsp;jmutation.mutation.heuristic.commands.<a href="MutationCommand.html" title="class in jmutation.mutation.heuristic.commands">MutationCommand</a></h3>
 <code><a href="MutationCommand.html#getNode()">getNode</a>, <a href="MutationCommand.html#toString()">toString</a></code></li>
 </ul>
 <ul class="blockList">
@@ -277,7 +277,7 @@ extends <a href="strong/MutationReturnStmtCommand.html" title="class in jmutatio
  Can lead to compilation errors. Check for those cases.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="strong/MutationReturnStmtCommand.html#canExecute()">canExecute</a></code>&nbsp;in class&nbsp;<code><a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.commands.strong">MutationReturnStmtCommand</a></code></dd>
+<dd><code><a href="strong/MutationReturnStmtCommand.html#canExecute()">canExecute</a></code>&nbsp;in class&nbsp;<code><a href="strong/MutationReturnStmtCommand.html" title="class in jmutation.mutation.heuristic.commands.strong">MutationReturnStmtCommand</a></code></dd>
 </dl>
 </li>
 </ul>

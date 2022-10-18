@@ -115,7 +115,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <!-- ======== START OF CLASS DATA ======== -->
 <main role="main">
 <div class="header">
-<div class="subTitle"><span class="packageLabelInType">Package</span>&nbsp;<a href="package-summary.html">jmutation.mutation.parser</a></div>
+<div class="subTitle"><span class="packageLabelInType">Package</span>&nbsp;<a href="package-summary.html">jmutation.mutation.heuristic.parser</a></div>
 <h2 title="Class StrongMutationParser" class="title">Class StrongMutationParser</h2>
 </div>
 <div class="contentContainer">
@@ -126,10 +126,10 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li>org.eclipse.jdt.core.dom.ASTVisitor</li>
 <li>
 <ul class="inheritance">
-<li><a href="MutationParser.html" title="class in jmutation.mutation.parser">jmutation.mutation.parser.MutationParser</a></li>
+<li><a href="MutationParser.html" title="class in jmutation.mutation.heuristic.parser">jmutation.mutation.heuristic.parser.MutationParser</a></li>
 <li>
 <ul class="inheritance">
-<li>jmutation.mutation.parser.StrongMutationParser</li>
+<li>jmutation.mutation.heuristic.parser.StrongMutationParser</li>
 </ul>
 </li>
 </ul>
@@ -142,7 +142,7 @@ $('.navPadding').css('padding-top', $('.fixedNav').css("height"));
 <li class="blockList">
 <hr>
 <pre>public class <span class="typeNameLabel">StrongMutationParser</span>
-extends <a href="MutationParser.html" title="class in jmutation.mutation.parser">MutationParser</a></pre>
+extends <a href="MutationParser.html" title="class in jmutation.mutation.heuristic.parser">MutationParser</a></pre>
 <div class="block">Similar to MutationParser, but for mutations that are stronger or break data dependencies, and we do not want to use them unless test case cannot fail</div>
 </li>
 </ul>
@@ -202,10 +202,10 @@ extends <a href="MutationParser.html" title="class in jmutation.mutation.parser"
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a id="methods.inherited.from.class.jmutation.mutation.parser.MutationParser">
+<li class="blockList"><a id="methods.inherited.from.class.jmutation.mutation.heuristic.parser.MutationParser">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;jmutation.mutation.parser.<a href="MutationParser.html" title="class in jmutation.mutation.parser">MutationParser</a></h3>
+<h3>Methods inherited from class&nbsp;jmutation.mutation.heuristic.parser.<a href="MutationParser.html" title="class in jmutation.mutation.heuristic.parser">MutationParser</a></h3>
 <code><a href="MutationParser.html#parse(org.eclipse.jdt.core.dom.ASTNode)">parse</a>, <a href="MutationParser.html#preVisit(org.eclipse.jdt.core.dom.ASTNode)">preVisit</a>, <a href="MutationParser.html#visit(org.eclipse.jdt.core.dom.ForStatement)">visit</a>, <a href="MutationParser.html#visit(org.eclipse.jdt.core.dom.IfStatement)">visit</a>, <a href="MutationParser.html#visit(org.eclipse.jdt.core.dom.InfixExpression)">visit</a>, <a href="MutationParser.html#visit(org.eclipse.jdt.core.dom.MethodInvocation)">visit</a>, <a href="MutationParser.html#visit(org.eclipse.jdt.core.dom.WhileStatement)">visit</a></code></li>
 </ul>
 <ul class="blockList">
@@ -266,7 +266,7 @@ extends <a href="MutationParser.html" title="class in jmutation.mutation.parser"
 <pre class="methodSignature">public&nbsp;boolean&nbsp;visit&#8203;(org.eclipse.jdt.core.dom.ReturnStatement&nbsp;node)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code><a href="MutationParser.html#visit(org.eclipse.jdt.core.dom.ReturnStatement)">visit</a></code>&nbsp;in class&nbsp;<code><a href="MutationParser.html" title="class in jmutation.mutation.parser">MutationParser</a></code></dd>
+<dd><code><a href="MutationParser.html#visit(org.eclipse.jdt.core.dom.ReturnStatement)">visit</a></code>&nbsp;in class&nbsp;<code><a href="MutationParser.html" title="class in jmutation.mutation.heuristic.parser">MutationParser</a></code></dd>
 </dl>
 </li>
 </ul>

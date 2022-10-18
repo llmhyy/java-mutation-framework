@@ -1,8 +1,9 @@
 package jmutation.utils;
 
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.strong.MutationBlockRemovalCommand;
-import jmutation.mutation.commands.MutationCommand;
+import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.heuristic.commands.strong.MutationBlockRemovalCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;

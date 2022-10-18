@@ -1,7 +1,8 @@
 package jmutation.utils;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
-import jmutation.mutation.commands.MutationCommand;
+import jmutation.mutation.MutationCommand;
+import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;

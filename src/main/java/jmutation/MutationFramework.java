@@ -3,13 +3,13 @@ package jmutation;
 import jmutation.constants.ExternalLibrary;
 import jmutation.execution.ProjectExecutor;
 import jmutation.model.*;
-import jmutation.mutation.parser.StrongMutationParser;
+import jmutation.mutation.heuristic.parser.StrongMutationParser;
 import jmutation.utils.ResourceExtractor;
 import jmutation.utils.TraceHelper;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
-import jmutation.mutation.Mutator;
-import jmutation.mutation.parser.MutationParser;
+import jmutation.mutation.heuristic.HeuristicMutator;
+import jmutation.mutation.heuristic.parser.MutationParser;
 import jmutation.utils.RandomSingleton;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
@@ -51,7 +51,7 @@ public class MutationFramework {
     private Project mutatedProject = null;
     private Project clonedProject;
     private ProjectConfig mutatedProjConfig;
-    private Mutator mutator;
+    private HeuristicMutator mutator;
 
 
     /**
@@ -299,7 +299,7 @@ public class MutationFramework {
     }
 
     private void setupMutator(MutationParser mutationParser) {
-        mutator = new Mutator(mutationParser);
+        mutator = new HeuristicMutator(mutationParser);
         mutator.setMaxNumberOfMutations(maxNumberOfMutations);
     }
 
