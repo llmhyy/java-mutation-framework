@@ -1,0 +1,126 @@
+[
+  {
+    "_id": "jquery/jquery_c75701a0152a589c21c4862c33b691902a8b8f7b",
+    "commit_hash": "c75701a0152a589c21c4862c33b691902a8b8f7b",
+    "commit_time": "17/05/2006, 20:46:51",
+    "local_repo_path": "benchmarks/top_JS_repos/jquery",
+    "url": "https://github.com/jquery/jquery/commit/c75701a0152a589c21c4862c33b691902a8b8f7b",
+    "fix": [
+      "typeof",
+      "Idf_1",
+      "!=",
+      "Lit_1"
+    ],
+    "fix_tokenType": "BinaryExpression",
+    "fix_file_path": "jquery/jquery.js",
+    "fix_actual": [
+      "typeof",
+      "v",
+      "!=",
+      "'undefined'"
+    ],
+    "fix_range": [
+      14637,
+      14660
+    ],
+    "fix_line": "576-576",
+    "buggy": [
+      "Idf_1",
+      "!==",
+      "Lit_2"
+    ],
+    "buggy_tokenType": "BinaryExpression",
+    "buggy_file_path": "jquery/jquery.js",
+    "buggy_actual": [
+      "v",
+      "!==",
+      "null"
+    ],
+    "buggy_range": [
+      14637,
+      14647
+    ],
+    "buggy_line": "576-576"
+  },
+  {
+    "_id": "jquery/jquery_65b1081e9e9f9b8c4a0f1621c98e823eac3e6bcf",
+    "commit_hash": "65b1081e9e9f9b8c4a0f1621c98e823eac3e6bcf",
+    "commit_time": "03/06/2006, 14:48:19",
+    "local_repo_path": "benchmarks/top_JS_repos/jquery",
+    "url": "https://github.com/jquery/jquery/commit/65b1081e9e9f9b8c4a0f1621c98e823eac3e6bcf",
+    "fix": [
+      "Idf_1",
+      "=",
+      "new",
+      "Idf_2",
+      ".",
+      "Idf_3",
+      ".",
+      "Idf_4",
+      "(",
+      "this",
+      ",",
+      "Idf_5",
+      ")",
+      ";"
+    ],
+    "fix_tokenType": "ExpressionStatement",
+    "fix_file_path": "fx/fx.js",
+    "fix_actual": [
+      "ef",
+      "=",
+      "new",
+      "$",
+      ".",
+      "fx",
+      ".",
+      "Opacity",
+      "(",
+      "this",
+      ",",
+      "o",
+      ")",
+      ";"
+    ],
+    "fix_range": [
+      1196,
+      1226
+    ],
+    "fix_line": "54-54",
+    "buggy": [
+      "Idf_1",
+      "=",
+      "new",
+      "Idf_3",
+      ".",
+      "Idf_4",
+      "(",
+      "this",
+      ",",
+      "Idf_5",
+      ")",
+      ";"
+    ],
+    "buggy_tokenType": "ExpressionStatement",
+    "buggy_file_path": "fx/fx.js",
+    "buggy_actual": [
+      "ef",
+      "=",
+      "new",
+      "fx",
+      ".",
+      "Opacity",
+      "(",
+      "this",
+      ",",
+      "o",
+      ")",
+      ";"
+    ],
+    "buggy_range": [
+      1196,
+      1224
+    ],
+    "buggy_line": "54-54"
+  }
+]

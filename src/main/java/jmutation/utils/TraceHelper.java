@@ -2,7 +2,6 @@ package jmutation.utils;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
 import jmutation.mutation.MutationCommand;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
@@ -19,6 +18,7 @@ import java.util.Set;
 public class TraceHelper {
     /**
      * Gets TraceNodes that matches the mutation history i.e. root cause of bugs
+     *
      * @param buggyTrace
      * @param mutationHistory
      * @return list of TraceNodes
@@ -26,7 +26,7 @@ public class TraceHelper {
     public static List<TraceNode> getMutatedTraceNodes(Trace buggyTrace, List<MutationCommand> mutationHistory) {
         Set<TraceNode> result = new HashSet<>();
         List<TraceNode> executionList = buggyTrace.getExecutionList();
-        for (MutationCommand mutationCommand: mutationHistory) {
+        for (MutationCommand mutationCommand : mutationHistory) {
             ASTNode node = mutationCommand.getNode();
             ASTNode root = node.getRoot();
             if (!(root instanceof CompilationUnit)) {
@@ -42,12 +42,12 @@ public class TraceHelper {
             String fullMutatedClassName = packageDeclaration == null ? mutatedClassName : packageDeclaration.getName() + "." + mutatedClassName;
             int startPos = unit.getLineNumber(node.getStartPosition());
             int endPos = unit.getLineNumber(node.getStartPosition() + node.getLength() - 1);
-            for (TraceNode traceNode: executionList) {
+            for (TraceNode traceNode : executionList) {
                 BreakPoint breakPoint = traceNode.getBreakPoint();
                 int lineNum = breakPoint.getLineNumber();
                 String classCanonicalName = breakPoint.getDeclaringCompilationUnitName();
                 if (classCanonicalName.equals(fullMutatedClassName) && lineNum <= endPos && lineNum >= startPos) {
-                   result.add(traceNode);
+                    result.add(traceNode);
                 }
             }
         }
