@@ -23,7 +23,7 @@ public class MutationChangeVarNameCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
 
     @Test
-    public void executeMutation_declaredVariable_mutatesCorrectly() {
+    public void canExecute_declaredVariable_cannotExecute() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "int a = 0;" +
@@ -89,5 +89,31 @@ public class MutationChangeVarNameCommandTest {
         ASTMatcher matcher = new ASTMatcher();
         boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
         assertTrue(isCorrectMutation);
+    }
+
+    @Test
+    public void canExecute_noReplacements_cannotExecute() {
+        String documentStr = "public class Main {" +
+                "public static void main(String[] args) {" +
+                "int b = 0;" +
+                "while(b != 20) {" +
+                "a++;" +
+                "int c = b + b;" +
+                "}" +
+                "}" +
+                "}";
+
+        helper.parseDocStr(documentStr);
+        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
+        Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
+        List<Statement> stmts = methodBody.statements();
+        WhileStatement whileStmt = (WhileStatement) stmts.get(1);
+        Block whileBody = (Block) whileStmt.getBody();
+        List<Statement> whileBodyStmts = whileBody.statements();
+        VariableDeclarationStatement cDeclaration = (VariableDeclarationStatement) whileBodyStmts.get(1);
+        InfixExpression infixExp = (InfixExpression) ((VariableDeclarationFragment) cDeclaration.fragments().get(0)).getInitializer();
+        SimpleName bSimpleName = (SimpleName) infixExp.getLeftOperand();
+        MutationChangeVarNameCommand command = new MutationChangeVarNameCommand(bSimpleName);
+        assertFalse(command.canExecute());
     }
 }

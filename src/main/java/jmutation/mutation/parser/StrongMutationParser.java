@@ -29,8 +29,8 @@ public class StrongMutationParser extends MutationParser {
     public boolean visit(ReturnStatement node) {
         List<MutationCommand> possibleCommands = new ArrayList<>();
         possibleCommands.add(new MutationReturnReplaceArgCommand(node));
-        possibleCommands.add(new MutationReturnMathCommand(node));
         possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
+        possibleCommands.add(new MutationReturnMathCommand(node));
         possibleCommands.add(new MutationReturnStmtCommand(node));
         possibleCommands = possibleCommands.stream().filter(command -> command.canExecute()).collect(Collectors.toList());
         if (possibleCommands.isEmpty()) {
