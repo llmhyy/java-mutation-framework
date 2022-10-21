@@ -3,6 +3,7 @@ package jmutation.mutation.semantic;
 import jmutation.execution.Coverage;
 import jmutation.model.project.Project;
 import jmutation.mutation.Mutator;
+import jmutation.mutation.semantic.semseed.SemSeedStaticAnalyzer;
 import jmutation.mutation.semantic.semseed.io.PatternIO;
 import jmutation.mutation.semantic.semseed.io.handler.FileHandler;
 import jmutation.mutation.semantic.semseed.model.Pattern;
@@ -22,7 +23,7 @@ public class SemanticMutator extends Mutator {
         // Recompile
         // If fail, redo with second ASTNode
         List<Pattern> patterns = readPatternsFromFile(patternFilePath);
-
+        SemSeedStaticAnalyzer staticAnalyzer = new SemSeedStaticAnalyzer(coverage, project.getRoot(), 1);
         return null;
     }
 
