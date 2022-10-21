@@ -3,12 +3,10 @@ package jmutation.mutation.heuristic;
 import jmutation.execution.Coverage;
 import jmutation.model.MutationRange;
 import jmutation.model.project.Project;
-import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
 import jmutation.mutation.heuristic.parser.MutationParser;
 import jmutation.parser.ProjectParser;
-import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.BadLocationException;
@@ -22,7 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +41,7 @@ public class HeuristicMutator extends Mutator {
 
     /**
      * if max number of mutations is 0 or less, there is no limit
+     *
      * @param numberOfMutations Maximum number of mutations allowed
      */
     public void setMaxNumberOfMutations(int numberOfMutations) {
@@ -51,11 +49,10 @@ public class HeuristicMutator extends Mutator {
     }
 
     public Project mutate(Coverage coverage, Project project) {
-        List<MutationRange> ranges = coverage.getRanges();
         boolean isRandomRetrieval = true;
         for (int i = 0; i < 2; i++) {
-            ranges = RandomSingleton.getSingleton().shuffle(ranges);
-            mutate(ranges, project, isRandomRetrieval);
+            coverage.shuffleRanges();
+            mutate(coverage, project, isRandomRetrieval);
             if (!mutationHistory.isEmpty()) {
                 break;
             }
@@ -65,20 +62,9 @@ public class HeuristicMutator extends Mutator {
         return project;
     }
 
-    private void mutate(List<MutationRange> ranges, Project project, boolean isRandomRetrieval) {
+    private void mutate(Coverage coverage, Project project, boolean isRandomRetrieval) {
         int numberOfExecutedMutations = 0;
-        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
-        for (MutationRange range : ranges) {
-            String className = range.getClassName();
-            List<MutationRange> rangesForClass;
-            if (classToRange.containsKey(className)) {
-                rangesForClass = classToRange.get(className);
-            } else {
-                rangesForClass = new ArrayList<>();
-            }
-            rangesForClass.add(range);
-            classToRange.put(className, rangesForClass);
-        }
+        Map<String, List<MutationRange>> classToRange = coverage.getRangesByClass();
         for (Entry<String, List<MutationRange>> entry : classToRange.entrySet()) {
             List<MutationRange> rangesForClass = entry.getValue();
             String className = entry.getKey();
@@ -146,8 +132,8 @@ public class HeuristicMutator extends Mutator {
     /**
      * Gets an AST node for the portion of code to be mutated
      *
-     * @param unit Compilation unit to parse
-     * @param range line number range to mutate in the compilation unit
+     * @param unit              Compilation unit to parse
+     * @param range             line number range to mutate in the compilation unit
      * @param isRandomRetrieval whether to randomly retrieve the nodes to mutate or get all that is encountered
      * @return The list of ASTNodes to mutate
      */

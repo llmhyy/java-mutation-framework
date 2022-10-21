@@ -1,15 +1,17 @@
 package jmutation.execution;
 
-import jmutation.model.TestCase;
 import jmutation.model.MutationRange;
-import microbat.model.ClassLocation;
+import jmutation.model.TestCase;
+import jmutation.utils.RandomSingleton;
 import microbat.model.BreakPoint;
+import microbat.model.ClassLocation;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -101,5 +103,25 @@ public class Coverage {
 
     public void setRanges(List<MutationRange> ranges) {
         this.ranges = ranges;
+    }
+
+    public Map<String, List<MutationRange>> getRangesByClass() {
+        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
+        for (MutationRange range : ranges) {
+            String className = range.getClassName();
+            List<MutationRange> rangesForClass;
+            if (classToRange.containsKey(className)) {
+                rangesForClass = classToRange.get(className);
+            } else {
+                rangesForClass = new ArrayList<>();
+            }
+            rangesForClass.add(range);
+            classToRange.put(className, rangesForClass);
+        }
+        return classToRange;
+    }
+
+    public void shuffleRanges() {
+        ranges = RandomSingleton.getSingleton().shuffle(ranges);
     }
 }
