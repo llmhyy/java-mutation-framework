@@ -31,4 +31,14 @@ public class StaticAnalysisResult {
     public Map<String, Set<String>> getLiteralsByFiles() {
         return literalsByFiles;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof StaticAnalysisResult)) return false;
+        StaticAnalysisResult otherResult = (StaticAnalysisResult) other;
+        return topOccurringIdentifiers.equals(otherResult.topOccurringIdentifiers) &&
+                topOccurringLiterals.equals(otherResult.topOccurringLiterals) &&
+                identifiersByFiles.equals(otherResult.identifiersByFiles) &&
+                literalsByFiles.equals(otherResult.literalsByFiles);
+    }
 }
