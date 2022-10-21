@@ -16,8 +16,6 @@ public class PatternIO {
     public static final String KEY_FIX = "fix";
     public static final String KEY_FIX_ACTUAL = "fix_actual";
     public static final String KEY_BUGGY_ACTUAL = "buggy_actual";
-
-    private final List<String> keysWithJsonArrays = List.of(KEY_BUGGY, KEY_BUGGY_ACTUAL, KEY_FIX_ACTUAL, KEY_FIX);
     IOHandler ioHandler;
 
     public PatternIO(IOHandler ioHandler) {

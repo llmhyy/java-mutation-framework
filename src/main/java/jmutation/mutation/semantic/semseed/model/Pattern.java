@@ -10,6 +10,8 @@ public class Pattern {
     private final List<String> fixConcrete;
 
     public Pattern(List<String> buggyPattern, List<String> fixPattern, List<String> buggyConcrete, List<String> fixConcrete) {
+        assert (buggyPattern.size() == fixPattern.size() && fixPattern.size() == buggyConcrete.size() &&
+                buggyConcrete.size() == fixConcrete.size());
         this.buggyPattern = buggyPattern;
         this.fixPattern = fixPattern;
         this.buggyConcrete = buggyConcrete;
@@ -30,6 +32,10 @@ public class Pattern {
 
     public List<String> getFixConcrete() {
         return fixConcrete;
+    }
+
+    public int getPatternLen() {
+        return buggyPattern.size();
     }
 
     @Override
