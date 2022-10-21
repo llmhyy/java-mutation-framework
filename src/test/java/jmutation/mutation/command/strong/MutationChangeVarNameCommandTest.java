@@ -1,7 +1,7 @@
-package jmutation.mutation.command;
+package jmutation.mutation.command.strong;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.MutationChangeVarNameCommand;
+import jmutation.mutation.commands.strong.MutationChangeVarNameCommand;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MutationChangeVarNameCommandTest {
@@ -43,22 +44,7 @@ public class MutationChangeVarNameCommandTest {
         VariableDeclarationStatement cDeclaration = (VariableDeclarationStatement) whileBodyStmts.get(1);
         SimpleName cSimpleName = ((VariableDeclarationFragment) cDeclaration.fragments().get(0)).getName();
         MutationChangeVarNameCommand command = new MutationChangeVarNameCommand(cSimpleName);
-        command.executeMutation();
-        String expectedDoc = String.join("\n", "public class Main {",
-                "public static void main(String[] args) {",
-                "int a = 0;",
-                "while(a != 20) {",
-                "a++;",
-                "int a = b + a;",
-                "}",
-                "}",
-                "}");
-        CompilationUnit actualCU = helper.getCompilationUnit();
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        ASTMatcher matcher = new ASTMatcher();
-        boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
-        assertTrue(isCorrectMutation);
+        assertFalse(command.canExecute());
     }
 
     @Test
@@ -69,7 +55,7 @@ public class MutationChangeVarNameCommandTest {
                 "int b = 0;" +
                 "while(a != 20) {" +
                 "a++;" +
-                "int a = b + a;" +
+                "int c = b + a;" +
                 "}" +
                 "}" +
                 "}";
@@ -85,6 +71,7 @@ public class MutationChangeVarNameCommandTest {
         InfixExpression infixExp = (InfixExpression) ((VariableDeclarationFragment) cDeclaration.fragments().get(0)).getInitializer();
         SimpleName bSimpleName = (SimpleName) infixExp.getLeftOperand();
         MutationChangeVarNameCommand command = new MutationChangeVarNameCommand(bSimpleName);
+        assertTrue(command.canExecute());
         command.executeMutation();
         String expectedDoc = String.join("\n", "public class Main {",
                 "public static void main(String[] args) {",
@@ -92,7 +79,7 @@ public class MutationChangeVarNameCommandTest {
                 "int b = 0;",
                 "while(a != 20) {",
                 "a++;",
-                "int a = a + a;",
+                "int c = a + a;",
                 "}",
                 "}",
                 "}");

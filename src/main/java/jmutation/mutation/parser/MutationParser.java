@@ -1,11 +1,15 @@
 package jmutation.mutation.parser;
 
-import jmutation.mutation.commands.*;
+import jmutation.mutation.commands.MutationCommand;
+import jmutation.mutation.commands.MutationForLoopToIfCommand;
+import jmutation.mutation.commands.MutationMathLibCommand;
+import jmutation.mutation.commands.MutationReturnMathCommand;
+import jmutation.mutation.commands.MutationReturnStmtLiteralCommand;
+import jmutation.mutation.commands.MutationWhileLoopToIfCommand;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -52,12 +56,6 @@ public class MutationParser extends ASTVisitor {
     @Override
     public boolean visit(ForStatement node) {
         command = new MutationForLoopToIfCommand(node);
-        return false;
-    }
-
-    @Override
-    public boolean visit(IfStatement node) {
-        command = new MutationIfCondToTrueCommand(node);
         return false;
     }
 

@@ -1,6 +1,8 @@
-package jmutation.mutation.commands;
+package jmutation.mutation.commands.strong;
 
+import jmutation.model.ast.ASTNodeParentRetriever;
 import jmutation.model.ast.ASTNodeRetriever;
+import jmutation.mutation.commands.MutationCommand;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -64,5 +66,16 @@ public class MutationChangeVarNameCommand extends MutationCommand {
         parent.setStructuralProperty(locationInParent, replacementClone);
         node = replacementClone;
         return simpleName;
+    }
+
+    @Override
+    public boolean canExecute() {
+        // Check that the obtained SimpleName is not the declared variable.
+        ASTNodeParentRetriever<VariableDeclarationStatement> parentRetriever = new ASTNodeParentRetriever<>(VariableDeclarationStatement.class);
+        VariableDeclarationStatement variableDeclarationStatement = parentRetriever.getParentOfType(node);
+        if (variableDeclarationStatement == null) return true;
+        List<VariableDeclarationFragment> fragments = variableDeclarationStatement.fragments();
+        if (fragments.isEmpty()) return true;
+        return !fragments.get(0).getName().equals(node);
     }
 }

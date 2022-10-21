@@ -1,5 +1,6 @@
-package jmutation.mutation.commands;
+package jmutation.mutation.commands.strong;
 
+import jmutation.mutation.commands.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;

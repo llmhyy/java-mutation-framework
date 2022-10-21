@@ -1,7 +1,7 @@
-package jmutation.mutation.command;
+package jmutation.mutation.command.strong;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.commands.MutationIfCondToTrueCommand;
+import jmutation.mutation.commands.strong.MutationIfCondToTrueCommand;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
