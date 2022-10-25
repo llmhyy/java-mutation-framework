@@ -1,13 +1,19 @@
 package jmutation.mutation.heuristic.parser;
 
-import jmutation.mutation.heuristic.commands.*;
-import jmutation.mutation.heuristic.commands.strong.MutationReturnReplaceArgCommand;
-import jmutation.mutation.heuristic.commands.strong.MutationVariableDeclarationDefaultCommand;
+import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.heuristic.commands.MutationReturnMathCommand;
+import jmutation.mutation.heuristic.commands.MutationReturnStmtLiteralCommand;
 import jmutation.mutation.heuristic.commands.strong.MutationBlockRemovalCommand;
+import jmutation.mutation.heuristic.commands.strong.MutationChangeVarNameCommand;
+import jmutation.mutation.heuristic.commands.strong.MutationIfCondToTrueCommand;
+import jmutation.mutation.heuristic.commands.strong.MutationReturnReplaceArgCommand;
 import jmutation.mutation.heuristic.commands.strong.MutationReturnStmtCommand;
+import jmutation.mutation.heuristic.commands.strong.MutationVariableDeclarationDefaultCommand;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import java.util.ArrayList;
@@ -23,8 +29,8 @@ public class StrongMutationParser extends MutationParser {
     public boolean visit(ReturnStatement node) {
         List<HeuristicMutationCommand> possibleCommands = new ArrayList<>();
         possibleCommands.add(new MutationReturnReplaceArgCommand(node));
-        possibleCommands.add(new MutationReturnMathCommand(node));
         possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
+        possibleCommands.add(new MutationReturnMathCommand(node));
         possibleCommands.add(new MutationReturnStmtCommand(node));
         possibleCommands = possibleCommands.stream().filter(command -> command.canExecute()).collect(Collectors.toList());
         if (possibleCommands.isEmpty()) {
@@ -34,7 +40,7 @@ public class StrongMutationParser extends MutationParser {
         command = possibleCommands.get(0);
         return false;
     }
-    
+
     @Override
     public boolean visit(Block node) {
         command = new MutationBlockRemovalCommand(node);
@@ -44,6 +50,18 @@ public class StrongMutationParser extends MutationParser {
     @Override
     public boolean visit(VariableDeclarationStatement node) {
         command = new MutationVariableDeclarationDefaultCommand(node);
+        return false;
+    }
+
+    @Override
+    public boolean visit(IfStatement node) {
+        command = new MutationIfCondToTrueCommand(node);
+        return false;
+    }
+
+    @Override
+    public boolean visit(SimpleName node) {
+        command = new MutationChangeVarNameCommand(node);
         return false;
     }
 }

@@ -1,7 +1,6 @@
-package jmutation.mutation.heuristic.commands;
+package jmutation.mutation.heuristic.commands.strong;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.heuristic.commands.MutationIfCondToTrueCommand;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;

@@ -1,5 +1,6 @@
-package jmutation.mutation.heuristic.commands;
+package jmutation.mutation.heuristic.commands.strong;
 
+import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
