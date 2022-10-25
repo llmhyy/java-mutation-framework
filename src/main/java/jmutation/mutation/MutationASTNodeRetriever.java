@@ -1,6 +1,7 @@
-package jmutation.mutation.heuristic;
+package jmutation.mutation;
 
 import jmutation.model.MutationRange;
+import jmutation.mutation.heuristic.MutationProbabilityCalculator;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -15,9 +16,6 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-Obtains nodes to be mutated within a given range
- */
 public class MutationASTNodeRetriever extends ASTVisitor {
 
     private int startLine;
@@ -50,6 +48,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
     public void setRandomness(boolean isRandomRetrieval) {
         this.isRandomRetrieval = isRandomRetrieval;
     }
+
     @Override
     public boolean visit(InfixExpression node) {
         addNodeToList(node);
@@ -70,10 +69,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(Block node) {
-        // Since we are removing all stmts in block, should not visit its children
-        if (addNodeToList(node)) {
-            return false;
-        }
+        addNodeToList(node);
         return true;
     }
 
@@ -85,11 +81,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(ReturnStatement node) {
-        // Should not visit children in return statement, if we are replacing the expression (return <expression>;)
-        // with default value.
-        if (addNodeToList(node)) {
-            return false;
-        };
+        addNodeToList(node);
         return true;
     }
 
@@ -99,7 +91,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
      * @param node
      * @return True if node was added, false otherwise.
      */
-    private boolean addNodeToList(ASTNode node) {
+    protected boolean addNodeToList(ASTNode node) {
         if (!nodeIsWithinRange(node)) {
             return false;
         }

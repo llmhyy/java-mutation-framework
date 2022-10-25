@@ -81,7 +81,8 @@ public class HeuristicMutator extends Mutator {
             unit.recordModifications();
             for (MutationRange range : rangesForClass) {
                 // Attempt random retrieval.
-                List<ASTNode> nodes = parseRangeToNodes(unit, range, isRandomRetrieval);
+                HeuristicMutationASTNodeRetriever retriever = new HeuristicMutationASTNodeRetriever(unit, range);
+                List<ASTNode> nodes = parseRangeToNodes(unit, retriever, isRandomRetrieval);
                 if (nodes.isEmpty()) {
                     // If mutation for node types in mutation range not implemented, skip to next mutation range
                     continue;
@@ -124,26 +125,6 @@ public class HeuristicMutator extends Mutator {
         }
     }
 
-    private File retrieveFileFromClassName(String className, Project newProject) {
-        File root = newProject.getRoot();
-        return ProjectParser.getFileOfClass(className, root);
-    }
-
-    /**
-     * Gets an AST node for the portion of code to be mutated
-     *
-     * @param unit              Compilation unit to parse
-     * @param range             line number range to mutate in the compilation unit
-     * @param isRandomRetrieval whether to randomly retrieve the nodes to mutate or get all that is encountered
-     * @return The list of ASTNodes to mutate
-     */
-    private List<ASTNode> parseRangeToNodes(CompilationUnit unit, MutationRange range, boolean isRandomRetrieval) {
-        MutationASTNodeRetriever retriever = new MutationASTNodeRetriever(unit, range);
-        retriever.setRandomness(isRandomRetrieval);
-        unit.accept(retriever);
-
-        return retriever.getNodes();
-    }
 
     private void writeToFile(CompilationUnit unit, File file) {
         String fileContent;
