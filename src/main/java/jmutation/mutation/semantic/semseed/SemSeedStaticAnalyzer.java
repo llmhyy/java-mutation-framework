@@ -24,6 +24,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+/**
+ * Obtains tokens from a project.
+ * It visits each java file from the root, and runs static analysis on each of them.
+ */
 public class SemSeedStaticAnalyzer {
     private final Coverage coverage;
     private final File root;

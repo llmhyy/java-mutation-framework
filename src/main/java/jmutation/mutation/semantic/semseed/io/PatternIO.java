@@ -16,6 +16,8 @@ public class PatternIO {
     public static final String KEY_FIX = "fix";
     public static final String KEY_FIX_ACTUAL = "fix_actual";
     public static final String KEY_BUGGY_ACTUAL = "buggy_actual";
+    public static final String KEY_BUGGY_TOKEN_TYPE = "buggy_tokenType";
+    public static final String KEY_FIX_TOKEN_TYPE = "fix_tokenType";
     IOHandler ioHandler;
 
     public PatternIO(IOHandler ioHandler) {
@@ -46,7 +48,13 @@ public class PatternIO {
             List<String> buggyActLs = convertObjLsToStrLs(buggyActual.toList());
             JSONArray fixActual = patternJsonObj.getJSONArray(KEY_FIX_ACTUAL);
             List<String> fixActLs = convertObjLsToStrLs(fixActual.toList());
-            result.add(new Pattern(buggyLs, fixLs, buggyActLs, fixActLs));
+            String buggyTokenType = patternJsonObj.getString(KEY_BUGGY_TOKEN_TYPE);
+            String fixTokenType = patternJsonObj.getString(KEY_FIX_TOKEN_TYPE);
+            try {
+                result.add(new Pattern(buggyLs, fixLs, buggyActLs, fixActLs, buggyTokenType, fixTokenType));
+            } catch (ClassNotFoundException e) {
+                System.out.println("PatternIO#readAll: Class not found for when creating pattern for " + buggyTokenType + " or " + fixTokenType);
+            }
         }
         return result;
     }
