@@ -16,14 +16,19 @@ public class Pattern {
 
     public Pattern(List<String> buggyPattern, List<String> fixPattern, List<String> buggyConcrete,
                    List<String> fixConcrete, String buggyASTNodeClass, String fixASTNodeClass) throws ClassNotFoundException {
+        this(buggyPattern, fixPattern, buggyConcrete, fixConcrete, (Class<? extends ASTNode>) Class.forName(buggyASTNodeClass), (Class<? extends ASTNode>) Class.forName(fixASTNodeClass));
+    }
+
+    public Pattern(List<String> buggyPattern, List<String> fixPattern, List<String> buggyConcrete,
+                   List<String> fixConcrete, Class<? extends ASTNode> buggyASTNodeClass, Class<? extends ASTNode> fixASTNodeClass) throws ClassNotFoundException {
         assert (buggyPattern.size() == fixPattern.size() && fixPattern.size() == buggyConcrete.size() &&
                 buggyConcrete.size() == fixConcrete.size());
         this.buggyPattern = buggyPattern;
         this.fixPattern = fixPattern;
         this.buggyConcrete = buggyConcrete;
         this.fixConcrete = fixConcrete;
-        this.buggyASTNodeClass = (Class<? extends ASTNode>) Class.forName(buggyASTNodeClass);
-        this.fixASTNodeClass = (Class<? extends ASTNode>) Class.forName(fixASTNodeClass);
+        this.buggyASTNodeClass = buggyASTNodeClass;
+        this.fixASTNodeClass = fixASTNodeClass;
     }
 
     public List<String> getBuggyPattern() {
