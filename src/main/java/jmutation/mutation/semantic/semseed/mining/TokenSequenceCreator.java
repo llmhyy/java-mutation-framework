@@ -1,5 +1,7 @@
 package jmutation.mutation.semantic.semseed.mining;
 
+import jmutation.mutation.semantic.semseed.model.TokenSequence;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -16,12 +18,13 @@ import java.util.Map;
  * Must be used for buggy and fixed version each
  */
 public class TokenSequenceCreator extends ASTVisitor {
-    Map<String, Integer> identifierToNumber;
-    Map<String, Integer> literalToNumber;
-    List<String> abstractTokens;
-    List<String> concreteTokens;
-    int literalCounter;
-    int identifierCounter;
+    private Map<String, Integer> identifierToNumber;
+    private Map<String, Integer> literalToNumber;
+    private int literalCounter;
+    private int identifierCounter;
+    private List<String> abstractTokens;
+    private List<String> concreteTokens;
+    private ASTNode node;
 
     public TokenSequenceCreator() {
         identifierToNumber = new HashMap<>();
@@ -30,6 +33,13 @@ public class TokenSequenceCreator extends ASTVisitor {
         concreteTokens = new ArrayList<>();
         literalCounter = 0;
         identifierCounter = 0;
+    }
+
+    @Override
+    public void preVisit(ASTNode node) {
+        if (this.node == null) {
+            this.node = node;
+        }
     }
 
     @Override
@@ -95,5 +105,19 @@ public class TokenSequenceCreator extends ASTVisitor {
 
     public List<String> getConcreteTokens() {
         return concreteTokens;
+    }
+
+    public TokenSequence getTokenSequence() {
+        return new TokenSequence(abstractTokens, concreteTokens, node);
+    }
+
+    public void reset() {
+        identifierToNumber = new HashMap<>();
+        literalToNumber = new HashMap<>();
+        abstractTokens = new ArrayList<>();
+        concreteTokens = new ArrayList<>();
+        literalCounter = 0;
+        identifierCounter = 0;
+        node = null;
     }
 }
