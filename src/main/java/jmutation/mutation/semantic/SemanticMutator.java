@@ -4,12 +4,16 @@ import jmutation.execution.Coverage;
 import jmutation.model.MutationRange;
 import jmutation.model.project.Project;
 import jmutation.mutation.MutationASTNodeRetriever;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
+import jmutation.mutation.semantic.semseed.FastTextWrapper;
 import jmutation.mutation.semantic.semseed.SemSeedStaticAnalyzer;
 import jmutation.mutation.semantic.semseed.io.PatternIO;
 import jmutation.mutation.semantic.semseed.io.handler.FileHandler;
 import jmutation.mutation.semantic.semseed.mining.TokenSequenceCreator;
 import jmutation.mutation.semantic.semseed.model.Pattern;
+import jmutation.mutation.semantic.semseed.model.StaticAnalysisResult;
+import jmutation.mutation.semantic.semseed.model.TokenSequence;
 import jmutation.parser.ProjectParser;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -19,11 +23,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SemanticMutator extends Mutator {
     private String patternFilePath;
+
+    private FastTextWrapper fastTextWrapper;
+
+    public SemanticMutator(String patternFilePath, String modelPath) {
+        this.patternFilePath = patternFilePath;
+        this.fastTextWrapper = new FastTextWrapper(modelPath);
+    }
 
     private List<ASTNode> getNodesOfSomeType(Coverage coverage, Project project, Class<? extends ASTNode> nodeType) {
         List<ASTNode> result = new ArrayList<>();
@@ -60,7 +73,19 @@ public class SemanticMutator extends Mutator {
         // If fail, redo with second ASTNode
         List<Pattern> patterns = readPatternsFromFile(patternFilePath);
         SemSeedStaticAnalyzer staticAnalyzer = new SemSeedStaticAnalyzer(coverage, project.getRoot(), 1);
-        List<ASTNode> syntacticallyMatchingNodes = getSyntacticallyMatchingNodes(coverage, project, patterns);
+        StaticAnalysisResult staticAnalysisResult = staticAnalyzer.analyse();
+        List<ASTNode> possibleASTNodes = getPossibleASTNodes(coverage, project, patterns);
+        List<TokenSequence> tokenSequencesOfNodes = getTokenSequences(possibleASTNodes);
+        List<TokenSequence> possibleTokenSequences = getMatchingTokenSequences(tokenSequencesOfNodes, patterns);
+        boolean wasSuccessful = false;
+        for (TokenSequence tokenSequence : possibleTokenSequences) {
+            MutationCommand mutationCommand = createMutationCommand(tokenSequence, staticAnalysisResult);
+            mutationCommand.executeMutation();
+            boolean compilationSuccess = compileProject(project);
+            if (!compilationSuccess) continue;
+            wasSuccessful = true;
+        }
+        if (wasSuccessful) return project;
         return null;
     }
 
@@ -72,43 +97,56 @@ public class SemanticMutator extends Mutator {
     }
 
     /**
-     * Obtains all ASTNode that has a syntax match with the bug fix patterns
+     * Get all target ASTNodes that have the same class type as those in fixed patterns
      *
      * @param coverage
      * @param project
      * @param bugFixPatterns
      * @return
      */
-    private List<ASTNode> getSyntacticallyMatchingNodes(Coverage coverage, Project project, List<Pattern> bugFixPatterns) {
-        // For each pattern, get all ASTNodes of its type, and find syntax match with its fix pattern.
+    public List<ASTNode> getPossibleASTNodes(Coverage coverage, Project project, List<Pattern> bugFixPatterns) {
         List<ASTNode> result = new ArrayList<>();
+        Set<Class<? extends ASTNode>> astNodeClassesSet = new HashSet<>();
+        for (Pattern pattern : bugFixPatterns) {
+            astNodeClassesSet.add(pattern.getFixASTNodeClass());
+        }
+        for (Class<? extends ASTNode> astNodeClass : astNodeClassesSet) {
+            result.addAll(getNodesOfSomeType(coverage, project, astNodeClass));
+        }
+        return result;
+    }
+
+    public List<TokenSequence> getTokenSequences(List<ASTNode> nodes) {
+        List<TokenSequence> result = new ArrayList<>();
+        TokenSequenceCreator tokenSequenceCreator = new TokenSequenceCreator();
+        for (ASTNode node : nodes) {
+            node.accept(tokenSequenceCreator);
+            result.add(tokenSequenceCreator.getTokenSequence());
+            tokenSequenceCreator.reset();
+        }
+        return result;
+    }
+
+    public List<TokenSequence> getMatchingTokenSequences(List<TokenSequence> targetTokenSequences, List<Pattern> bugFixPatterns) {
+        // For each pattern, get all ASTNodes of its type, and find syntax match with its fix pattern.
+        List<TokenSequence> result = new ArrayList<>();
         Map<Class<? extends ASTNode>, List<ASTNode>> classToASTNodeMap = new HashMap<>();
         for (Pattern pattern : bugFixPatterns) {
-            List<ASTNode> nodesOfSomeType;
-            Class<? extends ASTNode> astNodeClass = pattern.getFixASTNodeClass();
-            if (classToASTNodeMap.containsKey(astNodeClass)) {
-                nodesOfSomeType = classToASTNodeMap.get(astNodeClass);
-            } else {
-                nodesOfSomeType = getNodesOfSomeType(coverage, project, pattern.getFixASTNodeClass());
-            }
-            for (ASTNode node : nodesOfSomeType) {
-                if (nodeHasSyntaxMatchWithPattern(node, pattern.getFixPattern())) {
-                    result.add(node);
-                }
+            for (TokenSequence targetTokenSeq : targetTokenSequences) {
+                if (!targetTokenSeq.getAbstractTokens().equals(pattern.getFixPattern())) continue;
+                if (!fastTextWrapper.isSemanticallyMatching(targetTokenSeq.getConcreteTokens(),
+                        pattern.getFixConcrete())) continue;
+                result.add(targetTokenSeq);
             }
         }
         return result;
     }
 
-    /**
-     * @param node
-     * @param abstractFixPatterns
-     * @return
-     */
-    private boolean nodeHasSyntaxMatchWithPattern(ASTNode node, List<String> abstractFixPatterns) {
-        TokenSequenceCreator tokenSequenceCreator = new TokenSequenceCreator();
-        node.accept(tokenSequenceCreator);
-        List<String> abstractTokens = tokenSequenceCreator.getAbstractTokens();
-        return abstractFixPatterns.equals(abstractTokens);
+    public MutationCommand createMutationCommand(TokenSequence tokenSequence, StaticAnalysisResult staticAnalysisResult) {
+        return null;
+    }
+
+    public boolean compileProject(Project project) {
+        return true;
     }
 }
