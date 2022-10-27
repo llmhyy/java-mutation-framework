@@ -1,5 +1,6 @@
 package jmutation.mutation.heuristic.commands;
 
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.utils.DefaultValues;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -17,7 +18,7 @@ import java.util.List;
  * Difficulty obtaining return types of methods for method invocations.
  * (Need turn on bindings on ASTParser, but incurs large overhead)
  */
-public class MutationMethodInvocationReturnCommand extends HeuristicMutationCommand {
+public class MutationMethodInvocationReturnCommand extends MutationCommand {
     public MutationMethodInvocationReturnCommand(ASTNode node) {
         super(node);
     }
@@ -49,8 +50,9 @@ public class MutationMethodInvocationReturnCommand extends HeuristicMutationComm
     private class MethodReturnTypeObtainer extends ASTVisitor {
         MethodInvocation methodInvocation;
         Type type;
+
         void setMethodInvocation(MethodInvocation methodInvocation) {
-           this.methodInvocation = methodInvocation;
+            this.methodInvocation = methodInvocation;
         }
 
         Type getReturnType() {

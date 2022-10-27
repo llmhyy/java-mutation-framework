@@ -1,7 +1,7 @@
 package jmutation.mutation.heuristic.commands.strong;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.utils.DefaultValueReplacements;
 import jmutation.mutation.heuristic.utils.DefaultValues;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -15,13 +15,13 @@ import org.eclipse.jdt.core.dom.Type;
 /**
  * Replace return value with some default value
  */
-public class MutationReturnStmtCommand extends HeuristicMutationCommand {
+public class MutationReturnStmtCommand extends MutationCommand {
     public MutationReturnStmtCommand(ASTNode node) {
         super(node);
     }
 
     @Override
-    public ASTNode executeMutation(){
+    public ASTNode executeMutation() {
         ReturnStatement returnStatement = (ReturnStatement) node;
         Expression replacement = getReplacementExpression();
         returnStatement.setExpression(replacement);
@@ -39,6 +39,7 @@ public class MutationReturnStmtCommand extends HeuristicMutationCommand {
      * } catch (Exception e) {}
      * </pre>
      * Can lead to compilation errors. Check for those cases.
+     *
      * @return
      */
     @Override

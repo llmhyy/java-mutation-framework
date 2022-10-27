@@ -1,7 +1,7 @@
 package jmutation.mutation.heuristic.commands.strong;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayType;
@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.Type;
 
 import java.util.List;
 
-public class MutationReturnReplaceArgCommand extends HeuristicMutationCommand {
+public class MutationReturnReplaceArgCommand extends MutationCommand {
     public MutationReturnReplaceArgCommand(ASTNode node) {
         super(node);
     }

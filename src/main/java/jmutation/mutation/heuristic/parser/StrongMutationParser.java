@@ -1,6 +1,6 @@
 package jmutation.mutation.heuristic.parser;
 
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.commands.MutationReturnMathCommand;
 import jmutation.mutation.heuristic.commands.MutationReturnStmtLiteralCommand;
 import jmutation.mutation.heuristic.commands.strong.MutationBlockRemovalCommand;
@@ -27,7 +27,7 @@ public class StrongMutationParser extends MutationParser {
 
     @Override
     public boolean visit(ReturnStatement node) {
-        List<HeuristicMutationCommand> possibleCommands = new ArrayList<>();
+        List<MutationCommand> possibleCommands = new ArrayList<>();
         possibleCommands.add(new MutationReturnReplaceArgCommand(node));
         possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
         possibleCommands.add(new MutationReturnMathCommand(node));

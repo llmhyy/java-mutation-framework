@@ -1,6 +1,6 @@
 package jmutation.mutation.heuristic.parser;
 
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.commands.MutationForLoopToIfCommand;
 import jmutation.mutation.heuristic.commands.MutationMathLibCommand;
 import jmutation.mutation.heuristic.commands.MutationReturnMathCommand;
@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
  * Returns a mutation command to execute for a given ASTNode
  */
 public class MutationParser extends ASTVisitor {
-    HeuristicMutationCommand command;
+    MutationCommand command;
 
-    public HeuristicMutationCommand parse(ASTNode node) {
+    public MutationCommand parse(ASTNode node) {
         node.accept(this);
         if (command == null) {
             return null;
@@ -61,7 +61,7 @@ public class MutationParser extends ASTVisitor {
 
     @Override
     public boolean visit(ReturnStatement node) {
-        List<HeuristicMutationCommand> possibleCommands = new ArrayList<>();
+        List<MutationCommand> possibleCommands = new ArrayList<>();
         possibleCommands.add(new MutationReturnMathCommand(node));
         possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
         possibleCommands = possibleCommands.stream().filter(command -> command.canExecute()).collect(Collectors.toList());

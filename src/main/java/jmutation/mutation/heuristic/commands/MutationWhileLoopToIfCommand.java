@@ -1,5 +1,6 @@
 package jmutation.mutation.heuristic.commands;
 
+import jmutation.mutation.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -9,7 +10,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import java.util.List;
 
-public class MutationWhileLoopToIfCommand extends HeuristicMutationCommand {
+public class MutationWhileLoopToIfCommand extends MutationCommand {
 
     public MutationWhileLoopToIfCommand(ASTNode node) {
         super(node);

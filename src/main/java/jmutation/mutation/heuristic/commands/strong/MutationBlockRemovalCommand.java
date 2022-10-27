@@ -1,7 +1,7 @@
 package jmutation.mutation.heuristic.commands.strong;
 
 import jmutation.model.ast.ASTNodeRetriever;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MutationBlockRemovalCommand extends HeuristicMutationCommand {
+public class MutationBlockRemovalCommand extends MutationCommand {
     public MutationBlockRemovalCommand(ASTNode node) {
         super(node);
     }
@@ -56,6 +56,7 @@ public class MutationBlockRemovalCommand extends HeuristicMutationCommand {
         }
         return true;
     }
+
     private boolean hasIrremovableAssignmentsInBlock(List<Statement> stmts) {
         ASTNodeRetriever<VariableDeclaration> variableDeclarationRetriever = new ASTNodeRetriever<>(VariableDeclaration.class);
         int lastStmtIdx = stmts.size() - 1;

@@ -1,5 +1,6 @@
 package jmutation.mutation.heuristic.commands;
 
+import jmutation.mutation.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -25,7 +26,7 @@ import java.util.List;
  * }
  * </pre>
  */
-public class MutationForLoopToIfCommand extends HeuristicMutationCommand {
+public class MutationForLoopToIfCommand extends MutationCommand {
 
     public MutationForLoopToIfCommand(ASTNode node) {
         super(node);

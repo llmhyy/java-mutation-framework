@@ -3,20 +3,14 @@ package jmutation.mutation.heuristic;
 import jmutation.execution.Coverage;
 import jmutation.model.MutationRange;
 import jmutation.model.project.Project;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
 import jmutation.mutation.heuristic.parser.MutationParser;
 import jmutation.parser.ProjectParser;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.TextEdit;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -87,16 +81,16 @@ public class HeuristicMutator extends Mutator {
                     // If mutation for node types in mutation range not implemented, skip to next mutation range
                     continue;
                 }
-                List<HeuristicMutationCommand> newMutationCommands = new ArrayList<>();
+                List<MutationCommand> newMutationCommands = new ArrayList<>();
                 for (ASTNode node : nodes) {
-                    HeuristicMutationCommand mutationCommand = mutationParser.parse(node);
+                    MutationCommand mutationCommand = mutationParser.parse(node);
                     if (mutationCommand == null) {
                         continue;
                     }
                     newMutationCommands.add(mutationCommand);
                 }
 
-                for (HeuristicMutationCommand mutationCommand : newMutationCommands) {
+                for (MutationCommand mutationCommand : newMutationCommands) {
                     ASTNode node = mutationCommand.getNode();
                     ASTNode root = node.getRoot();
                     if (!(root instanceof CompilationUnit)) {
@@ -126,26 +120,4 @@ public class HeuristicMutator extends Mutator {
     }
 
 
-    private void writeToFile(CompilationUnit unit, File file) {
-        String fileContent;
-        try {
-            fileContent = Files.readString(file.toPath());
-        } catch (IOException e) {
-            throw new RuntimeException("Could not read file at " + file.toPath());
-        }
-        IDocument document = new Document(fileContent);
-        TextEdit edits = unit.rewrite(document, null);
-        try {
-            edits.apply(document);
-        } catch (MalformedTreeException | BadLocationException e) {
-            e.printStackTrace();
-        }
-        try {
-            FileWriter fw = new FileWriter(file);
-            fw.write(document.get());
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

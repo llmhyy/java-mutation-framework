@@ -1,5 +1,6 @@
 package jmutation.mutation.heuristic.commands;
 
+import jmutation.mutation.MutationCommand;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -12,14 +13,15 @@ import java.util.List;
 import java.util.Map;
 
 
-
-public class MutationMathLibCommand extends HeuristicMutationCommand {
-    private Map<String, List<String>> replacementMap = new HashMap<>(){{
-        put("pow", Arrays.asList("addExact"));
-        put("min", Arrays.asList("max"));
-        put("max", Arrays.asList("min"));
-    }
+public class MutationMathLibCommand extends MutationCommand {
+    private Map<String, List<String>> replacementMap = new HashMap<>() {
+        {
+            put("pow", Arrays.asList("addExact"));
+            put("min", Arrays.asList("max"));
+            put("max", Arrays.asList("min"));
+        }
     };
+
     public MutationMathLibCommand(ASTNode node) {
         super(node);
     }

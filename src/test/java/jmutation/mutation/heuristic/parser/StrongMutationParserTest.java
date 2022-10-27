@@ -1,7 +1,7 @@
 package jmutation.mutation.heuristic.parser;
 
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
 import jmutation.mutation.heuristic.commands.strong.MutationBlockRemovalCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -25,7 +25,7 @@ public class StrongMutationParserTest {
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         ASTNode methodBody = (ASTNode) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         MutationParser parser = new StrongMutationParser();
-        HeuristicMutationCommand command = parser.parse(methodBody);
+        MutationCommand command = parser.parse(methodBody);
         assertTrue(command instanceof MutationBlockRemovalCommand);
     }
 }

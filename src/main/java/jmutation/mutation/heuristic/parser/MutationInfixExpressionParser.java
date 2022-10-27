@@ -1,6 +1,6 @@
 package jmutation.mutation.heuristic.parser;
 
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.commands.MutationConditionalBoundaryCommand;
 import jmutation.mutation.heuristic.commands.MutationConditionalNegationCommand;
 import jmutation.mutation.heuristic.commands.MutationMathOperatorCommand;
@@ -28,7 +28,7 @@ public class MutationInfixExpressionParser {
         return comparisonOperators.contains(currentOp);
     }
 
-    public static HeuristicMutationCommand parse(InfixExpression node) {
+    public static MutationCommand parse(InfixExpression node) {
         if (isMathOperator(node)) {
             return new MutationMathOperatorCommand(node);
         }

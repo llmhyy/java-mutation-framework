@@ -1,5 +1,6 @@
 package jmutation.mutation.heuristic.commands;
 
+import jmutation.mutation.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
@@ -7,20 +8,20 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MutationConditionalBoundaryCommand extends HeuristicMutationCommand {
-    public MutationConditionalBoundaryCommand(ASTNode node) {
-        super(node);
-    }
-
-    static Map<Operator, Operator> replacementMap = new HashMap<>(){{
+public class MutationConditionalBoundaryCommand extends MutationCommand {
+    static Map<Operator, Operator> replacementMap = new HashMap<>() {{
         put(Operator.LESS, Operator.LESS_EQUALS);
         put(Operator.LESS_EQUALS, Operator.LESS);
         put(Operator.GREATER, Operator.GREATER_EQUALS);
         put(Operator.GREATER_EQUALS, Operator.GREATER);
     }};
 
+    public MutationConditionalBoundaryCommand(ASTNode node) {
+        super(node);
+    }
+
     @Override
-    public ASTNode executeMutation(){
+    public ASTNode executeMutation() {
         InfixExpression ieNode = (InfixExpression) node;
         InfixExpression.Operator thisOp = ieNode.getOperator();
         InfixExpression.Operator replacementOperator = replacementMap.get(thisOp);

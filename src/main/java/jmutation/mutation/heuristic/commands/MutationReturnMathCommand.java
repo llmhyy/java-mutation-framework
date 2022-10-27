@@ -1,22 +1,30 @@
 package jmutation.mutation.heuristic.commands;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.utils.MathOperator;
 import jmutation.utils.RandomSingleton;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Type;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MutationReturnMathCommand extends HeuristicMutationCommand {
-    private Set<PrimitiveType.Code> mathCodes = new HashSet<>(){{
-        add(PrimitiveType.INT);
-        add(PrimitiveType.FLOAT);
-        add(PrimitiveType.DOUBLE);
-        add(PrimitiveType.SHORT);
-        add(PrimitiveType.LONG);
-    }
+public class MutationReturnMathCommand extends MutationCommand {
+    private Set<PrimitiveType.Code> mathCodes = new HashSet<>() {
+        {
+            add(PrimitiveType.INT);
+            add(PrimitiveType.FLOAT);
+            add(PrimitiveType.DOUBLE);
+            add(PrimitiveType.SHORT);
+            add(PrimitiveType.LONG);
+        }
     };
 
     public MutationReturnMathCommand(ASTNode node) {

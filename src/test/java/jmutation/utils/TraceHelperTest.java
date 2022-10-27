@@ -2,7 +2,6 @@ package jmutation.utils;
 
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
 import jmutation.mutation.heuristic.commands.strong.MutationBlockRemovalCommand;
 import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
@@ -17,6 +16,7 @@ import java.util.List;
 
 public class TraceHelperTest {
     MutationTestHelper helper = new MutationTestHelper();
+
     @Test
     public void getMutatedTraceNodes_validMutationCommand_findsCorrectTraceNode() {
         List<TraceNode> executionList = new ArrayList<>();

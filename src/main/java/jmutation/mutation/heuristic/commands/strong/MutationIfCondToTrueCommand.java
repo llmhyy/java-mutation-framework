@@ -1,11 +1,11 @@
 package jmutation.mutation.heuristic.commands.strong;
 
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 
-public class MutationIfCondToTrueCommand extends HeuristicMutationCommand {
+public class MutationIfCondToTrueCommand extends MutationCommand {
 
     public MutationIfCondToTrueCommand(ASTNode node) {
         super(node);

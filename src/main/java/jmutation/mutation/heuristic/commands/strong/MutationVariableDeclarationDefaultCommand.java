@@ -1,13 +1,17 @@
 package jmutation.mutation.heuristic.commands.strong;
 
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.utils.DefaultValueReplacements;
 import jmutation.mutation.heuristic.utils.DefaultValues;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import java.util.List;
 
-public class MutationVariableDeclarationDefaultCommand extends HeuristicMutationCommand {
+public class MutationVariableDeclarationDefaultCommand extends MutationCommand {
     public MutationVariableDeclarationDefaultCommand(ASTNode node) {
         super(node);
     }

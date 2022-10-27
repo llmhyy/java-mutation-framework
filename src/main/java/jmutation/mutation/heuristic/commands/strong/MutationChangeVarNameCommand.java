@@ -2,7 +2,7 @@ package jmutation.mutation.heuristic.commands.strong;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
 import jmutation.model.ast.ASTNodeRetriever;
-import jmutation.mutation.heuristic.commands.HeuristicMutationCommand;
+import jmutation.mutation.MutationCommand;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MutationChangeVarNameCommand extends HeuristicMutationCommand {
+public class MutationChangeVarNameCommand extends MutationCommand {
     private List<SimpleName> possibleReplacements = null;
     private Type nodeType = null;
 
