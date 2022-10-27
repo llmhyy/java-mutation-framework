@@ -5,7 +5,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import java.util.List;
 
 public class Pattern {
-
     private final List<String> buggyPattern;
     private final List<String> fixPattern;
     private final List<String> buggyConcrete;
@@ -21,8 +20,7 @@ public class Pattern {
 
     public Pattern(List<String> buggyPattern, List<String> fixPattern, List<String> buggyConcrete,
                    List<String> fixConcrete, Class<? extends ASTNode> buggyASTNodeClass, Class<? extends ASTNode> fixASTNodeClass) throws ClassNotFoundException {
-        assert (buggyPattern.size() == fixPattern.size() && fixPattern.size() == buggyConcrete.size() &&
-                buggyConcrete.size() == fixConcrete.size());
+        assert (buggyPattern.size() == buggyConcrete.size() && fixPattern.size() == fixConcrete.size());
         this.buggyPattern = buggyPattern;
         this.fixPattern = fixPattern;
         this.buggyConcrete = buggyConcrete;
