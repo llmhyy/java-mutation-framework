@@ -1,9 +1,11 @@
 package jmutation.mutation.semantic.semseed.mining;
 
+import jmutation.mutation.semantic.semseed.constants.TokenPrefix;
 import jmutation.mutation.semantic.semseed.model.TokenSequence;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
@@ -44,16 +46,27 @@ public class TokenSequenceCreator extends ASTVisitor {
 
     @Override
     public boolean visit(InfixExpression infixExpression) {
+        infixExpression.getLeftOperand().accept(this);
         concreteTokens.add(infixExpression.getOperator().toString());
         abstractTokens.add(infixExpression.getOperator().toString());
-        return true;
+        infixExpression.getRightOperand().accept(this);
+        return false;
+    }
+
+    @Override
+    public boolean visit(QualifiedName qualifiedName) {
+        qualifiedName.getQualifier().accept(this);
+        concreteTokens.add(".");
+        abstractTokens.add(".");
+        qualifiedName.getName().accept(this);
+        return false;
     }
 
     @Override
     public boolean visit(SimpleName simpleName) {
         String identifierName = simpleName.toString();
         concreteTokens.add(identifierName);
-        String abstractName = "Idf_";
+        String abstractName = TokenPrefix.PREFIX_IDENTIFIER;
         if (identifierToNumber.containsKey(identifierName)) {
             int identifierNumber = identifierToNumber.get(identifierName);
             abstractName += identifierNumber;
@@ -70,7 +83,7 @@ public class TokenSequenceCreator extends ASTVisitor {
     public boolean visit(StringLiteral stringLiteral) {
         String string = stringLiteral.toString();
         concreteTokens.add(string);
-        String abstractName = "Lit_";
+        String abstractName = TokenPrefix.PREFIX_LITERAL;
         if (literalToNumber.containsKey(string)) {
             int identifierNumber = literalToNumber.get(string);
             abstractName += identifierNumber;

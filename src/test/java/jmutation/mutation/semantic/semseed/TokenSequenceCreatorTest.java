@@ -21,7 +21,7 @@ public class TokenSequenceCreatorTest {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "String a = \"string\";" +
-                "if (a != \"string\") {" +
+                "if (a.b != \"string\") {" +
                 "a++;" +
                 "int c = b + a;" +
                 "}" +
@@ -38,8 +38,8 @@ public class TokenSequenceCreatorTest {
         infixExpression.accept(tokenSequenceCreator);
         List<String> abstractSequence = tokenSequenceCreator.getAbstractTokens();
         List<String> concreteSequence = tokenSequenceCreator.getConcreteTokens();
-        List<String> expectedAbstractSequence = List.of("!=", "Idf_0", "Lit_0");
-        List<String> expectedConcreteSequence = List.of("!=", "a", "\"string\"");
+        List<String> expectedAbstractSequence = List.of("Idf_0", ".", "Idf_1", "!=", "Lit_0");
+        List<String> expectedConcreteSequence = List.of("a", ".", "b", "!=", "\"string\"");
         assertEquals(expectedAbstractSequence, abstractSequence);
         assertEquals(expectedConcreteSequence, concreteSequence);
     }
