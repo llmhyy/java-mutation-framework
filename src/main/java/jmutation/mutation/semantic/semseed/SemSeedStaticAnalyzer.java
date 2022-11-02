@@ -2,13 +2,16 @@ package jmutation.mutation.semantic.semseed;
 
 import jmutation.execution.Coverage;
 import jmutation.model.MutationRange;
+import jmutation.model.ast.ASTNodeRetriever;
 import jmutation.mutation.semantic.semseed.model.StaticAnalysisResult;
 import jmutation.parser.ProjectParser;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,12 +20,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * Obtains tokens from a project.
@@ -45,6 +50,8 @@ public class SemSeedStaticAnalyzer {
         final Map<String, Integer> literalCounts = new HashMap<>();
         final Map<String, Set<String>> identifiersByFiles = new HashMap<>();
         final Map<String, Set<String>> literalsByFiles = new HashMap<>();
+        final Map<String, Set<String>> identifiersByMethods = new HashMap<>();
+        final Map<String, Set<String>> literalsByMethods = new HashMap<>();
         Set<String> classSet = getCoveredFilesSet(coverage);
         Iterator<File> javaFiles = FileUtils.iterateFiles(root, new String[]{"java"}, true);
         while (javaFiles.hasNext()) {
@@ -60,13 +67,21 @@ public class SemSeedStaticAnalyzer {
             compilationUnit.accept(visitor);
             updateTotalCount(identifierCounts, visitor.identifierCounts);
             updateTotalCount(literalCounts, visitor.literalCounts);
-            String className = getClassNameFromFileName(javaFile.getName());
-            if (!classSet.contains(className)) continue;
-            if (identifierCounts.keySet().size() != 0) identifiersByFiles.put(className, identifierCounts.keySet());
-            if (literalCounts.keySet().size() != 0) literalsByFiles.put(className, literalCounts.keySet());
+            ASTNodeRetriever<TypeDeclaration> typeDeclarationASTNodeRetriever = new ASTNodeRetriever<>(TypeDeclaration.class);
+            compilationUnit.accept(typeDeclarationASTNodeRetriever);
+            List<String> classNames = new ArrayList<>();
+            for (TypeDeclaration typeDeclaration : typeDeclarationASTNodeRetriever.getNodes()) {
+                classNames.add(typeDeclaration.getName().toString());
+            }
+            if (classSet.stream().noneMatch(classNames::contains)) continue;
+            addTokensToMap(identifiersByFiles, visitor.identifierCounts.keySet(), javaFile.getAbsolutePath());
+            addTokensToMap(literalsByFiles, visitor.literalCounts.keySet(), javaFile.getAbsolutePath());
+            identifiersByMethods.putAll(visitor.identifiersByMethod);
+            literalsByMethods.putAll(visitor.literalsByMethod);
         }
         return new StaticAnalysisResult(getTopOccurringCounts(identifierCounts, topOccurring),
-                getTopOccurringCounts(literalCounts, topOccurring), identifiersByFiles, literalsByFiles);
+                getTopOccurringCounts(literalCounts, topOccurring), identifiersByFiles, literalsByFiles,
+                identifiersByMethods, literalsByMethods);
     }
 
     private void updateTotalCount(Map<String, Integer> currentCounts, Map<String, Integer> collectedCount) {
@@ -101,27 +116,67 @@ public class SemSeedStaticAnalyzer {
         return rangesByClass.keySet();
     }
 
-    private String getClassNameFromFileName(String fileName) {
-        return fileName.substring(0, fileName.indexOf(".java"));
+    private void addTokensToMap(Map<String, Set<String>> map, Set<String> setToAdd, String key) {
+        if (setToAdd.isEmpty()) return;
+        if (map.containsKey(key)) {
+            map.get(key).addAll(setToAdd);
+            return;
+        }
+        map.put(key, setToAdd);
     }
 
     /**
      * Token collector for each file (Compilation Unit)
      */
-    private class SemSeedStaticAnalyzerVisitor extends ASTVisitor {
+    private static class SemSeedStaticAnalyzerVisitor extends ASTVisitor {
         private final Map<String, Integer> identifierCounts = new HashMap<>();
         private final Map<String, Integer> literalCounts = new HashMap<>();
 
+        private final Map<String, Set<String>> identifiersByMethod = new HashMap<>();
+        private final Map<String, Set<String>> literalsByMethod = new HashMap<>();
+        private final Stack<String> visitingMethodStack = new Stack<>();
+        private final Stack<String> visitingClassNameStack = new Stack<>();
+
+        @Override
+        public boolean visit(TypeDeclaration typeDeclaration) {
+            visitingClassNameStack.add(typeDeclaration.getName().toString());
+            return true;
+        }
+
+        @Override
+        public void endVisit(TypeDeclaration typeDeclaration) {
+            visitingClassNameStack.pop();
+        }
+
+        @Override
+        public boolean visit(MethodDeclaration methodDeclaration) {
+            visitingMethodStack.add(visitingClassNameStack.peek() + "#" + methodDeclaration.getName().toString());
+            return true;
+        }
+
+        @Override
+        public void endVisit(MethodDeclaration methodDeclaration) {
+            visitingMethodStack.pop();
+        }
+
         @Override
         public boolean visit(SimpleName simpleName) {
-            addToMap(true, simpleName.toString());
+            addToAllMaps(true, simpleName.toString());
             return true;
         }
 
         @Override
         public boolean visit(StringLiteral stringLiteral) {
-            addToMap(false, stringLiteral.toString());
+            addToAllMaps(false, stringLiteral.toString());
             return true;
+        }
+
+        private void addToAllMaps(boolean isIdentifier, String string) {
+            addToMap(isIdentifier, string);
+            if (visitingMethodStack.isEmpty()) {
+                return;
+            }
+            addToMethodMap(isIdentifier, string, visitingMethodStack.peek());
         }
 
         private void addToMap(boolean isIdentifier, String string) {
@@ -137,6 +192,22 @@ public class SemSeedStaticAnalyzer {
                 return;
             }
             mapToAddTo.put(string, 1);
+        }
+
+        private void addToMethodMap(boolean isIdentifier, String string, String methodName) {
+            Map<String, Set<String>> mapToAddTo;
+            if (isIdentifier) {
+                mapToAddTo = identifiersByMethod;
+            } else {
+                mapToAddTo = literalsByMethod;
+            }
+            if (mapToAddTo.containsKey(methodName)) {
+                mapToAddTo.get(methodName).add(string);
+                return;
+            }
+            Set<String> newSet = new HashSet<>();
+            newSet.add(string);
+            mapToAddTo.put(methodName, newSet);
         }
     }
 }

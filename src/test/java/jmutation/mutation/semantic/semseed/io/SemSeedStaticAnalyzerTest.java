@@ -26,12 +26,19 @@ public class SemSeedStaticAnalyzerTest {
         File root = new File(String.join(File.separator, "sample", "testng"));
         SemSeedStaticAnalyzer staticAnalyzer = new SemSeedStaticAnalyzer(coverage, root, 1);
         StaticAnalysisResult actualResult = staticAnalyzer.analyse();
-        Set<String> expectedIdentifiersInFile = new HashSet<>(List.of("TestNGTest", "a", "sampleMethod", "test", "org", "Sample", "i", "annotations", "assertEquals", "test1", "Assert", "Test", "testng"));
+        Set<String> expectedIdentifiersInFile = new HashSet<>(List.of("a", "sampleMethod", "Sample", "i"));
         Map<String, Set<String>> expectedIdentifiers = new HashMap<>();
-        expectedIdentifiers.put("Sample", expectedIdentifiersInFile);
+        expectedIdentifiers.put(String.join(File.separator, root.getAbsolutePath(), "src", "main", "java", "Sample.java"), expectedIdentifiersInFile);
         Map<String, Integer> expectedIdentifierCount = new HashMap<>();
         expectedIdentifierCount.put("a", 7);
-        StaticAnalysisResult expectedResult = new StaticAnalysisResult(expectedIdentifierCount, new HashMap<>(), expectedIdentifiers, new HashMap<>());
+        Map<String, Set<String>> expectedIdentifiersInMethod = new HashMap<>();
+        Set<String> identifiersInMethod = new HashSet<>();
+        identifiersInMethod.add("a");
+        identifiersInMethod.add("sampleMethod");
+        identifiersInMethod.add("i");
+        expectedIdentifiersInMethod.put("Sample#sampleMethod", identifiersInMethod);
+
+        StaticAnalysisResult expectedResult = new StaticAnalysisResult(expectedIdentifierCount, new HashMap<>(), expectedIdentifiers, new HashMap<>(), expectedIdentifiersInMethod, new HashMap<>());
         assertEquals(expectedResult, actualResult);
     }
 }
