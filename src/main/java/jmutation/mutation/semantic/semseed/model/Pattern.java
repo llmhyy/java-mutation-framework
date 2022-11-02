@@ -66,4 +66,9 @@ public class Pattern {
         return buggyPattern.equals(otherPattern.buggyPattern) && fixPattern.equals(otherPattern.fixPattern) &&
                 buggyConcrete.equals(otherPattern.buggyConcrete) && fixConcrete.equals(otherPattern.fixConcrete);
     }
+
+    public boolean isBound(String token) {
+        assert (buggyPattern.contains(token));
+        return fixPattern.contains(token);
+    }
 }

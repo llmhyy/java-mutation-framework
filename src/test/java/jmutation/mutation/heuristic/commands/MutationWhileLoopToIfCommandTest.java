@@ -1,7 +1,6 @@
 package jmutation.mutation.heuristic.commands;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.heuristic.commands.MutationWhileLoopToIfCommand;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.WhileStatement;
