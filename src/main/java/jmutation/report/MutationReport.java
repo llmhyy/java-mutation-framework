@@ -3,6 +3,7 @@
  */
 package jmutation.report;
 
+import jmutation.mutation.commands.MutationCommand;
 import jmutation.report.excel.AbstractExcelWriter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -35,7 +36,8 @@ public class MutationReport extends AbstractExcelWriter {
     private void writeTestcase(Row row, MutationTrial trial) {
         addCell(row, PROJECT_NAME, trial.getProjectName());
         addCell(row, TEST_CASE, trial.getTestCase().toString());
-        addCell(row, MUTATION_COMMAND, trial.getMutationCommand().toString());
+        MutationCommand command = trial.getMutationCommand();
+        addCell(row, MUTATION_COMMAND, command == null ? "null" : command.toString());
         addCell(row, PROGRAM_MSG, trial.getProgramMsg());
     }
 

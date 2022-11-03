@@ -48,6 +48,10 @@ public abstract class MutationCommand {
         return rewriter;
     }
 
+    public ASTNode getOriginalNode() {
+        return originalNode;
+    }
+
     @Override
     public String toString() {
         List<TypeDeclaration> types = cu.types();

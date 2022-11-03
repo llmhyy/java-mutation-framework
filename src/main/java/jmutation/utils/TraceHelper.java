@@ -18,6 +18,7 @@ import java.util.Set;
 public class TraceHelper {
     /**
      * Gets TraceNodes that matches the mutation history i.e. root cause of bugs
+     *
      * @param buggyTrace
      * @param mutationHistory
      * @return list of TraceNodes
@@ -25,14 +26,9 @@ public class TraceHelper {
     public static List<TraceNode> getMutatedTraceNodes(Trace buggyTrace, List<MutationCommand> mutationHistory) {
         Set<TraceNode> result = new HashSet<>();
         List<TraceNode> executionList = buggyTrace.getExecutionList();
-        for (MutationCommand mutationCommand: mutationHistory) {
-            ASTNode node = mutationCommand.getNode();
+        for (MutationCommand mutationCommand : mutationHistory) {
+            ASTNode node = mutationCommand.getOriginalNode();
             ASTNode root = node.getRoot();
-            if (!(root instanceof CompilationUnit)) {
-                // If the ASTNode in mutation history is no longer part of a class, it must have been overwritten by another mutation.
-                // No need to look for corresponding TraceNode.
-                continue;
-            }
             ASTNodeParentRetriever<TypeDeclaration> typeDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(TypeDeclaration.class);
             TypeDeclaration typeDeclaration = typeDeclarationASTNodeParentRetriever.getParentOfType(node);
             CompilationUnit unit = (CompilationUnit) root;
@@ -41,12 +37,12 @@ public class TraceHelper {
             String fullMutatedClassName = packageDeclaration == null ? mutatedClassName : packageDeclaration.getName() + "." + mutatedClassName;
             int startPos = unit.getLineNumber(node.getStartPosition());
             int endPos = unit.getLineNumber(node.getStartPosition() + node.getLength() - 1);
-            for (TraceNode traceNode: executionList) {
+            for (TraceNode traceNode : executionList) {
                 BreakPoint breakPoint = traceNode.getBreakPoint();
                 int lineNum = breakPoint.getLineNumber();
                 String classCanonicalName = breakPoint.getDeclaringCompilationUnitName();
                 if (classCanonicalName.equals(fullMutatedClassName) && lineNum <= endPos && lineNum >= startPos) {
-                   result.add(traceNode);
+                    result.add(traceNode);
                 }
             }
         }
