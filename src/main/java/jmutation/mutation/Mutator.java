@@ -4,6 +4,7 @@ import jmutation.execution.Coverage;
 import jmutation.model.project.Project;
 import jmutation.mutation.commands.MutationCommand;
 import jmutation.mutation.parser.MutationParser;
+import jmutation.mutation.parser.StrongMutationParser;
 import jmutation.parser.ProjectParser;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -179,14 +180,14 @@ public class Mutator {
             } catch (IOException e) {
                 throw new RuntimeException("Could not read file at " + file.toPath());
             }
-
+            StrongMutationParser strongMutationParser = new StrongMutationParser();
             for (MutationRange range : rangesForClass) {
                 CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
                 AnalysisASTNodeRetriever retriever = new AnalysisASTNodeRetriever(unit, range);
                 unit.accept(retriever);
                 List<ASTNode> nodes = retriever.getNodes();
                 for (ASTNode node : nodes) {
-                    MutationCommand mutationCommand = mutationParser.parse(node);
+                    MutationCommand mutationCommand = strongMutationParser.parse(node);
                     if (mutationCommand == null) {
                         continue;
                     }
