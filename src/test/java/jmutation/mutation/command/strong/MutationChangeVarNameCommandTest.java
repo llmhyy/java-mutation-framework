@@ -2,9 +2,7 @@ package jmutation.mutation.command.strong;
 
 import jmutation.mutation.MutationTestHelper;
 import jmutation.mutation.commands.strong.MutationChangeVarNameCommand;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -83,12 +81,7 @@ public class MutationChangeVarNameCommandTest {
                 "}",
                 "}",
                 "}");
-        CompilationUnit actualCU = helper.getCompilationUnit();
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        ASTMatcher matcher = new ASTMatcher();
-        boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
-        assertTrue(isCorrectMutation);
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test

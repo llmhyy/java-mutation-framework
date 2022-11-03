@@ -3,12 +3,9 @@ package jmutation.mutation.command;
 import jmutation.mutation.MutationTestHelper;
 import jmutation.mutation.commands.MutationForLoopToIfCommand;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MutationForLoopToIfCommandTest {
 
@@ -26,7 +23,6 @@ public class MutationForLoopToIfCommandTest {
                 "}" +
                 "}";
         helper.parseDocStr(documentStr);
-        CompilationUnit cu = helper.getCompilationUnit();
         org.eclipse.jdt.core.dom.MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         ForStatement forStatement = (ForStatement) methodBody.statements().get(1);
@@ -44,8 +40,6 @@ public class MutationForLoopToIfCommandTest {
                 "}" +
                 "}" +
                 "}";
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        assertEquals(expectedCU.toString(), cu.toString());
+        helper.checkMutation(mutationCmd, documentStr, expectedDoc);
     }
 }

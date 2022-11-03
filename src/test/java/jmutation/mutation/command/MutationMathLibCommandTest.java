@@ -2,12 +2,17 @@ package jmutation.mutation.command;
 
 import jmutation.mutation.MutationTestHelper;
 import jmutation.mutation.commands.MutationMathLibCommand;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class MutationMathLibCommandTest {
@@ -51,7 +56,7 @@ public class MutationMathLibCommandTest {
                 "}";
         helper.parseDocStr(expectedDoc);
 
-        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test
@@ -103,10 +108,4 @@ public class MutationMathLibCommandTest {
         assertFalse(command.canExecute());
     }
 
-    double tets() {
-        double a = Math.addExact(1, 2);
-
-        a += 1;
-        return a;
-    }
 }
