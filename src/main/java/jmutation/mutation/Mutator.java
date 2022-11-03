@@ -8,6 +8,8 @@ import jmutation.parser.ProjectParser;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -42,6 +44,7 @@ public class Mutator {
 
     /**
      * if max number of mutations is 0 or less, there is no limit
+     *
      * @param numberOfMutations Maximum number of mutations allowed
      */
     public void setMaxNumberOfMutations(int numberOfMutations) {
@@ -60,6 +63,20 @@ public class Mutator {
             isRandomRetrieval = false;
         }
 
+        return project;
+    }
+
+    public Project mutate(MutationCommand command, Project project) {
+        CompilationUnit unit = command.getCu();
+        TypeDeclaration type = (TypeDeclaration) unit.types().get(0);
+        String className = unit.getPackage().getName() + "." + type.getName().toString();
+        File file = retrieveFileFromClassName(className, project);
+        command.executeMutation();
+        try {
+            writeToFile(command.getRewriter(), file);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
         return project;
     }
 
@@ -136,6 +153,52 @@ public class Mutator {
         }
     }
 
+    public List<MutationCommand> analyse(List<MutationRange> ranges, Project project) {
+        // Get all ASTNodes within the ranges, create mutation command.
+        // If canExecute, add to result.
+        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
+        for (MutationRange range : ranges) {
+            String className = range.getClassName();
+            List<MutationRange> rangesForClass;
+            if (classToRange.containsKey(className)) {
+                rangesForClass = classToRange.get(className);
+            } else {
+                rangesForClass = new ArrayList<>();
+            }
+            rangesForClass.add(range);
+            classToRange.put(className, rangesForClass);
+        }
+        List<MutationCommand> result = new ArrayList<>();
+        for (Entry<String, List<MutationRange>> entry : classToRange.entrySet()) {
+            List<MutationRange> rangesForClass = entry.getValue();
+            String className = entry.getKey();
+            File file = retrieveFileFromClassName(className, project);
+            String fileContent;
+            try {
+                fileContent = Files.readString(file.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException("Could not read file at " + file.toPath());
+            }
+
+            for (MutationRange range : rangesForClass) {
+                CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
+                AnalysisASTNodeRetriever retriever = new AnalysisASTNodeRetriever(unit, range);
+                unit.accept(retriever);
+                List<ASTNode> nodes = retriever.getNodes();
+                for (ASTNode node : nodes) {
+                    MutationCommand mutationCommand = mutationParser.parse(node);
+                    if (mutationCommand == null) {
+                        continue;
+                    }
+                    if (mutationCommand.canExecute()) {
+                        result.add(mutationCommand);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     private File retrieveFileFromClassName(String className, Project newProject) {
         File root = newProject.getRoot();
         return ProjectParser.getFileOfClass(className, root);
@@ -144,8 +207,8 @@ public class Mutator {
     /**
      * Gets an AST node for the portion of code to be mutated
      *
-     * @param unit Compilation unit to parse
-     * @param range line number range to mutate in the compilation unit
+     * @param unit              Compilation unit to parse
+     * @param range             line number range to mutate in the compilation unit
      * @param isRandomRetrieval whether to randomly retrieve the nodes to mutate or get all that is encountered
      * @return The list of ASTNodes to mutate
      */
@@ -155,6 +218,29 @@ public class Mutator {
         unit.accept(retriever);
 
         return retriever.getNodes();
+    }
+
+    private void writeToFile(ASTRewrite rewriter, File file) {
+        String fileContent;
+        try {
+            fileContent = Files.readString(file.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read file at " + file.toPath());
+        }
+        IDocument document = new Document(fileContent);
+        TextEdit edits = rewriter.rewriteAST(document, null);
+        try {
+            edits.apply(document);
+        } catch (MalformedTreeException | BadLocationException e) {
+            e.printStackTrace();
+        }
+        try {
+            FileWriter fw = new FileWriter(file);
+            fw.write(document.get());
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void writeToFile(CompilationUnit unit, File file) {

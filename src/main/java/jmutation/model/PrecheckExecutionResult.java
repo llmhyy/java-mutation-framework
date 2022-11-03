@@ -6,6 +6,7 @@ import tracecollection.model.PrecheckResult;
 public class PrecheckExecutionResult extends ExecutionResult {
     private final PrecheckResult precheckResult;
     private Coverage coverage;
+
     public PrecheckExecutionResult(String consoleOut, PrecheckResult precheckResult) {
         super(consoleOut);
         this.precheckResult = precheckResult;
@@ -29,5 +30,9 @@ public class PrecheckExecutionResult extends ExecutionResult {
 
     public void setCoverage(Coverage coverage) {
         this.coverage = coverage;
+    }
+
+    public PrecheckResult getPrecheckResult() {
+        return precheckResult;
     }
 }

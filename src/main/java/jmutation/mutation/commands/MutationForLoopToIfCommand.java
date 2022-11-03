@@ -34,9 +34,6 @@ public class MutationForLoopToIfCommand extends MutationCommand {
     @Override
     public ASTNode executeMutation() {
         ForStatement forStatement = (ForStatement) node;
-        Block parent = (Block) forStatement.getParent();
-        List<Statement> stmtLs = parent.statements();
-        int idxOfWhile = stmtLs.indexOf(forStatement);
 
         IfStatement wrapperIfStmt = ast.newIfStatement();
         Expression trueExpression = ast.newBooleanLiteral(true);
@@ -54,7 +51,6 @@ public class MutationForLoopToIfCommand extends MutationCommand {
             ifStmt.setThenStatement(bodyCopy);
             wrapperIfStmt.setExpression(trueExpression);
             wrapperIfStmt.setThenStatement(wrapperIfStmtBlock);
-            stmtLs.set(idxOfWhile, wrapperIfStmt);
             List<Statement> wrapperStmtLs = wrapperIfStmtBlock.statements();
             for (Expression initializer : initializers) {
                 Expression initializerCopy = (Expression) ASTNode.copySubtree(initializer.getAST(), initializer);

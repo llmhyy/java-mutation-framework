@@ -2,15 +2,21 @@ package jmutation;
 
 import jmutation.constants.ExternalLibrary;
 import jmutation.execution.ProjectExecutor;
-import jmutation.model.*;
-import jmutation.mutation.parser.StrongMutationParser;
-import jmutation.utils.ResourceExtractor;
-import jmutation.utils.TraceHelper;
+import jmutation.model.MicrobatConfig;
+import jmutation.model.MutationFrameworkResult;
+import jmutation.model.MutationResult;
+import jmutation.model.PrecheckExecutionResult;
+import jmutation.model.TestCase;
+import jmutation.model.TraceCollectionResult;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
 import jmutation.mutation.Mutator;
+import jmutation.mutation.commands.MutationCommand;
 import jmutation.mutation.parser.MutationParser;
+import jmutation.mutation.parser.StrongMutationParser;
 import jmutation.utils.RandomSingleton;
+import jmutation.utils.ResourceExtractor;
+import jmutation.utils.TraceHelper;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
@@ -52,10 +58,15 @@ public class MutationFramework {
     private Project clonedProject;
     private ProjectConfig mutatedProjConfig;
     private Mutator mutator;
+    private PrecheckExecutionResult precheckExecutionResult;
+    private ProjectExecutor projectExecutor;
+
+    private Project proj;
 
 
     /**
      * Set path to project
+     *
      * @param projectPath path to the project to mutate
      */
     public void setProjectPath(String projectPath) {
@@ -64,6 +75,7 @@ public class MutationFramework {
 
     /**
      * Path to directory that contains microbat jar files. If not specified, the default is used. (%userprofile%\lib\resources\java-mutation-framework)
+     *
      * @param dropInsPath path to microbat jar files.
      */
     public void setDropInsPath(String dropInsPath) {
@@ -72,6 +84,7 @@ public class MutationFramework {
 
     /**
      * Path to microbat configuration json file. If not specified, default configurations are used. Otherwise, please reference ./microbatConfig.json for the format.
+     *
      * @param microbatConfigPath path to a microbat configuration file
      */
     public void setMicrobatConfigPath(String microbatConfigPath) {
@@ -80,6 +93,7 @@ public class MutationFramework {
 
     /**
      * Sets the test case to run mutation on.
+     *
      * @param testCase Test case to run mutation on.
      */
     public void setTestCase(TestCase testCase) {
@@ -88,6 +102,7 @@ public class MutationFramework {
 
     /**
      * Sets max number of mutations. If it is 0 or less, there is no limit.
+     *
      * @param maxNumberOfMutations Maximum number of mutations allowed
      */
     public void setMaxNumberOfMutations(int maxNumberOfMutations) {
@@ -96,6 +111,7 @@ public class MutationFramework {
 
     /**
      * Sets the seed to use during mutation. This makes the mutation deterministic between each run.
+     *
      * @param seed Seed for the java.util.random
      */
     public void setSeed(long seed) {
@@ -106,8 +122,9 @@ public class MutationFramework {
     /**
      * Automate changing of seed until the mutation fails the test case.
      * Attempt seeds from startSeed to endSeed.
+     *
      * @param startSeed First seed to use
-     * @param endSeed Last seed to use
+     * @param endSeed   Last seed to use
      */
     public void autoSeed(long startSeed, long endSeed) {
         this.startSeed = startSeed;
@@ -117,6 +134,7 @@ public class MutationFramework {
 
     /**
      * Gets the test cases found in the project.
+     *
      * @return A list of test case objects.
      */
     public List<TestCase> getTestCases() {
@@ -157,60 +175,18 @@ public class MutationFramework {
 
     public void extractResources(String path) throws IOException {
         for (ExternalLibrary externalLibrary : ExternalLibrary.values()) {
-            ResourceExtractor.extractFile("lib/"+ externalLibrary.getName() + ".jar", path);
+            ResourceExtractor.extractFile("lib/" + externalLibrary.getName() + ".jar", path);
         }
         ResourceExtractor.extractFile("microbatConfig.json", path);
     }
 
     /**
      * Starts trace collection on the chosen test case, mutates the covered code, and runs trace collection on the mutated test case.
+     *
      * @return MutationResult object.
      */
-    public MutationResult startMutationFramework() {
-        if (projectPath == null || dropInsPath == null) {
-            System.out.println("Project path or drop ins directory not specified");
-            return null;
-        }
-
-        if (config == null) {
-            generateProjectConfiguration();
-        }
-
-        Project proj = config.getProject();
-
-        if (testCase == null) {
-            System.out.println("Test case to mutate not specified, choosing first test case found");
-            testCase = proj.getTestCases().get(0);
-        }
-
-        if (microbatConfig == null) {
-            generateMicrobatConfiguration();
-        }
-
-        microbatConfig = microbatConfig.setWorkingDir(projectPath);
-
-        setupMutator(new MutationParser());
-        System.out.println(testCase);
-        // Do precheck for normal + mutation to catch issues
-        // If no issues, collect trace for normal + mutation, and return them in mutation result
-
-        ProjectExecutor projectExecutor = new ProjectExecutor(microbatConfig, config);
-        // Precheck
-        PrecheckExecutionResult precheckExecutionResult = executePrecheck(projectExecutor);
-        System.out.println("Normal precheck done");
-
-;
-        if (isAutoSeed) {
-            runWithAutoSeed(proj, precheckExecutionResult);
-        } else {
-            if (strongMutationsEnabled) {
-                runWithStrongMutations(proj, precheckExecutionResult);
-            } else {
-                runMutation(proj, precheckExecutionResult);
-            }
-        }
-        System.out.println("Mutated precheck done");
-
+    public MutationFrameworkResult startMutationFramework() {
+        mutate();
         // Actual trace
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setExpectedSteps(precheckExecutionResult.getTotalSteps());
         projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
@@ -236,10 +212,80 @@ public class MutationFramework {
         boolean wasSuccessful = mutatedPrecheckExecutionResult.testCasePassed();
 
 
-        return new MutationResult(result.getInstrumentationResult(),
+        return new MutationFrameworkResult(result.getInstrumentationResult(),
                 mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(), mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
                 mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
                 wasSuccessful, testCase);
+    }
+
+    public MutationResult mutate() {
+        if (!setup()) return null;
+        // Do precheck for normal + mutation to catch issues
+        // If no issues, collect trace for normal + mutation, and return them in mutation result
+
+        projectExecutor = new ProjectExecutor(microbatConfig, config);
+        // Precheck
+        precheckExecutionResult = executePrecheck(projectExecutor);
+        System.out.println("Normal precheck done");
+
+        if (isAutoSeed) {
+            runWithAutoSeed(proj, precheckExecutionResult);
+        } else {
+            if (strongMutationsEnabled) {
+                runWithStrongMutations(proj, precheckExecutionResult);
+            } else {
+                runMutation(proj, precheckExecutionResult);
+            }
+        }
+        System.out.println("Mutated precheck done");
+        return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, testCase, mutator.getMutationHistory());
+    }
+
+    public List<MutationCommand> analyse() {
+        if (!setup()) return null;
+        // Do precheck for normal + mutation to catch issues
+        // If no issues, collect trace for normal + mutation, and return them in mutation result
+
+        projectExecutor = new ProjectExecutor(microbatConfig, config);
+        // Precheck
+        precheckExecutionResult = executePrecheck(projectExecutor);
+        System.out.println("Normal precheck done");
+        return mutator.analyse(precheckExecutionResult.getCoverage().getRanges(), proj);
+    }
+
+    public MutationResult mutate(MutationCommand command) {
+        runMutation(proj, command);
+
+        System.out.println("Mutated precheck done");
+        return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, testCase, mutator.getMutationHistory());
+    }
+
+    public boolean setup() {
+        if (projectPath == null || dropInsPath == null) {
+            System.out.println("Project path or drop ins directory not specified");
+            return false;
+        }
+
+        if (config == null) {
+            generateProjectConfiguration();
+        }
+
+        proj = config.getProject();
+
+        if (testCase == null) {
+            System.out.println("Test case to mutate not specified, choosing first test case found");
+            testCase = proj.getTestCases().get(0);
+        }
+
+        if (microbatConfig == null) {
+            generateMicrobatConfiguration();
+        }
+
+        microbatConfig = microbatConfig.setWorkingDir(projectPath);
+
+        setupMutator(new MutationParser());
+        System.out.println(testCase);
+        return true;
     }
 
     private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) {
@@ -253,6 +299,15 @@ public class MutationFramework {
     private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
         clonedProject = proj.cloneToOtherPath();
         mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
+        mutatedProjConfig = new ProjectConfig(config, mutatedProject);
+
+        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+        mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+    }
+
+    private void runMutation(Project proj, MutationCommand command) {
+        clonedProject = proj.cloneToOtherPath();
+        mutatedProject = mutator.mutate(command, clonedProject);
         mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
         mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
@@ -304,7 +359,7 @@ public class MutationFramework {
     }
 
     private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {
-        String[] assertionsArr = new String[] {"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
+        String[] assertionsArr = new String[]{"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
         return config.setIncludes(Arrays.asList(assertionsArr));
     }
 }

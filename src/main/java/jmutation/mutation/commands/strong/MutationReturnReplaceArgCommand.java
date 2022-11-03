@@ -26,7 +26,7 @@ public class MutationReturnReplaceArgCommand extends MutationCommand {
     public ASTNode executeMutation() {
         ReturnStatement returnStatement = (ReturnStatement) node;
         ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(MethodDeclaration.class);
-        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
+        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(originalNode);
         Type returnType = methodDeclaration.getReturnType2();
         List<SingleVariableDeclaration> parameters = methodDeclaration.parameters();
         TypeIdentifier typeIdentifier = new TypeIdentifier();
@@ -53,13 +53,13 @@ public class MutationReturnReplaceArgCommand extends MutationCommand {
         }
         if (expression instanceof MethodInvocation) {
             ASTNodeParentRetriever<TryStatement> tryStatementASTNodeParentRetriever = new ASTNodeParentRetriever<>(TryStatement.class);
-            TryStatement tryStatement = tryStatementASTNodeParentRetriever.getParentOfType(node);
+            TryStatement tryStatement = tryStatementASTNodeParentRetriever.getParentOfType(originalNode);
             if (tryStatement != null) {
                 return false;
             }
         }
         ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(MethodDeclaration.class);
-        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
+        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(originalNode);
         Type returnType = methodDeclaration.getReturnType2();
         List<SingleVariableDeclaration> parameters = methodDeclaration.parameters();
         TypeIdentifier typeIdentifier = new TypeIdentifier();
