@@ -61,14 +61,26 @@ public class MutationReportRunner extends ReportRunner {
         mutationFramework.setMicrobatConfig(microbatConfig);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         MutationReport report = new MutationReport(new File("reports/mutation-report.xlsx"));
+        boolean skip = true;
         for (TestCase testCase : testCaseList) {
+            if (testCase.toString().equals("org.apache.commons.math.analysis.interpolation.SmoothingBicubicSplineInterpolatorTest#testPreconditions(),31,82")) {
+                skip = false;
+            }
+            if (skip) {
+                continue;
+            }
             mutationFramework.setTestCase(testCase);
             try {
                 List<MutationCommand> commands = mutationFramework.analyse();
+                int commandId = 0;
                 for (MutationCommand command : commands) {
+                    if (commandId < 257 && testCase.toString().equals("org.apache.commons.math.analysis.interpolation.SmoothingBicubicSplineInterpolatorTest#testPreconditions(),31,82")) {
+                        continue;
+                    }
                     MutationResult result = mutationFramework.mutate(command);
                     report.record(new MutationTrial("math_70", testCase,
                             command, result.getMutatedPrecheckExecutionResult().getPrecheckResult().getProgramMessage()));
+                    commandId++;
                 }
             } catch (RuntimeException e) {
                 report.record(new MutationTrial("math_70", testCase,
