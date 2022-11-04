@@ -13,6 +13,7 @@ import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
 import jmutation.mutation.heuristic.parser.MutationParser;
 import jmutation.mutation.heuristic.parser.StrongMutationParser;
+import jmutation.mutation.semantic.SemanticMutator;
 import jmutation.utils.RandomSingleton;
 import jmutation.utils.ResourceExtractor;
 import jmutation.utils.TraceHelper;
@@ -266,10 +267,12 @@ public class MutationFramework {
 
     private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
         clonedProject = proj.cloneToOtherPath();
-        mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
-        mutatedProjConfig = new ProjectConfig(config, mutatedProject);
-
+        mutatedProjConfig = new ProjectConfig(config, clonedProject);
         mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+        String resourcesPath = String.join(File.separator, "src", "main", "resources", "semantic");
+        mutator = new SemanticMutator(resourcesPath + File.separator + "bug-fix-patterns.json",
+                resourcesPath + File.separator + "model.bin", mutatedProjectExecutor);
+        mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
         mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
     }
 

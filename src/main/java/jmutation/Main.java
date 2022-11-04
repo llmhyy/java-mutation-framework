@@ -3,9 +3,7 @@ package jmutation;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import jmutation.model.TestCase;
-import jmutation.mutation.semantic.SemanticMutator;
 
-import java.io.File;
 import java.util.List;
 
 
@@ -42,9 +40,7 @@ public class Main {
         }
         mutationFramework.setProjectPath(params.projectPath);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
-        String resourcesPath = String.join(File.separator, "src", "main", "resources", "semantic");
-        mutationFramework.setMutator(new SemanticMutator(resourcesPath + File.separator + "bug-fix-patterns.json",
-                resourcesPath + File.separator + "model.bin"));
+
         for (TestCase testCase : testCaseList) {
             mutationFramework.setTestCase(testCase);
             try {

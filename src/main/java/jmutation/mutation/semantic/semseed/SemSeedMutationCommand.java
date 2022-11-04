@@ -28,9 +28,15 @@ public class SemSeedMutationCommand extends MutationCommand {
     private StaticAnalysisResult tokenReplacements;
     private Pattern pattern;
     private TokenSequence targetSequence;
+    private List<List<String>> mutatedTokenSequences;
+    private int mutatedTokenSeqIdx = 0;
 
-    public SemSeedMutationCommand(ASTNode node) {
+    public SemSeedMutationCommand(ASTNode node, StaticAnalysisResult tokenReplacements, Pattern pattern, TokenSequence targetSequence) {
         super(node);
+        this.tokenReplacements = tokenReplacements;
+        this.pattern = pattern;
+        this.targetSequence = targetSequence;
+        mutatedTokenSequences = formMutatedTokenSequences();
     }
 
     public void setTokenReplacements(StaticAnalysisResult tokenReplacements) {
@@ -47,17 +53,14 @@ public class SemSeedMutationCommand extends MutationCommand {
 
     @Override
     public ASTNode executeMutation() {
-        boolean wasSuccessful = false;
-        List<List<String>> mutatedTokenSequences = formMutatedTokenSequences();
-        for (List<String> possibleMutatedSeq : mutatedTokenSequences) {
-            applySeq(possibleMutatedSeq);
-            if (recompile()) {
-                wasSuccessful = true;
-                break;
-            }
-        }
-        if (wasSuccessful) return node;
-        return null;
+        List<String> mutatedSeq = mutatedTokenSequences.get(mutatedTokenSeqIdx);
+        applySeq(mutatedSeq);
+        mutatedTokenSeqIdx++;
+        return node;
+    }
+
+    public boolean hasAnotherSeq() {
+        return mutatedTokenSeqIdx < mutatedTokenSequences.size();
     }
 
     private List<List<String>> formMutatedTokenSequences() {
@@ -67,6 +70,7 @@ public class SemSeedMutationCommand extends MutationCommand {
         Map<Integer, List<String>> replacementsByIdx = new HashMap<>();
         // TODO: Figure out how to pass the path to model
         FastTextWrapper fastTextWrapper = new FastTextWrapper("src/main/resources/semantic/model.bin");
+        boolean containsPlaceHolder = false;
         for (int i = 0; i < buggyAbstractSeq.size(); i++) {
             String buggyAbstractToken = buggyAbstractSeq.get(i);
             boolean tokenIsIdf = buggyAbstractToken.startsWith(TokenPrefix.PREFIX_IDENTIFIER);
@@ -81,14 +85,20 @@ public class SemSeedMutationCommand extends MutationCommand {
                 List<String> replacements = fastTextWrapper.getReplacementTokens(buggyConcreteSeq.get(i), pattern, targetSequence,
                         getCandidates(tokenIsIdf));
                 if (replacements.size() == 0) {
-                    return null;
+                    return new ArrayList<>();
                 }
                 replacementsByIdx.put(i, replacements);
                 mutatedTokenSeq.add(PLACEHOLDER_TOKEN);
+                containsPlaceHolder = true;
             }
         }
-        return createPossibleMutatedSeqsFromReplacements(replacementsByIdx,
-                mutatedTokenSeq);
+        if (containsPlaceHolder) {
+            return createPossibleMutatedSeqsFromReplacements(replacementsByIdx,
+                    mutatedTokenSeq);
+        }
+        List<List<String>> result = new ArrayList<>();
+        result.add(mutatedTokenSeq);
+        return result;
     }
 
     private List<String> getCandidates(boolean isIdentifiers) {
@@ -111,10 +121,6 @@ public class SemSeedMutationCommand extends MutationCommand {
                 new ASTNodeParentRetriever<>(MethodDeclaration.class);
         MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
         return getClassName() + "#" + methodDeclaration.getName();
-    }
-
-    private boolean recompile() {
-        return true;
     }
 
     private List<List<String>> createPossibleMutatedSeqsFromReplacements(Map<Integer, List<String>> replacementsByIdxOfSeq,

@@ -1,12 +1,13 @@
 package jmutation.mutation.semantic;
 
 import jmutation.execution.Coverage;
+import jmutation.execution.ProjectExecutor;
 import jmutation.model.MutationRange;
 import jmutation.model.project.Project;
 import jmutation.mutation.MutationASTNodeRetriever;
-import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.semantic.semseed.FastTextWrapper;
+import jmutation.mutation.semantic.semseed.SemSeedMutationCommand;
 import jmutation.mutation.semantic.semseed.SemSeedStaticAnalyzer;
 import jmutation.mutation.semantic.semseed.io.PatternIO;
 import jmutation.mutation.semantic.semseed.io.handler.FileHandler;
@@ -32,10 +33,12 @@ public class SemanticMutator extends Mutator {
     private String patternFilePath;
 
     private FastTextWrapper fastTextWrapper;
+    private ProjectExecutor projectExecutor;
 
-    public SemanticMutator(String patternFilePath, String modelPath) {
+    public SemanticMutator(String patternFilePath, String modelPath, ProjectExecutor executor) {
         this.patternFilePath = patternFilePath;
         this.fastTextWrapper = new FastTextWrapper(modelPath);
+        this.projectExecutor = executor;
     }
 
     private List<ASTNode> getNodesOfSomeType(Coverage coverage, Project project, Class<? extends ASTNode> nodeType) {
@@ -52,6 +55,7 @@ public class SemanticMutator extends Mutator {
             }
             CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
             MutationASTNodeRetriever mutationASTNodeRetriever = new MutationASTNodeRetriever(unit, mutationRange);
+            mutationASTNodeRetriever.setRandomness(false);
             unit.accept(mutationASTNodeRetriever);
             List<ASTNode> retrievedNodes = mutationASTNodeRetriever.getNodes();
             for (ASTNode retrievedNode : retrievedNodes) {
@@ -78,16 +82,21 @@ public class SemanticMutator extends Mutator {
         List<TokenSequence> tokenSequencesOfNodes = getTokenSequences(possibleASTNodes);
         List<TokenSequence> possibleTokenSequences = getMatchingTokenSequences(tokenSequencesOfNodes, patterns);
         StaticAnalysisResult staticAnalysisResult = staticAnalyzer.analyse();
-        boolean wasSuccessful = false;
         for (TokenSequence tokenSequence : possibleTokenSequences) {
-            MutationCommand mutationCommand = createMutationCommand(tokenSequence, staticAnalysisResult);
-            mutationCommand.executeMutation();
-            boolean compilationSuccess = compileProject(project);
-            if (!compilationSuccess) continue;
-            wasSuccessful = true;
+            for (Pattern pattern : patterns) {
+                SemSeedMutationCommand mutationCommand = new SemSeedMutationCommand(tokenSequence.getNode(),
+                        staticAnalysisResult, pattern, tokenSequence);
+                while (mutationCommand.hasAnotherSeq()) {
+                    mutationCommand.executeMutation();
+                    //writeToFile
+                    if (compileProject()) {
+                        return project;
+                    }
+                }
+            }
         }
-        if (wasSuccessful) return project;
-        return null;
+        System.out.println("No semantic mutations found");
+        return project;
     }
 
     private List<Pattern> readPatternsFromFile(String filePath) {
@@ -143,11 +152,8 @@ public class SemanticMutator extends Mutator {
         return result;
     }
 
-    public MutationCommand createMutationCommand(TokenSequence tokenSequence, StaticAnalysisResult staticAnalysisResult) {
-        return null;
-    }
-
-    public boolean compileProject(Project project) {
-        return true;
+    public boolean compileProject() {
+        String output = projectExecutor.compile();
+        return !output.contains("FAIL");
     }
 }
