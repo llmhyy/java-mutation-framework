@@ -11,7 +11,7 @@
       "!=",
       "Lit_1"
     ],
-    "fix_tokenType": "org.eclipse.jdt.core.dom.InfixExpression",
+    "fix_tokenType": "InfixExpression",
     "fix_file_path": "jquery/jquery.js",
     "fix_actual": [
       "typeof",
@@ -29,7 +29,7 @@
       "!==",
       "Lit_2"
     ],
-    "buggy_tokenType": "org.eclipse.jdt.core.dom.InfixExpression",
+    "buggy_tokenType": "InfixExpression",
     "buggy_file_path": "jquery/jquery.js",
     "buggy_actual": [
       "v",
@@ -64,7 +64,7 @@
       ")",
       ";"
     ],
-    "fix_tokenType": "org.eclipse.jdt.core.dom.InfixExpression",
+    "fix_tokenType": "InfixExpression",
     "fix_file_path": "fx/fx.js",
     "fix_actual": [
       "ef",
@@ -101,7 +101,7 @@
       ")",
       ";"
     ],
-    "buggy_tokenType": "org.eclipse.jdt.core.dom.InfixExpression",
+    "buggy_tokenType": "InfixExpression",
     "buggy_file_path": "fx/fx.js",
     "buggy_actual": [
       "ef",
