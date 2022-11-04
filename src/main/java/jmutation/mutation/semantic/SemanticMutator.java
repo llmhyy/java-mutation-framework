@@ -52,6 +52,7 @@ public class SemanticMutator extends Mutator {
             }
             CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
             MutationASTNodeRetriever mutationASTNodeRetriever = new MutationASTNodeRetriever(unit, mutationRange);
+            unit.accept(mutationASTNodeRetriever);
             List<ASTNode> retrievedNodes = mutationASTNodeRetriever.getNodes();
             for (ASTNode retrievedNode : retrievedNodes) {
                 if (retrievedNode.getClass().equals(nodeType)) {
@@ -73,10 +74,10 @@ public class SemanticMutator extends Mutator {
         // If fail, redo with second ASTNode
         List<Pattern> patterns = readPatternsFromFile(patternFilePath);
         SemSeedStaticAnalyzer staticAnalyzer = new SemSeedStaticAnalyzer(coverage, project.getRoot(), 1);
-        StaticAnalysisResult staticAnalysisResult = staticAnalyzer.analyse();
         List<ASTNode> possibleASTNodes = getPossibleASTNodes(coverage, project, patterns);
         List<TokenSequence> tokenSequencesOfNodes = getTokenSequences(possibleASTNodes);
         List<TokenSequence> possibleTokenSequences = getMatchingTokenSequences(tokenSequencesOfNodes, patterns);
+        StaticAnalysisResult staticAnalysisResult = staticAnalyzer.analyse();
         boolean wasSuccessful = false;
         for (TokenSequence tokenSequence : possibleTokenSequences) {
             MutationCommand mutationCommand = createMutationCommand(tokenSequence, staticAnalysisResult);

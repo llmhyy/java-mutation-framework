@@ -19,8 +19,8 @@ public class GradleProject extends Project {
 
 
     public GradleProject(String name, File root, List<TestCase> testCases,
-                        String srcFolderPath, String testFolderPath,
-                        String compiledSrcFolderPath, String compiledTestFolderPath) {
+                         String srcFolderPath, String testFolderPath,
+                         String compiledSrcFolderPath, String compiledTestFolderPath) {
         super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath);
     }
 
@@ -76,7 +76,7 @@ public class GradleProject extends Project {
     @Override
     public Project cloneToOtherPath() {
         String tmpdir = System.getProperty("java.io.tmpdir");
-        File dest = new File(tmpdir + "/mutation");
+        File dest = new File(tmpdir + "/mutation1");
         try {
             FileUtils.deleteDirectory(dest);
             FileUtils.copyDirectory(getRoot(), dest);

@@ -17,6 +17,7 @@ public abstract class MutationCommand {
     protected int startLine;
     protected int endLine;
     protected ASTNode node;
+    protected ASTNode originalNode;
 
     protected MutationCommand(ASTNode node) {
         this.node = node;

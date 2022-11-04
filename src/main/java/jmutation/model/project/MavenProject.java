@@ -76,7 +76,7 @@ public class MavenProject extends Project {
     @Override
     public Project cloneToOtherPath() {
         String tmpdir = System.getProperty("java.io.tmpdir");
-        File dest = new File(tmpdir + "/mutation");
+        File dest = new File(tmpdir + "/mutation1");
         try {
             FileUtils.deleteDirectory(dest);
             FileUtils.copyDirectory(getRoot(), dest);

@@ -2,13 +2,15 @@ package jmutation.mutation.semantic.semseed;
 
 import jmutation.execution.Coverage;
 import jmutation.model.MutationRange;
-import jmutation.model.ast.ASTNodeRetriever;
 import jmutation.mutation.semantic.semseed.model.StaticAnalysisResult;
 import jmutation.parser.ProjectParser;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -67,11 +69,13 @@ public class SemSeedStaticAnalyzer {
             compilationUnit.accept(visitor);
             updateTotalCount(identifierCounts, visitor.identifierCounts);
             updateTotalCount(literalCounts, visitor.literalCounts);
-            ASTNodeRetriever<TypeDeclaration> typeDeclarationASTNodeRetriever = new ASTNodeRetriever<>(TypeDeclaration.class);
-            compilationUnit.accept(typeDeclarationASTNodeRetriever);
+            List<AbstractTypeDeclaration> abstractTypeDeclarations = compilationUnit.types();
+            PackageDeclaration packageDeclaration = compilationUnit.getPackage();
+            String packageName = packageDeclaration == null ? "" : packageDeclaration.getName().toString();
             List<String> classNames = new ArrayList<>();
-            for (TypeDeclaration typeDeclaration : typeDeclarationASTNodeRetriever.getNodes()) {
-                classNames.add(typeDeclaration.getName().toString());
+            for (AbstractTypeDeclaration typeDeclaration : abstractTypeDeclarations) {
+                String typeName = typeDeclaration.getName().toString();
+                classNames.add(packageName.isEmpty() ? typeName : packageName + "." + typeName);
             }
             if (classSet.stream().noneMatch(classNames::contains)) continue;
             addTokensToMap(identifiersByFiles, visitor.identifierCounts.keySet(), javaFile.getAbsolutePath());
@@ -145,6 +149,17 @@ public class SemSeedStaticAnalyzer {
 
         @Override
         public void endVisit(TypeDeclaration typeDeclaration) {
+            visitingClassNameStack.pop();
+        }
+
+        @Override
+        public boolean visit(EnumDeclaration enumDeclaration) {
+            visitingClassNameStack.add(enumDeclaration.getName().toString());
+            return true;
+        }
+
+        @Override
+        public void endVisit(EnumDeclaration enumDeclaration) {
             visitingClassNameStack.pop();
         }
 

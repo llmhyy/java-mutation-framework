@@ -18,6 +18,8 @@ public class PatternIO {
     public static final String KEY_BUGGY_ACTUAL = "buggy_actual";
     public static final String KEY_BUGGY_TOKEN_TYPE = "buggy_tokenType";
     public static final String KEY_FIX_TOKEN_TYPE = "fix_tokenType";
+
+    private static final String AST_NODE_PACKAGE_NAME = "org.eclipse.jdt.core.dom";
     IOHandler ioHandler;
 
     public PatternIO(IOHandler ioHandler) {
@@ -48,8 +50,8 @@ public class PatternIO {
             List<String> buggyActLs = convertObjLsToStrLs(buggyActual.toList());
             JSONArray fixActual = patternJsonObj.getJSONArray(KEY_FIX_ACTUAL);
             List<String> fixActLs = convertObjLsToStrLs(fixActual.toList());
-            String buggyTokenType = patternJsonObj.getString(KEY_BUGGY_TOKEN_TYPE);
-            String fixTokenType = patternJsonObj.getString(KEY_FIX_TOKEN_TYPE);
+            String buggyTokenType = AST_NODE_PACKAGE_NAME + "." + patternJsonObj.getString(KEY_BUGGY_TOKEN_TYPE);
+            String fixTokenType = AST_NODE_PACKAGE_NAME + "." + patternJsonObj.getString(KEY_FIX_TOKEN_TYPE);
             try {
                 result.add(new Pattern(buggyLs, fixLs, buggyActLs, fixActLs, buggyTokenType, fixTokenType));
             } catch (ClassNotFoundException e) {

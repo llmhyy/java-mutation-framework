@@ -2,15 +2,20 @@ package jmutation;
 
 import jmutation.constants.ExternalLibrary;
 import jmutation.execution.ProjectExecutor;
-import jmutation.model.*;
-import jmutation.mutation.heuristic.parser.StrongMutationParser;
-import jmutation.utils.ResourceExtractor;
-import jmutation.utils.TraceHelper;
+import jmutation.model.MicrobatConfig;
+import jmutation.model.MutationResult;
+import jmutation.model.PrecheckExecutionResult;
+import jmutation.model.TestCase;
+import jmutation.model.TraceCollectionResult;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
+import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
 import jmutation.mutation.heuristic.parser.MutationParser;
+import jmutation.mutation.heuristic.parser.StrongMutationParser;
 import jmutation.utils.RandomSingleton;
+import jmutation.utils.ResourceExtractor;
+import jmutation.utils.TraceHelper;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
@@ -51,11 +56,12 @@ public class MutationFramework {
     private Project mutatedProject = null;
     private Project clonedProject;
     private ProjectConfig mutatedProjConfig;
-    private HeuristicMutator mutator;
+    private Mutator mutator;
 
 
     /**
      * Set path to project
+     *
      * @param projectPath path to the project to mutate
      */
     public void setProjectPath(String projectPath) {
@@ -64,6 +70,7 @@ public class MutationFramework {
 
     /**
      * Path to directory that contains microbat jar files. If not specified, the default is used. (%userprofile%\lib\resources\java-mutation-framework)
+     *
      * @param dropInsPath path to microbat jar files.
      */
     public void setDropInsPath(String dropInsPath) {
@@ -72,6 +79,7 @@ public class MutationFramework {
 
     /**
      * Path to microbat configuration json file. If not specified, default configurations are used. Otherwise, please reference ./microbatConfig.json for the format.
+     *
      * @param microbatConfigPath path to a microbat configuration file
      */
     public void setMicrobatConfigPath(String microbatConfigPath) {
@@ -80,6 +88,7 @@ public class MutationFramework {
 
     /**
      * Sets the test case to run mutation on.
+     *
      * @param testCase Test case to run mutation on.
      */
     public void setTestCase(TestCase testCase) {
@@ -88,6 +97,7 @@ public class MutationFramework {
 
     /**
      * Sets max number of mutations. If it is 0 or less, there is no limit.
+     *
      * @param maxNumberOfMutations Maximum number of mutations allowed
      */
     public void setMaxNumberOfMutations(int maxNumberOfMutations) {
@@ -96,6 +106,7 @@ public class MutationFramework {
 
     /**
      * Sets the seed to use during mutation. This makes the mutation deterministic between each run.
+     *
      * @param seed Seed for the java.util.random
      */
     public void setSeed(long seed) {
@@ -106,8 +117,9 @@ public class MutationFramework {
     /**
      * Automate changing of seed until the mutation fails the test case.
      * Attempt seeds from startSeed to endSeed.
+     *
      * @param startSeed First seed to use
-     * @param endSeed Last seed to use
+     * @param endSeed   Last seed to use
      */
     public void autoSeed(long startSeed, long endSeed) {
         this.startSeed = startSeed;
@@ -117,6 +129,7 @@ public class MutationFramework {
 
     /**
      * Gets the test cases found in the project.
+     *
      * @return A list of test case objects.
      */
     public List<TestCase> getTestCases() {
@@ -157,13 +170,14 @@ public class MutationFramework {
 
     public void extractResources(String path) throws IOException {
         for (ExternalLibrary externalLibrary : ExternalLibrary.values()) {
-            ResourceExtractor.extractFile("lib/"+ externalLibrary.getName() + ".jar", path);
+            ResourceExtractor.extractFile("lib/" + externalLibrary.getName() + ".jar", path);
         }
         ResourceExtractor.extractFile("microbatConfig.json", path);
     }
 
     /**
      * Starts trace collection on the chosen test case, mutates the covered code, and runs trace collection on the mutated test case.
+     *
      * @return MutationResult object.
      */
     public MutationResult startMutationFramework() {
@@ -189,7 +203,7 @@ public class MutationFramework {
 
         microbatConfig = microbatConfig.setWorkingDir(projectPath);
 
-        setupMutator(new MutationParser());
+        //setupMutator(new MutationParser());
         System.out.println(testCase);
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
@@ -199,7 +213,7 @@ public class MutationFramework {
         PrecheckExecutionResult precheckExecutionResult = executePrecheck(projectExecutor);
         System.out.println("Normal precheck done");
 
-;
+        ;
         if (isAutoSeed) {
             runWithAutoSeed(proj, precheckExecutionResult);
         } else {
@@ -300,11 +314,15 @@ public class MutationFramework {
 
     private void setupMutator(MutationParser mutationParser) {
         mutator = new HeuristicMutator(mutationParser);
-        mutator.setMaxNumberOfMutations(maxNumberOfMutations);
+        //    mutator.setMaxNumberOfMutations(maxNumberOfMutations);
+    }
+
+    public void setMutator(Mutator mutator) {
+        this.mutator = mutator;
     }
 
     private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {
-        String[] assertionsArr = new String[] {"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
+        String[] assertionsArr = new String[]{"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
         return config.setIncludes(Arrays.asList(assertionsArr));
     }
 }

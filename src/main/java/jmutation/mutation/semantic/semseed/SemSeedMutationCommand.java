@@ -7,9 +7,13 @@ import jmutation.mutation.semantic.semseed.constants.TokenScope;
 import jmutation.mutation.semantic.semseed.model.Pattern;
 import jmutation.mutation.semantic.semseed.model.StaticAnalysisResult;
 import jmutation.mutation.semantic.semseed.model.TokenSequence;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 import org.gradle.internal.Pair;
 
 import java.util.ArrayList;
@@ -17,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 public class SemSeedMutationCommand extends MutationCommand {
     private static final String PLACEHOLDER_TOKEN = "PLACEHOLDER";
@@ -61,7 +66,7 @@ public class SemSeedMutationCommand extends MutationCommand {
         List<String> mutatedTokenSeq = new ArrayList<>();
         Map<Integer, List<String>> replacementsByIdx = new HashMap<>();
         // TODO: Figure out how to pass the path to model
-        FastTextWrapper fastTextWrapper = new FastTextWrapper("");
+        FastTextWrapper fastTextWrapper = new FastTextWrapper("src/main/resources/semantic/model.bin");
         for (int i = 0; i < buggyAbstractSeq.size(); i++) {
             String buggyAbstractToken = buggyAbstractSeq.get(i);
             boolean tokenIsIdf = buggyAbstractToken.startsWith(TokenPrefix.PREFIX_IDENTIFIER);
@@ -82,13 +87,16 @@ public class SemSeedMutationCommand extends MutationCommand {
                 mutatedTokenSeq.add(PLACEHOLDER_TOKEN);
             }
         }
-        List<List<String>> possibleMutatedTokenSeqs = createPossibleMutatedSeqsFromReplacements(replacementsByIdx,
+        return createPossibleMutatedSeqsFromReplacements(replacementsByIdx,
                 mutatedTokenSeq);
-        return null;
     }
 
     private List<String> getCandidates(boolean isIdentifiers) {
-        return new ArrayList<>(tokenReplacements.getTokens(TokenScope.SCOPE_METHOD, isIdentifiers, getMethodName()));
+        Set<String> candidates = tokenReplacements.getTokens(TokenScope.SCOPE_METHOD, isIdentifiers, getMethodName());
+        if (candidates == null) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(candidates);
     }
 
     private String getClassName() {
@@ -113,33 +121,37 @@ public class SemSeedMutationCommand extends MutationCommand {
                                                                          List<String> mutatedTokenSeq) {
         int totalPossibleCombinations = 0;
         // token id as key, to the idx of replacement to use as value
-        Map<Integer, Pair<Integer, Integer>> replacementIdxTracker = new HashMap<>();
+        //Map<Integer, Pair<Integer, Integer>> replacementIdxTracker = new HashMap<>();
+        List<Pair<Integer, Pair<Integer, Integer>>> replacementIdxTracker = new ArrayList<>();
         for (Entry<Integer, List<String>> idxToReplacements : replacementsByIdxOfSeq.entrySet()) {
             totalPossibleCombinations += idxToReplacements.getValue().size();
-            replacementIdxTracker.put(idxToReplacements.getKey(), Pair.of(0, idxToReplacements.getValue().size() - 1));
+            //replacementIdxTracker.put(idxToReplacements.getKey(), Pair.of(0, idxToReplacements.getValue().size() - 1));
+            replacementIdxTracker.add(Pair.of(idxToReplacements.getKey(), Pair.of(0, idxToReplacements.getValue().size() - 1)));
         }
         List<List<String>> possibleMutatedTokenSeqs = new ArrayList<>();
         for (int i = 0; i < totalPossibleCombinations; i++) {
             List<String> possibleMutatedSeq = new ArrayList<>(mutatedTokenSeq);
-            for (Entry<Integer, Pair<Integer, Integer>> replacementIdx : replacementIdxTracker.entrySet()) {
-                List<String> replacements = replacementsByIdxOfSeq.get(replacementIdx.getKey());
-                possibleMutatedSeq.set(replacementIdx.getKey(), replacements.get(replacementIdx.getValue().left));
+            for (Pair<Integer, Pair<Integer, Integer>> replacementIdx : replacementIdxTracker) {
+                List<String> replacements = replacementsByIdxOfSeq.get(replacementIdx.left);
+                possibleMutatedSeq.set(replacementIdx.left, replacements.get(replacementIdx.right.left));
             }
             possibleMutatedTokenSeqs.add(possibleMutatedSeq);
             // Increment the last replacement idx
             int idx = replacementIdxTracker.size() - 1;
-            Pair<Integer, Integer> currIdx = replacementIdxTracker.get(idx);
-            Pair<Integer, Integer> replacementPair = Pair.of(currIdx.left + 1, currIdx.right);
-            replacementIdxTracker.put(idx, replacementPair);
+            Pair<Integer, Pair<Integer, Integer>> tokenIdxToTracker = replacementIdxTracker.get(idx);
+            Pair<Integer, Integer> currIdx = tokenIdxToTracker.right;
+            Pair<Integer, Pair<Integer, Integer>> replacementPair = Pair.of(tokenIdxToTracker.left, Pair.of(currIdx.left + 1, currIdx.right));
+            replacementIdxTracker.set(idx, replacementPair);
 
             // If the last idx overflow, add 1 to the next replacement idx and repeat
             // e.g. 0999 + 1 -> 1000 if at each idx, there is at most 10 replacements
             while (currIdx.left > currIdx.right) {
-                replacementPair = Pair.of(0, currIdx.right);
-                replacementIdxTracker.put(idx, replacementPair);
-                currIdx = replacementIdxTracker.get(idx - 1);
-                replacementPair = Pair.of(currIdx.left + 1, currIdx.right);
-                replacementIdxTracker.put(idx - 1, replacementPair);
+                replacementPair = Pair.of(tokenIdxToTracker.left, Pair.of(0, currIdx.right));
+                replacementIdxTracker.set(idx, replacementPair);
+                tokenIdxToTracker = replacementIdxTracker.get(idx - 1);
+                currIdx = tokenIdxToTracker.right;
+                replacementPair = Pair.of(tokenIdxToTracker.left, Pair.of(currIdx.left + 1, currIdx.right));
+                replacementIdxTracker.set(idx - 1, replacementPair);
                 idx--;
             }
         }
@@ -147,6 +159,14 @@ public class SemSeedMutationCommand extends MutationCommand {
     }
 
     private void applySeq(List<String> mutatedSeq) {
-
+        StringBuilder joinStr = new StringBuilder();
+        for (String token : mutatedSeq) {
+            joinStr.append(token);
+        }
+        ASTParser parser = ASTParser.newParser(AST.getJLSLatest());
+        IDocument doc = new Document(joinStr.toString());
+        parser.setSource(doc.get().toCharArray());
+        parser.setKind(ASTParser.K_EXPRESSION);
+        node = parser.createAST(null);
     }
 }
