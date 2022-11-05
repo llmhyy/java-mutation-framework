@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class MutationBlockRemovalCommandTest {
@@ -31,7 +30,6 @@ public class MutationBlockRemovalCommandTest {
                 "}";
 
         helper.parseDocStr(documentStr);
-        CompilationUnit cu = helper.getCompilationUnit();
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> methodStmts = methodBody.statements();
@@ -48,7 +46,7 @@ public class MutationBlockRemovalCommandTest {
                 "}";
         helper.parseDocStr(expectedDoc);
 
-        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test

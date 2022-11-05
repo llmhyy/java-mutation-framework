@@ -1,18 +1,29 @@
 package jmutation.parser;
 
 import jmutation.constants.ProjectType;
-import jmutation.model.*;
+import jmutation.model.TestCase;
 import jmutation.model.ast.JdtMethodRetriever;
 import jmutation.model.project.GradleProject;
 import jmutation.model.project.MavenProject;
 import jmutation.model.project.Project;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.Predicate;
 
 /**
@@ -26,8 +37,6 @@ public class ProjectParser {
     protected ProjectType projectType;
 
     public ProjectParser(File root) {
-        // TODO: Determine project type (gradle or maven or none from project structure)
-        // Currently assume project type is maven
         if (!root.exists()) {
             throw new RuntimeException("Project " + root.getAbsolutePath() + " does not exist");
         }
@@ -40,30 +49,6 @@ public class ProjectParser {
             projectType = ProjectType.GRADLE;
         }
         this.root = root;
-    }
-
-    public Project parse() {
-        if (project == null) {
-            // traverse project differently depending on project type ?
-            // assume Maven project by default for now
-            switch (projectType) {
-                case MAVEN:
-                    MavenProjectParser mavenProjectParser = new MavenProjectParser(root);
-                    this.project = new MavenProject(mavenProjectParser.getProjectName(), root, walk(root),
-                            mavenProjectParser.getSrcFolderPath(), mavenProjectParser.getTestFolderPath(),
-                            mavenProjectParser.getCompiledSrcFolderPath(), mavenProjectParser.getCompiledTestFolderPath());
-                    break;
-                case GRADLE:
-                    GradleProjectParser gradleProjectParser = new GradleProjectParser(root);
-                    this.project = new GradleProject(gradleProjectParser.getProjectName(), root, walk(root),
-                            gradleProjectParser.getSrcFolderPath(), gradleProjectParser.getTestFolderPath(),
-                            gradleProjectParser.getCompiledSrcFolderPath(), gradleProjectParser.getCompiledTestFolderPath());
-                    break;
-                default:
-                    throw new RuntimeException("Unrecognized Project Type");
-            }
-        }
-        return this.project;
     }
 
     private static List<TestCase> walk(File start) {
@@ -93,7 +78,6 @@ public class ProjectParser {
         return testCases;
     }
 
-
     static List<File> walk(File start, Predicate<File> predicate, boolean recursive) {
         File[] list = start.listFiles();
         List<File> result = new ArrayList<>();
@@ -122,12 +106,12 @@ public class ProjectParser {
         JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
         parser.setCompilerOptions(options);
 
-        CompilationUnit result = (CompilationUnit) parser.createAST(null);
-        return result;
+        return (CompilationUnit) parser.createAST(null);
     }
 
     /**
      * Returns a list of methods from the String representation of a file.
+     *
      * @param codeContent file content as String
      * @return List of methods
      */
@@ -146,7 +130,7 @@ public class ProjectParser {
             className = unit.getPackage().getName() + "." + retriever.getClassName();
         }
         for (MethodDeclaration node : methodNodes) {
-            if (!(node.getParent().getParent() instanceof CompilationUnit) ){
+            if (!(node.getParent().getParent() instanceof CompilationUnit)) {
                 continue;
             }
             if (isIgnoredMethod(node) || !isTestMethod(node)) {
@@ -209,7 +193,7 @@ public class ProjectParser {
                 if (f.getName().contains(".java")) {
                     try {
                         String fileContent = Files.readString(f.toPath());
-                        boolean isCorrectPackage = packageName.isEmpty() || !packageName.isEmpty() && fileContent.contains("package " + packageName);
+                        boolean isCorrectPackage = packageName.isEmpty() || fileContent.contains("package " + packageName);
                         if (isCorrectPackage && (fileContent.contains("class " + className) || fileContent.contains("enum " + className))) {
                             return f;
                         }
@@ -221,5 +205,29 @@ public class ProjectParser {
             }
         }
         return null;
+    }
+
+    public Project parse() {
+        if (project == null) {
+            // traverse project differently depending on project type ?
+            // assume Maven project by default for now
+            switch (projectType) {
+                case MAVEN:
+                    MavenProjectParser mavenProjectParser = new MavenProjectParser(root);
+                    this.project = new MavenProject(mavenProjectParser.getProjectName(), root, walk(root),
+                            mavenProjectParser.getSrcFolderPath(), mavenProjectParser.getTestFolderPath(),
+                            mavenProjectParser.getCompiledSrcFolderPath(), mavenProjectParser.getCompiledTestFolderPath());
+                    break;
+                case GRADLE:
+                    GradleProjectParser gradleProjectParser = new GradleProjectParser(root);
+                    this.project = new GradleProject(gradleProjectParser.getProjectName(), root, walk(root),
+                            gradleProjectParser.getSrcFolderPath(), gradleProjectParser.getTestFolderPath(),
+                            gradleProjectParser.getCompiledSrcFolderPath(), gradleProjectParser.getCompiledTestFolderPath());
+                    break;
+                default:
+                    throw new RuntimeException("Unrecognized Project Type");
+            }
+        }
+        return this.project;
     }
 }

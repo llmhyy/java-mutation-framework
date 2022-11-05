@@ -44,30 +44,27 @@ public class MutationReturnStmtCommand extends MutationCommand {
      */
     @Override
     public boolean canExecute() {
-        ReturnStatement returnStatement = (ReturnStatement) node;
+        ReturnStatement returnStatement = (ReturnStatement) originalNode;
         Expression expression = returnStatement.getExpression();
         if (expression == null) {
             return false;
         }
         if (expression instanceof MethodInvocation) {
             ASTNodeParentRetriever<TryStatement> tryStatementASTNodeParentRetriever = new ASTNodeParentRetriever<>(TryStatement.class);
-            TryStatement tryStatement = tryStatementASTNodeParentRetriever.getParentOfType(node);
+            TryStatement tryStatement = tryStatementASTNodeParentRetriever.getParentOfType(originalNode);
             if (tryStatement != null) {
                 return false;
             }
         }
         Expression replacement = getReplacementExpression();
-        if (replacement == null) {
-            return false;
-        }
-        return true;
+        return replacement != null;
     }
 
     protected Expression getReplacementExpression() {
         ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(MethodDeclaration.class);
-        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
+        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(originalNode);
         Type returnType = methodDeclaration.getReturnType2();
-        ReturnStatement returnStatement = (ReturnStatement) node;
+        ReturnStatement returnStatement = (ReturnStatement) originalNode;
         Expression expression = returnStatement.getExpression();
         boolean isDefaultExpression = DefaultValues.isDefaultExpression(expression);
         Expression replacement;

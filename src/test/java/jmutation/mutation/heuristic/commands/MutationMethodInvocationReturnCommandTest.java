@@ -10,12 +10,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MutationMethodInvocationReturnCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
@@ -37,7 +35,7 @@ public class MutationMethodInvocationReturnCommandTest {
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> stmts = methodBody.statements();
-        VariableDeclarationStatement stmt =(VariableDeclarationStatement) stmts.get(0);
+        VariableDeclarationStatement stmt = (VariableDeclarationStatement) stmts.get(0);
         MethodInvocation methodInvocation = (MethodInvocation) ((VariableDeclarationFragment) stmt.fragments().get(0)).getInitializer();
         MutationMethodInvocationReturnCommand command = new MutationMethodInvocationReturnCommand(methodInvocation);
         command.executeMutation();
@@ -50,13 +48,7 @@ public class MutationMethodInvocationReturnCommandTest {
                 "return 1;" +
                 "}" +
                 "}";
-
-        CompilationUnit actualCU = helper.getCompilationUnit();
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        ASTMatcher matcher = new ASTMatcher();
-        boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
-        assertTrue(isCorrectMutation);
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Disabled("Disabled until return type for MethodInvocation can be obtained efficiently w/o bindings on ASTParser")
@@ -96,12 +88,6 @@ public class MutationMethodInvocationReturnCommandTest {
                 "return a;" +
                 "}" +
                 "}";
-
-        CompilationUnit actualCU = helper.getCompilationUnit();
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        ASTMatcher matcher = new ASTMatcher();
-        boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
-        assertTrue(isCorrectMutation);
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 }

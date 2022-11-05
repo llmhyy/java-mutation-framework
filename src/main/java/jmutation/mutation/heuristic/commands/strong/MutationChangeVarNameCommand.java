@@ -7,7 +7,6 @@ import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -26,9 +25,9 @@ public class MutationChangeVarNameCommand extends MutationCommand {
     @Override
     public ASTNode executeMutation() {
         SimpleName simpleName = (SimpleName) node;
-        CompilationUnit compilationUnit = (CompilationUnit) simpleName.getRoot();
+        CompilationUnit compilationUnit = (CompilationUnit) originalNode.getRoot();
         ASTNodeRetriever<VariableDeclarationStatement> variableDeclarationASTNodeRetriever = new ASTNodeRetriever<>(VariableDeclarationStatement.class);
-        variableDeclarationASTNodeRetriever.setStopNode(simpleName);
+        variableDeclarationASTNodeRetriever.setStopNode(originalNode);
         compilationUnit.accept(variableDeclarationASTNodeRetriever);
 
         List<SimpleName> possibleReplacements = getPossibleReplacements();
@@ -44,11 +43,11 @@ public class MutationChangeVarNameCommand extends MutationCommand {
     public boolean canExecute() {
         // Check that the obtained SimpleName is not the declared variable.
         ASTNodeParentRetriever<VariableDeclarationStatement> parentRetriever = new ASTNodeParentRetriever<>(VariableDeclarationStatement.class);
-        VariableDeclarationStatement variableDeclarationStatement = parentRetriever.getParentOfType(node);
+        VariableDeclarationStatement variableDeclarationStatement = parentRetriever.getParentOfType(originalNode);
         if (variableDeclarationStatement == null) return true;
         List<VariableDeclarationFragment> fragments = variableDeclarationStatement.fragments();
         if (fragments.isEmpty()) return true;
-        if (fragments.get(0).getName().equals(node)) return false;
+        if (fragments.get(0).getName().equals(originalNode)) return false;
         // If no possible replacements, return false, otherwise true
         return !getPossibleReplacements().isEmpty();
     }
@@ -61,7 +60,7 @@ public class MutationChangeVarNameCommand extends MutationCommand {
      */
     private SimpleName varDeclaredInStatement() {
         ASTNodeParentRetriever<VariableDeclarationStatement> parentRetriever = new ASTNodeParentRetriever<>(VariableDeclarationStatement.class);
-        VariableDeclarationStatement variableDeclarationStatement = parentRetriever.getParentOfType(node);
+        VariableDeclarationStatement variableDeclarationStatement = parentRetriever.getParentOfType(originalNode);
         if (variableDeclarationStatement == null) return null;
         List<VariableDeclarationFragment> fragments = variableDeclarationStatement.fragments();
         if (fragments.isEmpty()) return null;
@@ -69,14 +68,9 @@ public class MutationChangeVarNameCommand extends MutationCommand {
     }
 
     private void replace(List<SimpleName> possibleReplacements) {
-        SimpleName simpleName = (SimpleName) node;
-        ASTNode parent = simpleName.getParent();
-        StructuralPropertyDescriptor locationInParent = simpleName.getLocationInParent();
         int randIdx = (int) Math.round(RandomSingleton.getSingleton().random() * (possibleReplacements.size() - 1));
         SimpleName replacement = possibleReplacements.get(randIdx);
-        SimpleName replacementClone = ast.newSimpleName(replacement.getIdentifier());
-        parent.setStructuralProperty(locationInParent, replacementClone);
-        node = replacementClone;
+        node = ast.newSimpleName(replacement.getIdentifier());
     }
 
     private List<SimpleName> getPossibleReplacements() {
@@ -90,7 +84,7 @@ public class MutationChangeVarNameCommand extends MutationCommand {
             return possibleReplacements;
         }
         SimpleName varDeclaredInStatement = varDeclaredInStatement();
-        SimpleName simpleName = (SimpleName) node;
+        SimpleName simpleName = (SimpleName) originalNode;
         CompilationUnit compilationUnit = (CompilationUnit) simpleName.getRoot();
         ASTNodeRetriever<VariableDeclarationStatement> variableDeclarationASTNodeRetriever = new ASTNodeRetriever<>(VariableDeclarationStatement.class);
         variableDeclarationASTNodeRetriever.setStopNode(simpleName);
@@ -120,7 +114,7 @@ public class MutationChangeVarNameCommand extends MutationCommand {
         if (nodeType != null) {
             return nodeType;
         }
-        SimpleName simpleName = (SimpleName) node;
+        SimpleName simpleName = (SimpleName) originalNode;
         CompilationUnit compilationUnit = (CompilationUnit) simpleName.getRoot();
         ASTNodeRetriever<VariableDeclarationStatement> variableDeclarationASTNodeRetriever = new ASTNodeRetriever<>(VariableDeclarationStatement.class);
         variableDeclarationASTNodeRetriever.setStopNode(simpleName);

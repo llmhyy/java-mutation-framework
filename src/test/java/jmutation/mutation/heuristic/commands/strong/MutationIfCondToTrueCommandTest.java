@@ -1,17 +1,13 @@
 package jmutation.mutation.heuristic.commands.strong;
 
 import jmutation.mutation.MutationTestHelper;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MutationIfCondToTrueCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
@@ -45,11 +41,6 @@ public class MutationIfCondToTrueCommandTest {
                 "}" +
                 "}" +
                 "}";
-        CompilationUnit actualCU = helper.getCompilationUnit();
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        ASTMatcher matcher = new ASTMatcher();
-        boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
-        assertTrue(isCorrectMutation);
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 }

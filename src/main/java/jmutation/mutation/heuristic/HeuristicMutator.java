@@ -3,10 +3,14 @@ package jmutation.mutation.heuristic;
 import jmutation.execution.Coverage;
 import jmutation.model.MutationRange;
 import jmutation.model.project.Project;
+import jmutation.mutation.AnalysisASTNodeRetriever;
+import jmutation.mutation.MutationASTNodeRetriever;
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.parser.MutationParser;
+import jmutation.mutation.heuristic.parser.StrongMutationParser;
 import jmutation.parser.ProjectParser;
+import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -14,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,12 +30,13 @@ import java.util.Map.Entry;
  */
 public class HeuristicMutator extends Mutator {
     private final MutationParser mutationParser;
+    private List<MutationCommand> mutationHistory;
 
     private int numberOfMutations;
 
     public HeuristicMutator(MutationParser mutationParser) {
+        super();
         this.mutationParser = mutationParser;
-        this.mutationHistory = new ArrayList<>();
     }
 
     /**
@@ -43,10 +49,11 @@ public class HeuristicMutator extends Mutator {
     }
 
     public Project mutate(Coverage coverage, Project project) {
+        List<MutationRange> ranges = coverage.getRanges();
         boolean isRandomRetrieval = true;
         for (int i = 0; i < 2; i++) {
-            coverage.shuffleRanges();
-            mutate(coverage, project, isRandomRetrieval);
+            ranges = RandomSingleton.getSingleton().shuffle(ranges);
+            mutate(ranges, project, isRandomRetrieval);
             if (!mutationHistory.isEmpty()) {
                 break;
             }
@@ -56,9 +63,20 @@ public class HeuristicMutator extends Mutator {
         return project;
     }
 
-    private void mutate(Coverage coverage, Project project, boolean isRandomRetrieval) {
+    private void mutate(List<MutationRange> ranges, Project project, boolean isRandomRetrieval) {
         int numberOfExecutedMutations = 0;
-        Map<String, List<MutationRange>> classToRange = coverage.getRangesByClass();
+        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
+        for (MutationRange range : ranges) {
+            String className = range.getClassName();
+            List<MutationRange> rangesForClass;
+            if (classToRange.containsKey(className)) {
+                rangesForClass = classToRange.get(className);
+            } else {
+                rangesForClass = new ArrayList<>();
+            }
+            rangesForClass.add(range);
+            classToRange.put(className, rangesForClass);
+        }
         for (Entry<String, List<MutationRange>> entry : classToRange.entrySet()) {
             List<MutationRange> rangesForClass = entry.getValue();
             String className = entry.getKey();
@@ -75,8 +93,7 @@ public class HeuristicMutator extends Mutator {
             unit.recordModifications();
             for (MutationRange range : rangesForClass) {
                 // Attempt random retrieval.
-                HeuristicMutationASTNodeRetriever retriever = new HeuristicMutationASTNodeRetriever(unit, range);
-                List<ASTNode> nodes = parseRangeToNodes(unit, retriever, isRandomRetrieval);
+                List<ASTNode> nodes = parseRangeToNodes(unit, range, isRandomRetrieval);
                 if (nodes.isEmpty()) {
                     // If mutation for node types in mutation range not implemented, skip to next mutation range
                     continue;
@@ -103,21 +120,79 @@ public class HeuristicMutator extends Mutator {
                         writeToFile(unit, file);
                         return;
                     }
-                    /**
-                     * TODO:
-                     * check https://www.ibm.com/docs/en/rational-soft-arch/9.5?topic=SS8PJ7_9.5.0/org.eclipse.jdt.doc.isv/reference/api/org/eclipse/jdt/core/dom/rewrite/ASTRewrite.html
-                     * https://www.eclipse.org/articles/article.php?file=Article-JavaCodeManipulation_AST/index.html
-                     * to rewrite the AST
-                     */
-
-                    // step 1: define mutation operator based on AST node
-                    // step 2: apply mutation on the AST node
-                    // step 3: rewrite the AST node back to Java doc
                 }
             }
             writeToFile(unit, file);
         }
     }
 
+    public List<MutationCommand> analyse(List<MutationRange> ranges, Project project) {
+        // Get all ASTNodes within the ranges, create mutation command.
+        // If canExecute, add to result.
+        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
+        for (MutationRange range : ranges) {
+            String className = range.getClassName();
+            List<MutationRange> rangesForClass;
+            if (classToRange.containsKey(className)) {
+                rangesForClass = classToRange.get(className);
+            } else {
+                rangesForClass = new ArrayList<>();
+            }
+            rangesForClass.add(range);
+            classToRange.put(className, rangesForClass);
+        }
+        List<MutationCommand> result = new ArrayList<>();
+        for (Entry<String, List<MutationRange>> entry : classToRange.entrySet()) {
+            List<MutationRange> rangesForClass = entry.getValue();
+            String className = entry.getKey();
+            File file = retrieveFileFromClassName(className, project);
+            String fileContent;
+            try {
+                fileContent = Files.readString(file.toPath());
+            } catch (IOException e) {
+                throw new RuntimeException("Could not read file at " + file.toPath());
+            }
+            StrongMutationParser strongMutationParser = new StrongMutationParser();
+            for (MutationRange range : rangesForClass) {
+                CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
+                AnalysisASTNodeRetriever retriever = new AnalysisASTNodeRetriever(unit, range);
+                unit.accept(retriever);
+                List<ASTNode> nodes = retriever.getNodes();
+                for (ASTNode node : nodes) {
+                    MutationCommand mutationCommand = strongMutationParser.parse(node);
+                    if (mutationCommand == null) {
+                        continue;
+                    }
+                    if (mutationCommand.canExecute()) {
+                        result.add(mutationCommand);
+                    }
+                }
+            }
+        }
+        return result;
+    }
 
+    /**
+     * Gets an AST node for the portion of code to be mutated
+     *
+     * @param unit              Compilation unit to parse
+     * @param range             line number range to mutate in the compilation unit
+     * @param isRandomRetrieval whether to randomly retrieve the nodes to mutate or get all that is encountered
+     * @return The list of ASTNodes to mutate
+     */
+    private List<ASTNode> parseRangeToNodes(CompilationUnit unit, MutationRange range, boolean isRandomRetrieval) {
+        MutationASTNodeRetriever retriever = new MutationASTNodeRetriever(unit, range);
+        retriever.setRandomness(isRandomRetrieval);
+        unit.accept(retriever);
+
+        return retriever.getNodes();
+    }
+
+    public List<MutationCommand> getMutationHistory() {
+        return mutationHistory;
+    }
+
+    public void clearHistory() {
+        mutationHistory = new ArrayList<>();
+    }
 }

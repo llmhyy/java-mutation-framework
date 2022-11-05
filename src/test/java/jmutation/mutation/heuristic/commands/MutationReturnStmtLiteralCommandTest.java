@@ -7,10 +7,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class MutationReturnStmtLiteralCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
+
     @Test
     public void executeMutation_validMethodDeclaration_mutatesCorrectly() {
 
@@ -33,12 +34,7 @@ public class MutationReturnStmtLiteralCommandTest {
                 "}" +
                 "}";
 
-        CompilationUnit actualCU = helper.getCompilationUnit();
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        ASTMatcher matcher = new ASTMatcher();
-        boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
-        assertTrue(isCorrectMutation);
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test
@@ -63,7 +59,7 @@ public class MutationReturnStmtLiteralCommandTest {
     }
 
     @Test
-    public void canExecute_returnsDefaultInt_canMutate() {
+    public void executeMutation_returnsDefaultInt_canMutate() {
 
         String documentStr = "public class Main {" +
                 "public int bar() throws Exception {" +
@@ -72,22 +68,18 @@ public class MutationReturnStmtLiteralCommandTest {
                 "}";
 
         helper.parseDocStr(documentStr);
-        CompilationUnit cu = helper.getCompilationUnit();
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> stmts = methodBody.statements();
         ReturnStatement returnStatement = (ReturnStatement) stmts.get(0);
         MutationReturnStmtLiteralCommand command = new MutationReturnStmtLiteralCommand(returnStatement);
         command.executeMutation();
-        String actual = cu.toString();
         String expectedStr = "public class Main {" +
                 "public int bar() throws Exception {" +
                 "return 1;" +
                 "}" +
                 "}";
-        helper.parseDocStr(expectedStr);
-        String expected = helper.getCompilationUnit().toString();
-        assertEquals(expected, actual);
+        helper.checkMutation(command, documentStr, expectedStr);
     }
 
     @Test
@@ -100,21 +92,17 @@ public class MutationReturnStmtLiteralCommandTest {
                 "}";
 
         helper.parseDocStr(documentStr);
-        CompilationUnit cu = helper.getCompilationUnit();
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> stmts = methodBody.statements();
         ReturnStatement returnStatement = (ReturnStatement) stmts.get(0);
         MutationReturnStmtLiteralCommand command = new MutationReturnStmtLiteralCommand(returnStatement);
         command.executeMutation();
-        String actual = cu.toString();
         String expectedStr = "public class Main {" +
                 "public double bar() throws Exception {" +
                 "return 1.0;" +
                 "}" +
                 "}";
-        helper.parseDocStr(expectedStr);
-        String expected = helper.getCompilationUnit().toString();
-        assertEquals(expected, actual);
+        helper.checkMutation(command, documentStr, expectedStr);
     }
 }

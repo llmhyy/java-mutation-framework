@@ -6,8 +6,6 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class MutationWhileLoopToIfCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
 
@@ -29,6 +27,7 @@ public class MutationWhileLoopToIfCommandTest {
         MutationWhileLoopToIfCommand mutationCmd = new MutationWhileLoopToIfCommand(whileStatement);
         mutationCmd.executeMutation();
         String expectedDoc = String.join("\n",
+                "public class Main {",
                 "public static void main(String[] args){",
                 "  int a=0;",
                 "  if (a != 20) {",
@@ -36,8 +35,8 @@ public class MutationWhileLoopToIfCommandTest {
                 "    int b=0;",
                 "  }",
                 "}",
-                ""
+                "}"
         );
-        assertEquals(methodDeclaration.toString(), expectedDoc);
+        helper.checkMutation(mutationCmd, documentStr, expectedDoc);
     }
 }

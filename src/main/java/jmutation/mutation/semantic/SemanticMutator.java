@@ -4,7 +4,9 @@ import jmutation.execution.Coverage;
 import jmutation.execution.ProjectExecutor;
 import jmutation.model.MutationRange;
 import jmutation.model.project.Project;
+import jmutation.model.project.ProjectConfig;
 import jmutation.mutation.MutationASTNodeRetriever;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.semantic.semseed.FastTextWrapper;
 import jmutation.mutation.semantic.semseed.SemSeedMutationCommand;
@@ -29,16 +31,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static jmutation.constants.ResourcesPath.DEFAULT_RESOURCES_PATH;
+import static jmutation.constants.ResourcesPath.DEFAULT_SEMSEED_DIR;
+import static jmutation.constants.ResourcesPath.DEFAULT_SEMSEED_MODEL;
+import static jmutation.constants.ResourcesPath.DEFAULT_SEMSEED_PATTERNS;
+
 public class SemanticMutator extends Mutator {
-    private String patternFilePath;
+    private final String patternFilePath;
 
-    private FastTextWrapper fastTextWrapper;
-    private ProjectExecutor projectExecutor;
+    private final FastTextWrapper fastTextWrapper;
 
-    public SemanticMutator(String patternFilePath, String modelPath, ProjectExecutor executor) {
+    public SemanticMutator(String patternFilePath, String modelPath) {
+        super();
         this.patternFilePath = patternFilePath;
         this.fastTextWrapper = new FastTextWrapper(modelPath);
-        this.projectExecutor = executor;
+    }
+
+    public SemanticMutator() {
+        String semSeedPath = String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_SEMSEED_DIR);
+        this.patternFilePath = semSeedPath + File.separator + DEFAULT_SEMSEED_PATTERNS;
+        this.fastTextWrapper = new FastTextWrapper(semSeedPath + File.separator + DEFAULT_SEMSEED_MODEL);
     }
 
     private List<ASTNode> getNodesOfSomeType(Coverage coverage, Project project, Class<? extends ASTNode> nodeType) {
@@ -87,9 +99,9 @@ public class SemanticMutator extends Mutator {
                 SemSeedMutationCommand mutationCommand = new SemSeedMutationCommand(tokenSequence.getNode(),
                         staticAnalysisResult, pattern, tokenSequence);
                 while (mutationCommand.hasAnotherSeq()) {
-                    mutationCommand.executeMutation();
-                    //writeToFile
-                    if (compileProject()) {
+                    project = mutate(mutationCommand, project);
+                    if (compileProject(project)) {
+                        mutationHistory.add(mutationCommand);
                         return project;
                     }
                 }
@@ -97,6 +109,11 @@ public class SemanticMutator extends Mutator {
         }
         System.out.println("No semantic mutations found");
         return project;
+    }
+
+    public List<MutationCommand> analyse(List<MutationRange> mutationRanges, Project project) {
+        // TODO
+        return null;
     }
 
     private List<Pattern> readPatternsFromFile(String filePath) {
@@ -152,8 +169,10 @@ public class SemanticMutator extends Mutator {
         return result;
     }
 
-    public boolean compileProject() {
+    public boolean compileProject(Project project) {
+        ProjectConfig config = new ProjectConfig(project);
+        ProjectExecutor projectExecutor = new ProjectExecutor(null, config);
         String output = projectExecutor.compile();
-        return !output.contains("FAIL");
+        return output.contains("BUILD SUCCESS");
     }
 }

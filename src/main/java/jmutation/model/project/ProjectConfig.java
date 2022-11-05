@@ -26,6 +26,11 @@ public class ProjectConfig {
         this.dropInsDir = config.dropInsDir;
     }
 
+    public ProjectConfig(Project project) {
+        this.project = project;
+        dropInsDir = null;
+    }
+
     public String getProjectPath() {
         return getProjectRoot().getAbsolutePath();
     }

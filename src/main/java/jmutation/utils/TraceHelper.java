@@ -27,13 +27,8 @@ public class TraceHelper {
         Set<TraceNode> result = new HashSet<>();
         List<TraceNode> executionList = buggyTrace.getExecutionList();
         for (MutationCommand mutationCommand : mutationHistory) {
-            ASTNode node = mutationCommand.getNode();
+            ASTNode node = mutationCommand.getOriginalNode();
             ASTNode root = node.getRoot();
-            if (!(root instanceof CompilationUnit)) {
-                // If the ASTNode in mutation history is no longer part of a class, it must have been overwritten by another mutation.
-                // No need to look for corresponding TraceNode.
-                continue;
-            }
             ASTNodeParentRetriever<TypeDeclaration> typeDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(TypeDeclaration.class);
             TypeDeclaration typeDeclaration = typeDeclarationASTNodeParentRetriever.getParentOfType(node);
             CompilationUnit unit = (CompilationUnit) root;

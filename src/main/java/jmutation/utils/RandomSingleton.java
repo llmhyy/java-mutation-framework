@@ -7,11 +7,6 @@ import java.util.Random;
 
 public class RandomSingleton {
     private static final Random random = new Random();
-    private static class LazyLoader {
-        // By wrapping, the singleton will only be generated when genSingleton() is called,
-        // not when class is accessed e.g. RandomSingleton.getClass()
-        static final RandomSingleton INSTANCE = new RandomSingleton();
-    }
 
     private RandomSingleton() {
     }
@@ -25,7 +20,7 @@ public class RandomSingleton {
     }
 
     public double random() {
-       return random.nextDouble();
+        return random.nextDouble();
     }
 
     public List shuffle(List list) {
@@ -33,5 +28,11 @@ public class RandomSingleton {
         shuffledList.addAll(list);
         Collections.shuffle(shuffledList, random);
         return shuffledList;
+    }
+
+    private static class LazyLoader {
+        // By wrapping, the singleton will only be generated when getSingleton() is called,
+        // not when class is accessed e.g. RandomSingleton.getClass()
+        static final RandomSingleton INSTANCE = new RandomSingleton();
     }
 }

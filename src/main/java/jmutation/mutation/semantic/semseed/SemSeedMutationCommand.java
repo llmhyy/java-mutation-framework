@@ -10,8 +10,8 @@ import jmutation.mutation.semantic.semseed.model.TokenSequence;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.gradle.internal.Pair;
@@ -25,10 +25,10 @@ import java.util.Set;
 
 public class SemSeedMutationCommand extends MutationCommand {
     private static final String PLACEHOLDER_TOKEN = "PLACEHOLDER";
+    private final List<List<String>> mutatedTokenSequences;
     private StaticAnalysisResult tokenReplacements;
     private Pattern pattern;
     private TokenSequence targetSequence;
-    private List<List<String>> mutatedTokenSequences;
     private int mutatedTokenSeqIdx = 0;
 
     public SemSeedMutationCommand(ASTNode node, StaticAnalysisResult tokenReplacements, Pattern pattern, TokenSequence targetSequence) {
@@ -110,16 +110,16 @@ public class SemSeedMutationCommand extends MutationCommand {
     }
 
     private String getClassName() {
-        ASTNodeParentRetriever<TypeDeclaration> typeDeclarationASTNodeParentRetriever =
-                new ASTNodeParentRetriever<>(TypeDeclaration.class);
-        TypeDeclaration typeDeclaration = typeDeclarationASTNodeParentRetriever.getParentOfType(node);
-        return typeDeclaration.getName().toString();
+        ASTNodeParentRetriever<AbstractTypeDeclaration> typeDeclarationASTNodeParentRetriever =
+                new ASTNodeParentRetriever<>(AbstractTypeDeclaration.class);
+        AbstractTypeDeclaration abstractTypeDeclaration = typeDeclarationASTNodeParentRetriever.getParentOfType(originalNode);
+        return abstractTypeDeclaration.getName().toString();
     }
 
     private String getMethodName() {
         ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever =
                 new ASTNodeParentRetriever<>(MethodDeclaration.class);
-        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
+        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(originalNode);
         return getClassName() + "#" + methodDeclaration.getName();
     }
 

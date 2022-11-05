@@ -3,6 +3,7 @@ package jmutation;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import jmutation.model.TestCase;
+import jmutation.mutation.semantic.SemanticMutator;
 
 import java.util.List;
 
@@ -41,6 +42,8 @@ public class Main {
         mutationFramework.setProjectPath(params.projectPath);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
 
+        SemanticMutator mutator = new SemanticMutator();
+        mutationFramework.setMutator(mutator);
         for (TestCase testCase : testCaseList) {
             mutationFramework.setTestCase(testCase);
             try {

@@ -6,12 +6,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-
-import java.util.List;
 
 /**
  * Not complete. Only works for var declaration method invocations e.g. int x = bar(); -&gt; int x = 0;
@@ -27,19 +24,9 @@ public class MutationMethodInvocationReturnCommand extends MutationCommand {
     public ASTNode executeMutation() {
         MethodInvocation methodInvocation = (MethodInvocation) node;
         MethodReturnTypeObtainer returnTypeObtainer = new MethodReturnTypeObtainer();
-        returnTypeObtainer.setMethodInvocation(methodInvocation);
+        returnTypeObtainer.setMethodInvocation((MethodInvocation) originalNode);
         Type methodReturnType = returnTypeObtainer.getReturnType();
-        StructuralPropertyDescriptor location = methodInvocation.getLocationInParent();
-        Expression replacement = getDefaultValue(methodReturnType);
-        ASTNode parent = methodInvocation.getParent();
-        if (!location.isChildListProperty()) {
-            parent.setStructuralProperty(location, replacement);
-        } else {
-            List<ASTNode> children = ((List) parent.getStructuralProperty(location));
-            int childIdx = children.indexOf(methodInvocation);
-            children.set(childIdx, replacement);
-        }
-        node = replacement;
+        node = getDefaultValue(methodReturnType);
         return methodInvocation;
     }
 
@@ -47,7 +34,7 @@ public class MutationMethodInvocationReturnCommand extends MutationCommand {
         return DefaultValues.getDefaultExpression(methodReturnType);
     }
 
-    private class MethodReturnTypeObtainer extends ASTVisitor {
+    private static class MethodReturnTypeObtainer extends ASTVisitor {
         MethodInvocation methodInvocation;
         Type type;
 

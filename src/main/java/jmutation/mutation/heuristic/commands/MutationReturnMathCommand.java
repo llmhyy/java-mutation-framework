@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MutationReturnMathCommand extends MutationCommand {
-    private Set<PrimitiveType.Code> mathCodes = new HashSet<>() {
+    private final Set<PrimitiveType.Code> mathCodes = new HashSet<>() {
         {
             add(PrimitiveType.INT);
             add(PrimitiveType.FLOAT);
@@ -48,7 +48,7 @@ public class MutationReturnMathCommand extends MutationCommand {
     @Override
     public boolean canExecute() {
         ASTNodeParentRetriever<MethodDeclaration> methodDeclarationASTNodeParentRetriever = new ASTNodeParentRetriever<>(MethodDeclaration.class);
-        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(node);
+        MethodDeclaration methodDeclaration = methodDeclarationASTNodeParentRetriever.getParentOfType(originalNode);
         Type returnType = methodDeclaration.getReturnType2();
         if (returnType instanceof PrimitiveType) {
             PrimitiveType primitiveType = (PrimitiveType) returnType;

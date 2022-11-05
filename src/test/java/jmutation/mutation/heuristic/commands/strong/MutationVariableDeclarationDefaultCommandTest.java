@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 public class MutationVariableDeclarationDefaultCommandTest {
 
     MutationTestHelper helper = new MutationTestHelper();
@@ -38,7 +36,7 @@ public class MutationVariableDeclarationDefaultCommandTest {
                 "}";
         helper.parseDocStr(expectedDoc);
 
-        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test
@@ -63,7 +61,7 @@ public class MutationVariableDeclarationDefaultCommandTest {
                 "}";
         helper.parseDocStr(expectedDoc);
 
-        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test
@@ -75,7 +73,6 @@ public class MutationVariableDeclarationDefaultCommandTest {
                 "}";
 
         helper.parseDocStr(documentStr);
-        CompilationUnit cu = helper.getCompilationUnit();
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> methodStmts = methodBody.statements();
@@ -88,7 +85,7 @@ public class MutationVariableDeclarationDefaultCommandTest {
                 "}";
         helper.parseDocStr(expectedDoc);
 
-        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test
@@ -100,7 +97,6 @@ public class MutationVariableDeclarationDefaultCommandTest {
                 "}";
 
         helper.parseDocStr(documentStr);
-        CompilationUnit cu = helper.getCompilationUnit();
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         Block methodBody = (Block) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         List<Statement> methodStmts = methodBody.statements();
@@ -113,6 +109,6 @@ public class MutationVariableDeclarationDefaultCommandTest {
                 "}";
         helper.parseDocStr(expectedDoc);
 
-        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 }

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class MutationMathLibCommandTest {
@@ -51,7 +50,7 @@ public class MutationMathLibCommandTest {
                 "}";
         helper.parseDocStr(expectedDoc);
 
-        assertEquals(helper.getCompilationUnit().toString(), cu.toString());
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test
@@ -103,10 +102,4 @@ public class MutationMathLibCommandTest {
         assertFalse(command.canExecute());
     }
 
-    double tets() {
-        double a = Math.addExact(1, 2);
-
-        a += 1;
-        return a;
-    }
 }

@@ -1,10 +1,13 @@
 package jmutation.mutation;
 
 import jmutation.execution.Coverage;
+import jmutation.model.MutationRange;
 import jmutation.model.project.Project;
 import jmutation.parser.ProjectParser;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -18,10 +21,36 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Given an arbitrary project (maven or gradle) and a region, we shall mutate the region into a compilable project.
+ *
+ * @author Yun Lin
+ */
+
 public abstract class Mutator {
     protected List<MutationCommand> mutationHistory;
 
+    public Mutator() {
+        this.mutationHistory = new ArrayList<>();
+    }
+
     public abstract Project mutate(Coverage coverage, Project project);
+
+    public Project mutate(MutationCommand command, Project project) {
+        CompilationUnit unit = command.getCu();
+        TypeDeclaration type = (TypeDeclaration) unit.types().get(0);
+        String className = unit.getPackage().getName() + "." + type.getName().toString();
+        File file = retrieveFileFromClassName(className, project);
+        command.executeMutation();
+        try {
+            writeToFile(command.getRewriter(), file);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return project;
+    }
+
+    public abstract List<MutationCommand> analyse(List<MutationRange> mutationRanges, Project project);
 
     public List<MutationCommand> getMutationHistory() {
         return mutationHistory;
@@ -61,6 +90,29 @@ public abstract class Mutator {
         }
         IDocument document = new Document(fileContent);
         TextEdit edits = unit.rewrite(document, null);
+        try {
+            edits.apply(document);
+        } catch (MalformedTreeException | BadLocationException e) {
+            e.printStackTrace();
+        }
+        try {
+            FileWriter fw = new FileWriter(file);
+            fw.write(document.get());
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void writeToFile(ASTRewrite rewriter, File file) {
+        String fileContent;
+        try {
+            fileContent = Files.readString(file.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read file at " + file.toPath());
+        }
+        IDocument document = new Document(fileContent);
+        TextEdit edits = rewriter.rewriteAST(document, null);
         try {
             edits.apply(document);
         } catch (MalformedTreeException | BadLocationException e) {

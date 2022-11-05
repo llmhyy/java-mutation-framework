@@ -16,32 +16,35 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+Obtains nodes to be mutated within a given range
+ */
 public class MutationASTNodeRetriever extends ASTVisitor {
 
+    private final CompilationUnit unit;
+    protected List<ASTNode> nodes;
     private int startLine;
     private int endLine;
-
-    private CompilationUnit unit;
-
-    private List<ASTNode> nodes;
-
     private MutationProbabilityCalculator mutationProbabilityCalculator;
 
     private boolean isRandomRetrieval = true;
 
-    public MutationASTNodeRetriever(CompilationUnit unit, MutationRange range) {
+    public MutationASTNodeRetriever(CompilationUnit unit) {
         this.unit = unit;
-        this.startLine = range.getStartLine();
-        this.endLine = range.getEndLine();
+        this.startLine = 0;
+        this.endLine = Integer.MAX_VALUE;
         nodes = new ArrayList<>();
         mutationProbabilityCalculator = new MutationProbabilityCalculator();
     }
 
-    public MutationASTNodeRetriever(CompilationUnit unit, MutationRange range, MutationProbabilityCalculator mutationProbabilityCalculator) {
-        this.unit = unit;
+    public MutationASTNodeRetriever(CompilationUnit unit, MutationRange range) {
+        this(unit);
         this.startLine = range.getStartLine();
         this.endLine = range.getEndLine();
-        nodes = new ArrayList<>();
+    }
+
+    public MutationASTNodeRetriever(CompilationUnit unit, MutationRange range, MutationProbabilityCalculator mutationProbabilityCalculator) {
+        this(unit, range);
         this.mutationProbabilityCalculator = mutationProbabilityCalculator;
     }
 
@@ -96,7 +99,8 @@ public class MutationASTNodeRetriever extends ASTVisitor {
             return false;
         }
         if (isRandomRetrieval) {
-            boolean shouldNotAdd = RandomSingleton.getSingleton().random() > mutationProbabilityCalculator.getProbability(node);
+            double randomValue = RandomSingleton.getSingleton().random();
+            boolean shouldNotAdd = randomValue > mutationProbabilityCalculator.getProbability(node);
             if (shouldNotAdd) {
                 return false;
             }
@@ -105,7 +109,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
         return true;
     }
 
-    private boolean nodeIsWithinRange(ASTNode node) {
+    protected boolean nodeIsWithinRange(ASTNode node) {
         int sLine = unit.getLineNumber(node.getStartPosition());
         int eLine = unit.getLineNumber(node.getStartPosition() + node.getLength() - 1);
         if (startLine <= sLine && eLine <= endLine) {

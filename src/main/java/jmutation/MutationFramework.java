@@ -3,12 +3,14 @@ package jmutation;
 import jmutation.constants.ExternalLibrary;
 import jmutation.execution.ProjectExecutor;
 import jmutation.model.MicrobatConfig;
+import jmutation.model.MutationFrameworkResult;
 import jmutation.model.MutationResult;
 import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.TestCase;
 import jmutation.model.TraceCollectionResult;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
+import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
 import jmutation.mutation.heuristic.parser.MutationParser;
@@ -25,13 +27,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import static jmutation.constants.ResourcesPath.DEFAULT_DROP_INS_DIR;
+import static jmutation.constants.ResourcesPath.DEFAULT_RESOURCES_PATH;
+
 /**
  * API class for usage as an external library
  */
 public class MutationFramework {
-    final public static String DEFAULT_RESOURCES_PATH = String.join(File.separator,
-            System.getenv("USERPROFILE"), "lib", "resources", "java-mutation-framework");
-    final public static String DEFAULT_DROP_INS_DIR = "lib";
     private String projectPath;
     private String dropInsPath = String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_DROP_INS_DIR);
 
@@ -58,6 +60,9 @@ public class MutationFramework {
     private Project clonedProject;
     private ProjectConfig mutatedProjConfig;
     private Mutator mutator;
+    private PrecheckExecutionResult precheckExecutionResult;
+    private ProjectExecutor projectExecutor;
+    private Project proj;
 
 
     /**
@@ -165,6 +170,10 @@ public class MutationFramework {
         projectPath = microbatConfig.getWorkingDir();
     }
 
+    public void setMutator(Mutator mutator) {
+        this.mutator = mutator;
+    }
+
     public void extractResources() throws IOException {
         extractResources(DEFAULT_RESOURCES_PATH);
     }
@@ -181,51 +190,8 @@ public class MutationFramework {
      *
      * @return MutationResult object.
      */
-    public MutationResult startMutationFramework() {
-        if (projectPath == null || dropInsPath == null) {
-            System.out.println("Project path or drop ins directory not specified");
-            return null;
-        }
-
-        if (config == null) {
-            generateProjectConfiguration();
-        }
-
-        Project proj = config.getProject();
-
-        if (testCase == null) {
-            System.out.println("Test case to mutate not specified, choosing first test case found");
-            testCase = proj.getTestCases().get(0);
-        }
-
-        if (microbatConfig == null) {
-            generateMicrobatConfiguration();
-        }
-
-        microbatConfig = microbatConfig.setWorkingDir(projectPath);
-
-        //setupMutator(new MutationParser());
-        System.out.println(testCase);
-        // Do precheck for normal + mutation to catch issues
-        // If no issues, collect trace for normal + mutation, and return them in mutation result
-
-        ProjectExecutor projectExecutor = new ProjectExecutor(microbatConfig, config);
-        // Precheck
-        PrecheckExecutionResult precheckExecutionResult = executePrecheck(projectExecutor);
-        System.out.println("Normal precheck done");
-
-        ;
-        if (isAutoSeed) {
-            runWithAutoSeed(proj, precheckExecutionResult);
-        } else {
-            if (strongMutationsEnabled) {
-                runWithStrongMutations(proj, precheckExecutionResult);
-            } else {
-                runMutation(proj, precheckExecutionResult);
-            }
-        }
-        System.out.println("Mutated precheck done");
-
+    public MutationFrameworkResult startMutationFramework() {
+        mutate();
         // Actual trace
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setExpectedSteps(precheckExecutionResult.getTotalSteps());
         projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
@@ -251,10 +217,80 @@ public class MutationFramework {
         boolean wasSuccessful = mutatedPrecheckExecutionResult.testCasePassed();
 
 
-        return new MutationResult(result.getInstrumentationResult(),
+        return new MutationFrameworkResult(result.getInstrumentationResult(),
                 mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(), mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
                 mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
                 wasSuccessful, testCase);
+    }
+
+    public MutationResult mutate() {
+        if (!setup()) return null;
+        // Do precheck for normal + mutation to catch issues
+        // If no issues, collect trace for normal + mutation, and return them in mutation result
+
+        projectExecutor = new ProjectExecutor(microbatConfig, config);
+        // Precheck
+        precheckExecutionResult = executePrecheck(projectExecutor);
+        System.out.println("Normal precheck done");
+
+        if (isAutoSeed) {
+            runWithAutoSeed(proj, precheckExecutionResult);
+        } else {
+            if (strongMutationsEnabled) {
+                runWithStrongMutations(proj, precheckExecutionResult);
+            } else {
+                runMutation(proj, precheckExecutionResult);
+            }
+        }
+        System.out.println("Mutated precheck done");
+        return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, testCase, mutator.getMutationHistory());
+    }
+
+    public List<MutationCommand> analyse() {
+        if (!setup()) return null;
+        // Do precheck for normal + mutation to catch issues
+        // If no issues, collect trace for normal + mutation, and return them in mutation result
+
+        projectExecutor = new ProjectExecutor(microbatConfig, config);
+        // Precheck
+        precheckExecutionResult = executePrecheck(projectExecutor);
+        System.out.println("Normal precheck done");
+        return mutator.analyse(precheckExecutionResult.getCoverage().getRanges(), proj);
+    }
+
+    public MutationResult mutate(MutationCommand command) {
+        runMutation(proj, command);
+
+        System.out.println("Mutated precheck done");
+        return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, testCase, mutator.getMutationHistory());
+    }
+
+    public boolean setup() {
+        if (projectPath == null || dropInsPath == null) {
+            System.out.println("Project path or drop ins directory not specified");
+            return false;
+        }
+
+        if (config == null) {
+            generateProjectConfiguration();
+        }
+
+        proj = config.getProject();
+
+        if (testCase == null) {
+            System.out.println("Test case to mutate not specified, choosing first test case found");
+            testCase = proj.getTestCases().get(0);
+        }
+
+        if (microbatConfig == null) {
+            generateMicrobatConfiguration();
+        }
+
+        microbatConfig = microbatConfig.setWorkingDir(projectPath);
+
+        setupMutator(new MutationParser());
+        System.out.println(testCase);
+        return true;
     }
 
     private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) {
@@ -271,8 +307,20 @@ public class MutationFramework {
         mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
         String resourcesPath = String.join(File.separator, "src", "main", "resources", "semantic");
         mutator = new SemanticMutator(resourcesPath + File.separator + "bug-fix-patterns.json",
-                resourcesPath + File.separator + "model.bin", mutatedProjectExecutor);
+                resourcesPath + File.separator + "model.bin");
         mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
+        mutatedProjConfig = new ProjectConfig(config, mutatedProject);
+
+        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+        mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+    }
+
+    private void runMutation(Project proj, MutationCommand command) {
+        clonedProject = proj.cloneToOtherPath();
+        mutatedProject = mutator.mutate(command, clonedProject);
+        mutatedProjConfig = new ProjectConfig(config, mutatedProject);
+
+        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
         mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
     }
 
@@ -317,11 +365,6 @@ public class MutationFramework {
 
     private void setupMutator(MutationParser mutationParser) {
         mutator = new HeuristicMutator(mutationParser);
-        //    mutator.setMaxNumberOfMutations(maxNumberOfMutations);
-    }
-
-    public void setMutator(Mutator mutator) {
-        this.mutator = mutator;
     }
 
     private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {

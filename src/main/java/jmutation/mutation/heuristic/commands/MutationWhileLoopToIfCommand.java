@@ -2,13 +2,10 @@ package jmutation.mutation.heuristic.commands;
 
 import jmutation.mutation.MutationCommand;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
-import java.util.List;
 
 public class MutationWhileLoopToIfCommand extends MutationCommand {
 
@@ -19,9 +16,6 @@ public class MutationWhileLoopToIfCommand extends MutationCommand {
     @Override
     public ASTNode executeMutation() {
         WhileStatement whileStatement = (WhileStatement) node;
-        Block parent = (Block) whileStatement.getParent();
-        List<Statement> stmtLs = parent.statements();
-        int idxOfWhile = stmtLs.indexOf(whileStatement);
 
         IfStatement ifStmt = ast.newIfStatement();
         Expression expression = whileStatement.getExpression();
@@ -31,7 +25,6 @@ public class MutationWhileLoopToIfCommand extends MutationCommand {
 
         ifStmt.setExpression(expCopy);
         ifStmt.setThenStatement(bodyCopy);
-        stmtLs.set(idxOfWhile, ifStmt);
 
         node = ifStmt;
 

@@ -82,12 +82,7 @@ public class MutationChangeVarNameCommandTest {
                 "}",
                 "}",
                 "}");
-        CompilationUnit actualCU = helper.getCompilationUnit();
-        helper.parseDocStr(expectedDoc);
-        CompilationUnit expectedCU = helper.getCompilationUnit();
-        ASTMatcher matcher = new ASTMatcher();
-        boolean isCorrectMutation = matcher.match(expectedCU, actualCU);
-        assertTrue(isCorrectMutation);
+        helper.checkMutation(command, documentStr, expectedDoc);
     }
 
     @Test

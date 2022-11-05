@@ -23,7 +23,7 @@ import static jmutation.mutation.semantic.semseed.constants.TokenPrefix.PREFIX_I
 public class SemSeedMutationCommandTest {
     MutationTestHelper helper = new MutationTestHelper();
 
-    @Disabled("model is too large to be pushed. Disabled until a stub is created for FastTestWrapper")
+    @Disabled("model is too large to be pushed. Disabled until a stub is created for FastTextWrapper")
     public void executeMutation_handlesUnboundTokens_validMutation() throws ClassNotFoundException {
         // TODO: create token replacements, target sequence, bug fix pattern and the target code, see if it mutates correctly
         // Future can use sample project
