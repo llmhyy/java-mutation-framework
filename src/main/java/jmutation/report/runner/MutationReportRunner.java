@@ -62,8 +62,9 @@ public class MutationReportRunner extends ReportRunner {
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         MutationReport report = new MutationReport(new File("C:\\Users\\bchenghi\\Desktop\\mutation-report.xlsx"));
         boolean skip = true;
+        String testCaseName = "org.apache.commons.math.analysis.interpolation.SmoothingPolynomialBicubicSplineInterpolatorTest#testPreconditions(),30,81";
         for (TestCase testCase : testCaseList) {
-            if (testCase.toString().equals("org.apache.commons.math.analysis.interpolation.SmoothingBicubicSplineInterpolatorTest#testPreconditions(),31,82")) {
+            if (testCase.toString().equals(testCaseName)) {
                 skip = false;
             }
             if (skip) {
@@ -74,7 +75,7 @@ public class MutationReportRunner extends ReportRunner {
                 List<MutationCommand> commands = mutationFramework.analyse();
                 int commandId = 0;
                 for (MutationCommand command : commands) {
-                    if (commandId < 377 && testCase.toString().equals("org.apache.commons.math.analysis.interpolation.SmoothingBicubicSplineInterpolatorTest#testPreconditions(),31,82")) {
+                    if (commandId < 5 && testCase.toString().equals(testCaseName)) {
                         continue;
                     }
                     MutationResult result = mutationFramework.mutate(command);
