@@ -183,6 +183,9 @@ public class MutationFramework {
             ResourceExtractor.extractFile("lib/" + externalLibrary.getName() + ".jar", path);
         }
         ResourceExtractor.extractFile("microbatConfig.json", path);
+        ResourceExtractor.extractFile("semantic/bug-fix-patterns.json", path);
+        // TODO: model.bin is too large to push to git.
+        // ResourceExtractor.extractFile("semantic/model.bin", path);
     }
 
     /**
