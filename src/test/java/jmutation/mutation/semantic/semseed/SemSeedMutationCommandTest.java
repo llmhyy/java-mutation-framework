@@ -79,7 +79,7 @@ public class SemSeedMutationCommandTest {
                 new HashMap<>(), new HashMap<>(), identifiersByMethod, new HashMap<>());
 
         // Create fast text wrapper
-        FastTextWrapperStub fastTextWrapperStub = new FastTextWrapperStub();
+        FastTextWrapperStub fastTextWrapperStub = new FastTextWrapperStub(null);
         List<String> replacementTokens = new ArrayList<>();
         replacementTokens.add("id");
         fastTextWrapperStub.setReplacementTokens(replacementTokens);

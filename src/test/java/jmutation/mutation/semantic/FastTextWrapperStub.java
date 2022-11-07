@@ -1,5 +1,6 @@
 package jmutation.mutation.semantic;
 
+import com.github.jfasttext.JFastText;
 import jmutation.mutation.semantic.semseed.FastTextWrapper;
 import jmutation.mutation.semantic.semseed.model.Pattern;
 import jmutation.mutation.semantic.semseed.model.TokenSequence;
@@ -9,6 +10,10 @@ import java.util.List;
 public class FastTextWrapperStub extends FastTextWrapper {
     private List<String> replacementTokens;
     private boolean isMatching;
+
+    public FastTextWrapperStub(JFastText jft) {
+        super(jft);
+    }
 
     @Override
     public List<String> getReplacementTokens(String buggyConcreteToken, Pattern pattern, TokenSequence targetTokenSeq,

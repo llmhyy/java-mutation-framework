@@ -16,26 +16,28 @@ import static jmutation.constants.ResourcesPath.DEFAULT_SEMSEED_MODEL;
 
 public class FastTextWrapper {
 
-    private final float threshold;
     JFastText jft;
+    private float threshold = 0.4f;
 
 
     public FastTextWrapper() {
         jft = new JFastText();
         jft.loadModel(String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_SEMSEED_DIR, DEFAULT_SEMSEED_MODEL));
-        threshold = 0.4f;
     }
 
     public FastTextWrapper(String pathToModel) {
         jft = new JFastText();
         jft.loadModel(pathToModel);
-        threshold = 0.4f;
     }
 
     public FastTextWrapper(String pathToModel, float threshold) {
         jft = new JFastText();
         jft.loadModel(pathToModel);
         this.threshold = threshold;
+    }
+
+    public FastTextWrapper(JFastText jft) {
+        this.jft = jft;
     }
 
     private static double cosineDistance(List<Float> vectorA, List<Float> vectorB) {
