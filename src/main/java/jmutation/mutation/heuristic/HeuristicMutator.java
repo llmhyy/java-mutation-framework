@@ -30,9 +30,12 @@ import java.util.Map.Entry;
  */
 public class HeuristicMutator extends Mutator {
     private final MutationParser mutationParser;
-    private List<MutationCommand> mutationHistory;
+    private int numberOfMutations = 1;
 
-    private int numberOfMutations;
+    public HeuristicMutator() {
+        super();
+        mutationParser = new MutationParser();
+    }
 
     public HeuristicMutator(MutationParser mutationParser) {
         super();
@@ -108,7 +111,7 @@ public class HeuristicMutator extends Mutator {
                 }
 
                 for (MutationCommand mutationCommand : newMutationCommands) {
-                    ASTNode node = mutationCommand.getNode();
+                    ASTNode node = mutationCommand.getOriginalNode();
                     ASTNode root = node.getRoot();
                     if (!(root instanceof CompilationUnit)) {
                         continue;
@@ -116,13 +119,12 @@ public class HeuristicMutator extends Mutator {
                     mutationCommand.executeMutation();
                     mutationHistory.add(mutationCommand);
                     numberOfExecutedMutations++;
+                    writeToFile(mutationCommand.getRewriter(), file);
                     if (numberOfMutations == numberOfExecutedMutations) {
-                        writeToFile(unit, file);
                         return;
                     }
                 }
             }
-            writeToFile(unit, file);
         }
     }
 

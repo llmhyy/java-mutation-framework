@@ -5,15 +5,26 @@ import jmutation.mutation.semantic.semseed.model.Pattern;
 import jmutation.mutation.semantic.semseed.model.TokenSequence;
 import org.gradle.internal.Pair;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static jmutation.constants.ResourcesPath.DEFAULT_RESOURCES_PATH;
+import static jmutation.constants.ResourcesPath.DEFAULT_SEMSEED_DIR;
+import static jmutation.constants.ResourcesPath.DEFAULT_SEMSEED_MODEL;
 
 public class FastTextWrapper {
 
     private final float threshold;
     JFastText jft;
 
+
+    public FastTextWrapper() {
+        jft = new JFastText();
+        jft.loadModel(String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_SEMSEED_DIR, DEFAULT_SEMSEED_MODEL));
+        threshold = 0.4f;
+    }
 
     public FastTextWrapper(String pathToModel) {
         jft = new JFastText();
