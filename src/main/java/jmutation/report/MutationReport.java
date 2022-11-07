@@ -8,10 +8,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import java.io.File;
 import java.io.IOException;
 
-import static jmutation.report.MutationTrialHeader.MUTATION_COMMAND;
-import static jmutation.report.MutationTrialHeader.PROGRAM_MSG;
-import static jmutation.report.MutationTrialHeader.PROJECT_NAME;
-import static jmutation.report.MutationTrialHeader.TEST_CASE;
+import static jmutation.report.MutationTrialHeader.*;
 
 /**
  * @author LLT
@@ -36,6 +33,9 @@ public class MutationReport extends AbstractExcelWriter {
         MutationCommand command = trial.getMutationCommand();
         addCell(row, MUTATION_COMMAND, command == null ? "null" : command.toString());
         addCell(row, PROGRAM_MSG, trial.getProgramMsg());
+        addCell(row, MUTATED_PROGRAM_MSG, trial.getMutatedProgramMsg());
+        addCell(row, TOTAL_STEPS, trial.getTraceLength());
+        addCell(row, MUTATED_TOTAL_STEPS, trial.getMutatedTraceLength());
     }
 
 

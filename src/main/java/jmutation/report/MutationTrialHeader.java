@@ -13,7 +13,9 @@ public enum MutationTrialHeader implements ExcelHeader {
     TEST_CASE,
     MUTATION_COMMAND,
     PROGRAM_MSG,
-    TOTAL_STEPS;
+    MUTATED_PROGRAM_MSG,
+    TOTAL_STEPS,
+    MUTATED_TOTAL_STEPS;
 
     @Override
     public String getTitle() {

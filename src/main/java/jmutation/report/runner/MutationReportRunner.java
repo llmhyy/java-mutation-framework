@@ -26,36 +26,26 @@ public class MutationReportRunner extends ReportRunner {
         mutationFramework.setMutator(new HeuristicMutator(new StrongMutationParser()));
         MicrobatConfig microbatConfig = MicrobatConfig.defaultConfig(projectPath);
         microbatConfig = microbatConfig.setJavaHome("C:\\Program Files\\Java\\jre1.8.0_341");
-        microbatConfig = microbatConfig.setStepLimit(1000000);
+        microbatConfig = microbatConfig.setStepLimit(10000000);
         mutationFramework.setMicrobatConfig(microbatConfig);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
-        MutationReport report = new MutationReport(new File("C:\\Users\\bchenghi\\Desktop\\mutation-report.xlsx"));
-        boolean skip = true;
-        String testCaseName = "org.apache.commons.math.optimization.linear.SimplexSolverTest#testMath272(),31,46";
+        MutationReport report = new MutationReport(new File("C:\\Users\\Chenghin\\Desktop\\mutation-report.xlsx"));
         for (TestCase testCase : testCaseList) {
-            if (testCase.toString().equals(testCaseName)) {
-                skip = false;
-            }
-            if (skip) {
-                continue;
-            }
             mutationFramework.setTestCase(testCase);
             try {
                 List<MutationCommand> commands = mutationFramework.analyse();
-                int commandId = 0;
                 for (MutationCommand command : commands) {
-                    if (commandId < 13 && testCase.toString().equals(testCaseName)) {
-                        commandId++;
-                        continue;
-                    }
                     MutationResult result = mutationFramework.mutate(command);
                     report.record(new MutationTrial("math_70", testCase,
-                            command, result.getMutatedPrecheckExecutionResult().getPrecheckResult().getProgramMessage()));
-                    commandId++;
+                            command,
+                            result.getFixedPrecheckExecutionResult().getPrecheckResult().getProgramMessage(),
+                            result.getMutatedPrecheckExecutionResult().getPrecheckResult().getProgramMessage(),
+                            result.getFixedPrecheckExecutionResult().getTotalSteps(),
+                            result.getMutatedPrecheckExecutionResult().getPrecheckResult().getTotalSteps()));
                 }
             } catch (RuntimeException e) {
                 report.record(new MutationTrial("math_70", testCase,
-                        null, e.toString()));
+                        null, e.toString(), "", 0, 0)) ;
             }
         }
     }
