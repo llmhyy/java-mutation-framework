@@ -97,7 +97,7 @@ public class SemanticMutator extends Mutator {
         for (TokenSequence tokenSequence : possibleTokenSequences) {
             for (Pattern pattern : patterns) {
                 SemSeedMutationCommand mutationCommand = new SemSeedMutationCommand(tokenSequence.getNode(),
-                        staticAnalysisResult, pattern, tokenSequence);
+                        staticAnalysisResult, pattern, tokenSequence, fastTextWrapper);
                 while (mutationCommand.hasAnotherSeq()) {
                     project = mutate(mutationCommand, project);
                     if (compileProject(project)) {

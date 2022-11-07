@@ -26,16 +26,19 @@ import java.util.Set;
 public class SemSeedMutationCommand extends MutationCommand {
     private static final String PLACEHOLDER_TOKEN = "PLACEHOLDER";
     private final List<List<String>> mutatedTokenSequences;
+    private final FastTextWrapper fastTextWrapper;
     private StaticAnalysisResult tokenReplacements;
     private Pattern pattern;
     private TokenSequence targetSequence;
     private int mutatedTokenSeqIdx = 0;
 
-    public SemSeedMutationCommand(ASTNode node, StaticAnalysisResult tokenReplacements, Pattern pattern, TokenSequence targetSequence) {
+    public SemSeedMutationCommand(ASTNode node, StaticAnalysisResult tokenReplacements, Pattern pattern,
+                                  TokenSequence targetSequence, FastTextWrapper fastTextWrapper) {
         super(node);
         this.tokenReplacements = tokenReplacements;
         this.pattern = pattern;
         this.targetSequence = targetSequence;
+        this.fastTextWrapper = fastTextWrapper;
         mutatedTokenSequences = formMutatedTokenSequences();
     }
 
@@ -69,7 +72,6 @@ public class SemSeedMutationCommand extends MutationCommand {
         List<String> mutatedTokenSeq = new ArrayList<>();
         Map<Integer, List<String>> replacementsByIdx = new HashMap<>();
         // TODO: Figure out how to pass the path to model
-        FastTextWrapper fastTextWrapper = new FastTextWrapper("src/main/resources/semantic/model.bin");
         boolean containsPlaceHolder = false;
         for (int i = 0; i < buggyAbstractSeq.size(); i++) {
             String buggyAbstractToken = buggyAbstractSeq.get(i);
