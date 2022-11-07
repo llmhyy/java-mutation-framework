@@ -58,10 +58,14 @@ public abstract class MutationCommand {
         String className = types.get(0).getName().toString();
         PackageDeclaration packageDeclaration = cu.getPackage();
         if (packageDeclaration == null) {
-            return getClass().getSimpleName() + "#" + className + "#lines " + startLine + "-" + endLine + "#[" + node + "]";
+            return getClass().getSimpleName() + "#" + className +
+                    "#lines " + startLine + "-" + endLine +
+                    "#[" + originalNode + "]->["+ node + "]";
         }
         String packageName = packageDeclaration.getName().toString();
-        return getClass().getSimpleName() + "#" + packageName + "." + className + "#lines " + startLine + "-" + endLine + "#[" + node + "]";
+        return getClass().getSimpleName() + "#" + packageName + "." + className +
+                "#lines " + startLine + "-" + endLine +
+                "#[" + originalNode + "]->["+ node + "]";
     }
 
     @Override
