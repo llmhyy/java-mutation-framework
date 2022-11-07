@@ -12,10 +12,6 @@ import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
-import jmutation.mutation.heuristic.HeuristicMutator;
-import jmutation.mutation.heuristic.parser.MutationParser;
-import jmutation.mutation.heuristic.parser.StrongMutationParser;
-import jmutation.mutation.semantic.SemanticMutator;
 import jmutation.utils.RandomSingleton;
 import jmutation.utils.ResourceExtractor;
 import jmutation.utils.TraceHelper;
@@ -46,14 +42,11 @@ public class MutationFramework {
 
     private MicrobatConfig microbatConfig;
 
-    private int maxNumberOfMutations = -1;
-
     private long startSeed = 1;
     private long endSeed = 1;
 
     private boolean isAutoSeed = false;
 
-    private boolean strongMutationsEnabled = false;
     private PrecheckExecutionResult mutatedPrecheckExecutionResult = null;
     private ProjectExecutor mutatedProjectExecutor = null;
     private Project mutatedProject = null;
@@ -99,15 +92,6 @@ public class MutationFramework {
      */
     public void setTestCase(TestCase testCase) {
         this.testCase = testCase;
-    }
-
-    /**
-     * Sets max number of mutations. If it is 0 or less, there is no limit.
-     *
-     * @param maxNumberOfMutations Maximum number of mutations allowed
-     */
-    public void setMaxNumberOfMutations(int maxNumberOfMutations) {
-        this.maxNumberOfMutations = maxNumberOfMutations;
     }
 
     /**
@@ -161,10 +145,6 @@ public class MutationFramework {
                 MicrobatConfig.parse(microbatConfigPath, projectPath);
     }
 
-    public void toggleStrongMutations(boolean strongMutationsEnabled) {
-        this.strongMutationsEnabled = strongMutationsEnabled;
-    }
-
     public void setMicrobatConfig(MicrobatConfig microbatConfig) {
         this.microbatConfig = microbatConfig;
         projectPath = microbatConfig.getWorkingDir();
@@ -184,8 +164,8 @@ public class MutationFramework {
         }
         ResourceExtractor.extractFile("microbatConfig.json", path);
         ResourceExtractor.extractFile("semantic/bug-fix-patterns.json", path);
-        // TODO: model.bin is too large to push to git.
-        // ResourceExtractor.extractFile("semantic/model.bin", path);
+        // TODO: token-embeddings-FT.bin is too large to push to git.
+        // ResourceExtractor.extractFile("semantic/token-embeddings-FT.bin", path);
     }
 
     /**
@@ -239,11 +219,7 @@ public class MutationFramework {
         if (isAutoSeed) {
             runWithAutoSeed(proj, precheckExecutionResult);
         } else {
-            if (strongMutationsEnabled) {
-                runWithStrongMutations(proj, precheckExecutionResult);
-            } else {
-                runMutation(proj, precheckExecutionResult);
-            }
+            runMutation(proj, precheckExecutionResult);
         }
         System.out.println("Mutated precheck done");
         return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, testCase, mutator.getMutationHistory());
@@ -291,7 +267,6 @@ public class MutationFramework {
 
         microbatConfig = microbatConfig.setWorkingDir(projectPath);
 
-        setupMutator(new MutationParser());
         System.out.println(testCase);
         return true;
     }
@@ -308,9 +283,6 @@ public class MutationFramework {
         clonedProject = proj.cloneToOtherPath();
         mutatedProjConfig = new ProjectConfig(config, clonedProject);
         mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-        String resourcesPath = String.join(File.separator, "src", "main", "resources", "semantic");
-        mutator = new SemanticMutator(resourcesPath + File.separator + "bug-fix-patterns.json",
-                resourcesPath + File.separator + "model.bin");
         mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
         mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
@@ -331,11 +303,7 @@ public class MutationFramework {
         boolean hasFailed = false;
         for (long i = startSeed; i <= endSeed; i++) {
             RandomSingleton.getSingleton().setSeed(i);
-            if (strongMutationsEnabled) {
-                runWithStrongMutations(proj, precheckExecutionResult);
-            } else {
-                runMutation(proj, precheckExecutionResult);
-            }
+            runMutation(proj, precheckExecutionResult);
             if (!mutatedPrecheckExecutionResult.testCasePassed()) {
                 System.out.println("Mutated test case failed with seed " + i);
                 hasFailed = true;
@@ -347,27 +315,6 @@ public class MutationFramework {
         if (!hasFailed) {
             throw new RuntimeException("Test case " + testCase + " could not fail after attempting seeds from " + startSeed + " to " + endSeed);
         }
-    }
-
-    private void runWithStrongMutations(Project proj, PrecheckExecutionResult precheckExecutionResult) {
-        for (int i = 0; i < 2; i++) {
-            boolean useStrongMutations = i != 0;
-            MutationParser mutationParser = useStrongMutations ? new StrongMutationParser() : new MutationParser();
-            setupMutator(mutationParser);
-            runMutation(proj, precheckExecutionResult);
-            if (!mutatedPrecheckExecutionResult.testCasePassed()) {
-                break;
-            }
-            String mutationType = useStrongMutations ? "strong" : "normal";
-            String endOfMsg = useStrongMutations ? "" : " Re-attempting with strong mutations.";
-            String message = String.format("Test case %s did not fail with %s mutations.%s",
-                    testCase, mutationType, endOfMsg);
-            System.out.println(message);
-        }
-    }
-
-    private void setupMutator(MutationParser mutationParser) {
-        mutator = new HeuristicMutator(mutationParser);
     }
 
     private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {
