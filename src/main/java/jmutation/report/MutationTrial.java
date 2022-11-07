@@ -13,11 +13,14 @@ public class MutationTrial {
     private final MutationCommand mutationCommand;
     private final String programMsg;
 
-    public MutationTrial(String projectName, TestCase testCase, MutationCommand mutationCommand, String programMsg) {
+    private final int traceLength;
+
+    public MutationTrial(String projectName, TestCase testCase, MutationCommand mutationCommand, String programMsg, int traceLength) {
         this.projectName = projectName;
         this.testCase = testCase;
         this.mutationCommand = mutationCommand;
         this.programMsg = programMsg;
+        this.traceLength = traceLength;
     }
 
     public String getProjectName() {
@@ -34,5 +37,9 @@ public class MutationTrial {
 
     public String getProgramMsg() {
         return programMsg;
+    }
+
+    public int getTraceLength() {
+        return traceLength;
     }
 }
