@@ -7,8 +7,8 @@ import jmutation.mutation.AnalysisASTNodeRetriever;
 import jmutation.mutation.MutationASTNodeRetriever;
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
+import jmutation.mutation.heuristic.parser.MutationAnalysisParser;
 import jmutation.mutation.heuristic.parser.MutationParser;
-import jmutation.mutation.heuristic.parser.StrongMutationParser;
 import jmutation.parser.ProjectParser;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -152,20 +152,18 @@ public class HeuristicMutator extends Mutator {
             } catch (IOException e) {
                 throw new RuntimeException("Could not read file at " + file.toPath());
             }
-            StrongMutationParser strongMutationParser = new StrongMutationParser();
+            MutationAnalysisParser mutationAnalysisParser = new MutationAnalysisParser();
             for (MutationRange range : rangesForClass) {
                 CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
                 AnalysisASTNodeRetriever retriever = new AnalysisASTNodeRetriever(unit, range);
                 unit.accept(retriever);
                 List<ASTNode> nodes = retriever.getNodes();
                 for (ASTNode node : nodes) {
-                    MutationCommand mutationCommand = strongMutationParser.parse(node);
-                    if (mutationCommand == null) {
+                    List<MutationCommand> mutationCommands = mutationAnalysisParser.parse(node);
+                    if (mutationCommands == null) {
                         continue;
                     }
-                    if (mutationCommand.canExecute()) {
-                        result.add(mutationCommand);
-                    }
+                    result.addAll(mutationCommands);
                 }
             }
         }

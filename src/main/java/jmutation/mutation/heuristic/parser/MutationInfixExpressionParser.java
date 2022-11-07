@@ -10,6 +10,8 @@ import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,11 +47,25 @@ public class MutationInfixExpressionParser {
         return null;
     }
 
+    public static List<MutationCommand> parseAllCommands(InfixExpression node) {
+        List<MutationCommand> result = new ArrayList<>();
+        if (isMathOperator(node)) {
+            result.add(new MutationMathOperatorCommand(node));
+            return result;
+        }
+        if (isComparisonOperator(node)) {
+            if (cannotCreateConditionalBoundaryCommand(node)) {
+                result.add(new MutationConditionalNegationCommand(node));
+                return result;
+            }
+            result.add(new MutationConditionalBoundaryCommand(node));
+            result.add(new MutationConditionalNegationCommand(node));
+        }
+        return result;
+    }
+
     private static boolean cannotCreateConditionalBoundaryCommand(InfixExpression node) {
         Operator op = node.getOperator();
-        if (op.equals(Operator.EQUALS) || op.equals(Operator.NOT_EQUALS)) {
-            return true;
-        }
-        return false;
+        return op.equals(Operator.EQUALS) || op.equals(Operator.NOT_EQUALS);
     }
 }
