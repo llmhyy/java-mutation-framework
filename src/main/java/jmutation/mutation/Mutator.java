@@ -42,6 +42,7 @@ public abstract class Mutator {
         String className = unit.getPackage().getName() + "." + type.getName().toString();
         File file = retrieveFileFromClassName(className, project);
         command.executeMutation();
+        mutationHistory.add(command);
         try {
             writeToFile(command.getRewriter(), file);
         } catch (Exception e) {

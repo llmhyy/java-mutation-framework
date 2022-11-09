@@ -56,6 +56,7 @@ public class MutationFramework {
     private PrecheckExecutionResult precheckExecutionResult;
     private ProjectExecutor projectExecutor;
     private Project proj;
+    private String mutatedProjectPath = "";
 
 
     /**
@@ -150,6 +151,10 @@ public class MutationFramework {
         projectPath = microbatConfig.getWorkingDir();
     }
 
+    public void setMutatedProjectPath(String projectPath) {
+        mutatedProjectPath = projectPath;
+    }
+
     public void setMutator(Mutator mutator) {
         this.mutator = mutator;
     }
@@ -174,36 +179,15 @@ public class MutationFramework {
      * @return MutationResult object.
      */
     public MutationFrameworkResult startMutationFramework() {
+        mutator.clearHistory();
         mutate();
-        // Actual trace
-        MicrobatConfig updatedMicrobatConfig = microbatConfig.setExpectedSteps(precheckExecutionResult.getTotalSteps());
-        projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
-        TraceCollectionResult result = projectExecutor.exec(testCase);
-        System.out.println("Normal trace done");
-        MicrobatConfig updatedMutationMicrobatConfig = microbatConfig.setExpectedSteps(mutatedPrecheckExecutionResult.getTotalSteps());
-        mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
-        TraceCollectionResult mutatedResult = mutatedProjectExecutor.exec(testCase);
-        System.out.println("Mutated trace done");
+        return runTraceCollection();
+    }
 
-        // Trace with assertions to get output of test case
-        MicrobatConfig includeAssertionsMicrobatConfig = addAssertionsToMicrobatConfig(updatedMicrobatConfig);
-        projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
-        TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase);
-
-        MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
-        mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
-        TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
-
-        Trace mutatedTrace = mutatedResult.getTrace();
-        List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
-
-        boolean wasSuccessful = mutatedPrecheckExecutionResult.testCasePassed();
-
-
-        return new MutationFrameworkResult(result.getInstrumentationResult(),
-                mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(), mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
-                mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
-                wasSuccessful, testCase);
+    public MutationFrameworkResult startMutationFramework(MutationCommand command) {
+        mutator.clearHistory();
+        mutate(command);
+        return runTraceCollection();
     }
 
     public MutationResult mutate() {
@@ -280,7 +264,11 @@ public class MutationFramework {
     }
 
     private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
-        clonedProject = proj.cloneToOtherPath();
+        if (mutatedProjectPath.isEmpty()) {
+            clonedProject = proj.cloneToOtherPath();
+        } else {
+            clonedProject = proj.cloneToOtherPath(mutatedProjectPath);
+        }
         mutatedProjConfig = new ProjectConfig(config, clonedProject);
         mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
         mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
@@ -291,7 +279,11 @@ public class MutationFramework {
     }
 
     private void runMutation(Project proj, MutationCommand command) {
-        clonedProject = proj.cloneToOtherPath();
+        if (mutatedProjectPath.isEmpty()) {
+            clonedProject = proj.cloneToOtherPath();
+        } else {
+            clonedProject = proj.cloneToOtherPath(mutatedProjectPath);
+        }
         mutatedProject = mutator.mutate(command, clonedProject);
         mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
@@ -320,5 +312,37 @@ public class MutationFramework {
     private MicrobatConfig addAssertionsToMicrobatConfig(MicrobatConfig config) {
         String[] assertionsArr = new String[]{"org.junit.Assert", "org.junit.jupiter.api.Assertions", "org.testng.Assert"};
         return config.setIncludes(Arrays.asList(assertionsArr));
+    }
+
+    private MutationFrameworkResult runTraceCollection() {
+        // Actual trace
+        MicrobatConfig updatedMicrobatConfig = microbatConfig.setExpectedSteps(precheckExecutionResult.getTotalSteps());
+        projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
+        TraceCollectionResult result = projectExecutor.exec(testCase);
+        System.out.println("Normal trace done");
+        MicrobatConfig updatedMutationMicrobatConfig = microbatConfig.setExpectedSteps(mutatedPrecheckExecutionResult.getTotalSteps());
+        mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
+        TraceCollectionResult mutatedResult = mutatedProjectExecutor.exec(testCase);
+        System.out.println("Mutated trace done");
+
+        // Trace with assertions to get output of test case
+        MicrobatConfig includeAssertionsMicrobatConfig = addAssertionsToMicrobatConfig(updatedMicrobatConfig);
+        projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
+        TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase);
+
+        MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
+        mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
+        TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
+
+        Trace mutatedTrace = mutatedResult.getTrace();
+        List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, mutator.getMutationHistory());
+
+        boolean wasSuccessful = mutatedPrecheckExecutionResult.testCasePassed();
+
+
+        return new MutationFrameworkResult(result.getInstrumentationResult(),
+                mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(), mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
+                mutator.getMutationHistory(), proj, mutatedProject, rootCauses,
+                wasSuccessful, testCase);
     }
 }
