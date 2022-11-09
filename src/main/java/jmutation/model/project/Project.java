@@ -16,9 +16,7 @@ public abstract class Project {
     private final String name;
 
     private final File root;
-    private List<TestCase> testCases;
-
-
+    private final List<TestCase> testCases;
     protected String compileSrcFolderPath;
     protected String compileTestFolderPath;
     protected String srcFolderPath;
@@ -51,6 +49,7 @@ public abstract class Project {
     }
 
     public abstract File getSrcFolder();
+
     public abstract File getTestFolder();
 
     public abstract String singleTestCommand(TestCase testCase);
@@ -70,5 +69,7 @@ public abstract class Project {
     public abstract File getCompiledFolder();
 
     public abstract Project cloneToOtherPath();
+
+    public abstract Project cloneToOtherPath(String path);
 
 }

@@ -75,8 +75,13 @@ public class GradleProject extends Project {
 
     @Override
     public Project cloneToOtherPath() {
-        String tmpdir = System.getProperty("java.io.tmpdir");
-        File dest = new File(tmpdir + "/mutation1");
+        String tmpdir = System.getProperty("java.io.tmpdir") + File.separator + "mutation";
+        return cloneToOtherPath(tmpdir);
+    }
+
+    @Override
+    public Project cloneToOtherPath(String path) {
+        File dest = new File(path);
         try {
             FileUtils.deleteDirectory(dest);
             FileUtils.copyDirectory(getRoot(), dest);
