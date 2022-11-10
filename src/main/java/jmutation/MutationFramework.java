@@ -269,8 +269,6 @@ public class MutationFramework {
         } else {
             clonedProject = proj.cloneToOtherPath(mutatedProjectPath);
         }
-        mutatedProjConfig = new ProjectConfig(config, clonedProject);
-        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
         mutatedProject = mutator.mutate(precheckExecutionResult.getCoverage(), clonedProject);
         mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
@@ -287,8 +285,15 @@ public class MutationFramework {
         mutatedProject = mutator.mutate(command, clonedProject);
         mutatedProjConfig = new ProjectConfig(config, mutatedProject);
 
-        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-        mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+        try {
+            File dumpFile = File.createTempFile("precheck", "exec");
+            microbatConfig = microbatConfig.setDumpFilePath(dumpFile.getAbsolutePath());
+            mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+            mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+            dumpFile.delete();
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 
     private void runWithAutoSeed(Project proj, PrecheckExecutionResult precheckExecutionResult) {
