@@ -222,6 +222,7 @@ public class MutationFramework {
     }
 
     public MutationResult mutate(MutationCommand command) {
+        if (!setup()) return null;
         runMutation(proj, command);
 
         System.out.println("Mutated precheck done");
