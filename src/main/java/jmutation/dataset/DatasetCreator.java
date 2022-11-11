@@ -53,51 +53,5 @@ public class DatasetCreator {
                 executorService.submit(new BuggyProjectCreator(repositoryPath, projectPath, projectName, testCase, command));
             }
         }
-//        int bugId = 1;
-//        boolean skip = true;
-//        boolean commandSkip = true;
-//        for (TestCase testCase : testCaseList) {
-//            if (testCase.toString().equals("org.apache.commons.math.analysis.interpolation.LoessInterpolatorTest#testMath296withoutWeights(),220,241")) {
-//                skip = false;
-//            }
-//            if (skip) {
-//                continue;
-//            }
-//            mutationFramework.setTestCase(testCase);
-//            List<MutationCommand> commands;
-//            try {
-//                commands = mutationFramework.analyse();
-//            } catch (RuntimeException e) {
-//                continue;
-//            }
-//            for (MutationCommand command : commands) {
-//                if (command.toString().contains("MutationMathOperatorCommand#org.apache.commons.math.analysis.interpolation.LoessInterpolator#lines 466-466#[i - 1]->")) {
-//                    commandSkip = false;
-//                    bugId = 910;
-//                }
-//                if (commandSkip) continue;
-//                mutatedProjPath.append(bugId);
-//                mutatedProjPath.append(File.separator);
-//                int mutatedBugPathLen = mutatedProjPath.length();
-//                mutatedProjPath.append("bug");
-//                mutationFramework.setMutatedProjectPath(mutatedProjPath.toString());
-//                mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
-//                mutationFramework.setTestCase(testCase);
-//                try {
-//                    MutationResult result = mutationFramework.mutate(command);
-//                    if (result.getMutatedPrecheckExecutionResult().testCasePassed()) {
-//                        mutatedProjPath.delete(mutatedProjPathLen, mutatedProjPath.length());
-//                        continue;
-//                    }
-//                    createFile(testCase.toString(), mutatedProjPath.toString(), "testcase.txt");
-//                    createFile(command.toString(), mutatedProjPath.toString(), "rootcause.txt");
-//                } catch (RuntimeException e) {
-//                    System.out.println(e);
-//                }
-//                mutatedProjPath.delete(mutatedProjPathLen, mutatedProjPath.length());
-//                bugId++;
-//            }
-//        }
     }
-
 }
