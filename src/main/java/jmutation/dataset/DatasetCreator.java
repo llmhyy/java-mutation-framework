@@ -23,7 +23,7 @@ public class DatasetCreator {
 
     public static void main(String[] args) {
         String projectPath = String.join(File.separator, "sample", "math_70");
-        String repoPath = "C:\\Users\\bchenghi\\Desktop";
+        String repoPath = "C:\\Users\\bchenghi\\Desktop\\path";
         run(projectPath, repoPath);
     }
 
@@ -60,6 +60,7 @@ public class DatasetCreator {
             for (MutationCommand command : commands) {
                 BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
                 if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
+                    bugId++;
                     continue;
                 }
                 executorService.submit(new BuggyProjectCreator(repositoryPath, projectPath, buggyProject,

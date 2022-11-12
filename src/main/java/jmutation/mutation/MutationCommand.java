@@ -60,12 +60,12 @@ public abstract class MutationCommand {
         if (packageDeclaration == null) {
             return getClass().getSimpleName() + "#" + className +
                     "#lines " + startLine + "-" + endLine +
-                    "#[" + originalNode + "]->[" + node + "]";
+                    "#[" + originalNode + "]";
         }
         String packageName = packageDeclaration.getName().toString();
         return getClass().getSimpleName() + "#" + packageName + "." + className +
                 "#lines " + startLine + "-" + endLine +
-                "#[" + originalNode + "]->[" + node + "]";
+                "#[" + originalNode + "]";
     }
 
     @Override
