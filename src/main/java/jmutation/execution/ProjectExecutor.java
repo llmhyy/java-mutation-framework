@@ -2,16 +2,19 @@ package jmutation.execution;
 
 import jmutation.execution.output.MicrobatOutputHandler;
 import jmutation.execution.output.OutputHandler;
-import jmutation.model.*;
+import jmutation.model.MicrobatConfig;
+import jmutation.model.PrecheckExecutionResult;
+import jmutation.model.TestCase;
+import jmutation.model.TraceCollectionResult;
 import jmutation.model.project.ProjectConfig;
-import tracecollection.model.InstrumentationResult;
-import tracecollection.model.PrecheckResult;
 import jmutation.parser.ProjectParser;
 import jmutation.trace.FileReader;
 import microbat.model.BreakPoint;
 import microbat.model.ClassLocation;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
+import tracecollection.model.InstrumentationResult;
+import tracecollection.model.PrecheckResult;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,10 +39,6 @@ public class ProjectExecutor extends Executor {
         this.microbatConfig = microbatConfig;
     }
 
-    public void setMicrobatConfig(MicrobatConfig microbatConfig) {
-        this.microbatConfig = microbatConfig;
-    }
-
     private static List<File> walk(File start) {
         File[] list = start.listFiles();
         if (list == null) {
@@ -60,6 +59,10 @@ public class ProjectExecutor extends Executor {
         return jarFiles;
     }
 
+    public void setMicrobatConfig(MicrobatConfig microbatConfig) {
+        this.microbatConfig = microbatConfig;
+    }
+
     /**
      * Compiles the entire project, including test classes
      *
@@ -78,6 +81,10 @@ public class ProjectExecutor extends Executor {
     }
 
     public TraceCollectionResult exec(TestCase testCase) {
+        return exec(testCase, true);
+    }
+
+    public TraceCollectionResult exec(TestCase testCase, boolean shouldDeleteDumpFile) {
         if (!compiled) {
             TraceCollectionResult out = new TraceCollectionResult(compile(), null);
             if (!out.isSuccessful()) {
@@ -87,8 +94,13 @@ public class ProjectExecutor extends Executor {
         }
 
         InstrumentationCommandBuilder ib = setUpForInstrumentation(testCase, false);
+        TraceCollectionResult result = instrumentationExec(ib);
 
-        return instrumentationExec(ib);
+        if (shouldDeleteDumpFile) {
+            deleteDumpFile();
+        }
+
+        return result;
     }
 
     public List<File> findJars() {
@@ -96,6 +108,11 @@ public class ProjectExecutor extends Executor {
     }
 
     public PrecheckExecutionResult execPrecheck(TestCase testCase) {
+        return execPrecheck(testCase, true);
+    }
+
+
+    public PrecheckExecutionResult execPrecheck(TestCase testCase, boolean shouldDeleteDumpFile) {
         if (!compiled) {
             PrecheckExecutionResult out = new PrecheckExecutionResult(compile(), null);
             if (!out.isSuccessful()) {
@@ -104,8 +121,11 @@ public class ProjectExecutor extends Executor {
             compiled = true;
         }
         InstrumentationCommandBuilder ib = setUpForInstrumentation(testCase, true);
-
-        return precheckExec(ib, testCase);
+        PrecheckExecutionResult result = precheckExec(ib, testCase);
+        if (shouldDeleteDumpFile) {
+            deleteDumpFile();
+        }
+        return result;
     }
 
     private TraceCollectionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
@@ -205,5 +225,12 @@ public class ProjectExecutor extends Executor {
         });
 
         return ib;
+    }
+
+    private void deleteDumpFile() {
+        File dumpFile = new File(microbatConfig.getDumpFilePath());
+        if (dumpFile.exists()) {
+            dumpFile.delete();
+        }
     }
 }

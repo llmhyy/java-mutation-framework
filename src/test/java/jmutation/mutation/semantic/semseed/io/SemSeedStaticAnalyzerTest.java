@@ -1,7 +1,7 @@
 package jmutation.mutation.semantic.semseed.io;
 
 import jmutation.execution.Coverage;
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import jmutation.mutation.semantic.semseed.SemSeedStaticAnalyzer;
 import jmutation.mutation.semantic.semseed.model.StaticAnalysisResult;
 import org.junit.jupiter.api.Test;

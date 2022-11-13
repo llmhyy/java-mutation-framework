@@ -1,6 +1,6 @@
 package jmutation.mutation.heuristic;
 
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import jmutation.mutation.MutationASTNodeRetriever;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -22,19 +22,13 @@ public class HeuristicMutationASTNodeRetriever extends MutationASTNodeRetriever 
     @Override
     public boolean visit(Block node) {
         // Since we are removing all stmts in block, should not visit its children
-        if (addNodeToList(node)) {
-            return false;
-        }
-        return true;
+        return !addNodeToList(node);
     }
 
     @Override
     public boolean visit(ReturnStatement node) {
         // Should not visit children in return statement, if we are replacing the expression (return <expression>;)
         // with default value.
-        if (addNodeToList(node)) {
-            return false;
-        }
-        return true;
+        return !addNodeToList(node);
     }
 }

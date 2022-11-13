@@ -55,10 +55,15 @@ public class MicrobatConfig {
     }
 
     public static MicrobatConfig parse(String pathToConfigFile, String projectPath) {
+        MicrobatConfig microbatConfig = parse(pathToConfigFile);
+        return microbatConfig.setWorkingDir(projectPath);
+    }
+
+    public static MicrobatConfig parse(String pathToConfigFile) {
         JSONObject jsonConfig = JSONWrapper.getJSONObjectFromFile(pathToConfigFile);
         Iterator<String> jsonConfigIterator = jsonConfig.keys();
 
-        MicrobatConfig newMicrobatConfig = defaultConfig(projectPath);
+        MicrobatConfig newMicrobatConfig = defaultConfig();
 
         while (jsonConfigIterator.hasNext()) {
             String key = jsonConfigIterator.next();

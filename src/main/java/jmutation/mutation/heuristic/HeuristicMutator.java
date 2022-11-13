@@ -1,7 +1,7 @@
 package jmutation.mutation.heuristic;
 
 import jmutation.execution.Coverage;
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import jmutation.model.project.Project;
 import jmutation.mutation.AnalysisASTNodeRetriever;
 import jmutation.mutation.MutationASTNodeRetriever;

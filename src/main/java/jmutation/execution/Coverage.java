@@ -1,7 +1,7 @@
 package jmutation.execution;
 
-import jmutation.model.MutationRange;
 import jmutation.model.TestCase;
+import jmutation.model.mutation.MutationRange;
 import jmutation.utils.RandomSingleton;
 import microbat.model.BreakPoint;
 import microbat.model.ClassLocation;

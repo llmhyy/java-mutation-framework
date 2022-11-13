@@ -1,6 +1,6 @@
 package jmutation.mutation;
 
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 

@@ -1,4 +1,4 @@
-package jmutation.model;
+package jmutation.model.mutation;
 
 public class MutationRange {
     private String className;

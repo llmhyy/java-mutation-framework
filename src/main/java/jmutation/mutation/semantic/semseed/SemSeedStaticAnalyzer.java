@@ -1,7 +1,7 @@
 package jmutation.mutation.semantic.semseed;
 
 import jmutation.execution.Coverage;
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import jmutation.mutation.semantic.semseed.model.StaticAnalysisResult;
 import jmutation.parser.ProjectParser;
 import org.apache.commons.io.FileUtils;

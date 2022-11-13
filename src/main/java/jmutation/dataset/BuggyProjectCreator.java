@@ -1,7 +1,8 @@
 package jmutation.dataset;
 
 import jmutation.MutationFramework;
-import jmutation.model.MutationResult;
+import jmutation.model.mutation.MutationFrameworkConfig;
+import jmutation.model.mutation.MutationResult;
 import jmutation.mutation.heuristic.HeuristicMutator;
 import org.json.JSONObject;
 
@@ -37,9 +38,10 @@ public class BuggyProjectCreator implements Runnable {
     }
 
     public void run() {
+        MutationFrameworkConfig configuration = new MutationFrameworkConfig();
         MutationFramework mutationFramework = new MutationFramework();
-        mutationFramework.setProjectPath(projectPath);
-        mutationFramework.setMutator(new HeuristicMutator());
+        configuration.setProjectPath(projectPath);
+        configuration.setMutator(new HeuristicMutator());
         StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator + buggyProject.getProjectName() + File.separator);
         int mutatedProjPathLen = mutatedProjPath.length();
         int currBugId = increaseAndGetBugId();
@@ -47,9 +49,9 @@ public class BuggyProjectCreator implements Runnable {
         mutatedProjPath.append(File.separator);
         int mutatedBugPathLen = mutatedProjPath.length();
         mutatedProjPath.append(DatasetCreator.BUGGY_PROJECT_DIR);
-        mutationFramework.setMutatedProjectPath(mutatedProjPath.toString());
+        configuration.setMutatedProjectPath(mutatedProjPath.toString());
         mutatedProjPath.delete(mutatedBugPathLen, mutatedBugPathLen + 3);
-        mutationFramework.setTestCase(buggyProject.getTestCase());
+        configuration.setTestCase(buggyProject.getTestCase());
         try {
             MutationResult result = mutationFramework.mutate(buggyProject.getCommand());
             if (result.getMutatedPrecheckExecutionResult().testCasePassed()) {

@@ -2,8 +2,9 @@ package jmutation.report.runner;
 
 import jmutation.MutationFramework;
 import jmutation.model.MicrobatConfig;
-import jmutation.model.MutationResult;
 import jmutation.model.TestCase;
+import jmutation.model.mutation.MutationFrameworkConfig;
+import jmutation.model.mutation.MutationResult;
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.HeuristicMutator;
 import jmutation.mutation.heuristic.parser.StrongMutationParser;
@@ -21,17 +22,19 @@ public class MutationReportRunner extends ReportRunner {
 
     public void run() throws Exception {
         String projectPath = String.join(File.separator, "sample", "math_70");
+        MutationFrameworkConfig configuration = new MutationFrameworkConfig();
         MutationFramework mutationFramework = new MutationFramework();
-        mutationFramework.setProjectPath(projectPath);
-        mutationFramework.setMutator(new HeuristicMutator(new StrongMutationParser()));
+        mutationFramework.setConfig(configuration);
+        configuration.setProjectPath(projectPath);
+        configuration.setMutator(new HeuristicMutator(new StrongMutationParser()));
         MicrobatConfig microbatConfig = MicrobatConfig.defaultConfig(projectPath);
         microbatConfig = microbatConfig.setJavaHome("C:\\Program Files\\Java\\jre1.8.0_341");
         microbatConfig = microbatConfig.setStepLimit(10000000);
-        mutationFramework.setMicrobatConfig(microbatConfig);
+        configuration.setMicrobatConfig(microbatConfig);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         MutationReport report = new MutationReport(new File("C:\\Users\\Chenghin\\Desktop\\mutation-report.xlsx"));
         for (TestCase testCase : testCaseList) {
-            mutationFramework.setTestCase(testCase);
+            configuration.setTestCase(testCase);
             try {
                 List<MutationCommand> commands = mutationFramework.analyse();
                 for (MutationCommand command : commands) {
@@ -45,7 +48,7 @@ public class MutationReportRunner extends ReportRunner {
                 }
             } catch (RuntimeException e) {
                 report.record(new MutationTrial("math_70", testCase,
-                        null, e.toString(), "", 0, 0)) ;
+                        null, e.toString(), "", 0, 0));
             }
         }
     }

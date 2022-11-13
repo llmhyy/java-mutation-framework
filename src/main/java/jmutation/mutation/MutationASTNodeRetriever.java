@@ -1,6 +1,6 @@
 package jmutation.mutation;
 
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import jmutation.mutation.heuristic.MutationProbabilityCalculator;
 import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;

@@ -1,5 +1,7 @@
-package jmutation.model;
+package jmutation.model.mutation;
 
+import jmutation.model.PrecheckExecutionResult;
+import jmutation.model.TestCase;
 import jmutation.mutation.MutationCommand;
 
 import java.util.List;

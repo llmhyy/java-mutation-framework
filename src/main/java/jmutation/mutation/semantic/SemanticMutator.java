@@ -2,7 +2,7 @@ package jmutation.mutation.semantic;
 
 import jmutation.execution.Coverage;
 import jmutation.execution.ProjectExecutor;
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import jmutation.model.project.Project;
 import jmutation.model.project.ProjectConfig;
 import jmutation.mutation.MutationASTNodeRetriever;

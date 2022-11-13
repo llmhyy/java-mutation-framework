@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.util.Collections;
 
 public class MutationFrameworkTest {
-    private String tempDirPath = "./src/test/temp";
-    private File tempDir = new File(tempDirPath);
+    private final String tempDirPath = "./src/test/temp";
+    private final File tempDir = new File(tempDirPath);
 
     @Test
     public void extractResources_provideDirectory_extractsAllIntoDirectory() throws IOException, MavenInvocationException {
@@ -32,6 +32,7 @@ public class MutationFrameworkTest {
             assert (new File(tempDir, "lib" + File.separator + externalLibrary.getName() + ".jar").exists());
         }
         assert (new File(tempDir, "microbatConfig.json").exists());
+        assert (new File(tempDir, "semantic" + File.separator + "bug-fix-patterns.json").exists());
     }
 
     @AfterEach

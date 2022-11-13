@@ -1,7 +1,7 @@
 package jmutation.mutation;
 
 import jmutation.execution.Coverage;
-import jmutation.model.MutationRange;
+import jmutation.model.mutation.MutationRange;
 import jmutation.model.project.Project;
 import jmutation.parser.ProjectParser;
 import org.eclipse.jdt.core.dom.ASTNode;

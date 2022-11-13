@@ -10,10 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class InstrumentationCommandBuilder {
-    private static final List<String> SYSTEM_JARS = List.of("junit", "org.hamcrest.core", "testrunner", "bcel-6.0",
-            "javassist", "instrumentator", "junit-platform-console-standalone-1.9.0",
-            "org.junit.platform.runner_1.8.1.v20211018-1956", "org.testng_7.4.0.r202105021533");
-
     private final String dropInsDir;
     private final MicrobatConfig microbatConfig;
     List<String> classPaths = new ArrayList<>();
