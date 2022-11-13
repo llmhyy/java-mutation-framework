@@ -2,8 +2,8 @@ package jmutation.dataset;
 
 import jmutation.MutationFramework;
 import jmutation.model.TestCase;
+import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.mutation.MutationCommand;
-import jmutation.mutation.heuristic.HeuristicMutator;
 import jmutation.utils.JSONWrapper;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
@@ -23,7 +23,7 @@ public class DatasetCreator {
 
     public static void main(String[] args) {
         String projectPath = String.join(File.separator, "sample", "math_70");
-        String repoPath = "C:\\Users\\bchenghi\\Desktop\\path";
+        String repoPath = "C:\\Users\\bchenghi\\Desktop\\math_70";
         run(projectPath, repoPath);
     }
 
@@ -43,21 +43,23 @@ public class DatasetCreator {
         }
         int numOfCores = Runtime.getRuntime().availableProcessors() - 1;
         ExecutorService executorService = Executors.newFixedThreadPool(numOfCores);
+        MutationFrameworkConfig mutationFrameworkConfig = new MutationFrameworkConfig();
+        mutationFrameworkConfig.setProjectPath(projectPath);
         MutationFramework mutationFramework = new MutationFramework();
-        mutationFramework.setProjectPath(projectPath);
-        mutationFramework.setMutator(new HeuristicMutator());
+        mutationFramework.setConfig(mutationFrameworkConfig);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         String createdBugsFilePath = String.join(File.separator, repositoryPath, projectName, CREATED_BUGGY_PROJECT_FILE);
         JSONObject storedProjects = getStoredProjects(createdBugsFilePath);
         for (TestCase testCase : testCaseList) {
-            mutationFramework.setTestCase(testCase);
+            mutationFrameworkConfig.setTestCase(testCase);
             List<MutationCommand> commands;
             try {
                 commands = mutationFramework.analyse();
             } catch (RuntimeException e) {
                 continue;
             }
-            for (MutationCommand command : commands) {
+            for (int i = 0; i < commands.size() && i < 7; i++) {
+                MutationCommand command = commands.get(i);
                 BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
                 if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
                     bugId++;

@@ -3,6 +3,7 @@ package jmutation;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import jmutation.model.TestCase;
+import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
 
@@ -34,21 +35,23 @@ public class Main {
         JCommander.newBuilder().addObject(params).build().parse(args);
 
         MutationFramework mutationFramework = new MutationFramework();
+        MutationFrameworkConfig configuration = new MutationFrameworkConfig();
+        mutationFramework.setConfig(configuration);
         if (params.dropInsDir != null) {
-            mutationFramework.setDropInsPath(params.dropInsDir);
+            configuration.setDropInsPath(params.dropInsDir);
         }
         if (params.microbatConfigPath != null) {
-            mutationFramework.setMicrobatConfigPath(params.microbatConfigPath);
+            configuration.setMicrobatConfigPath(params.microbatConfigPath);
         }
-        mutationFramework.setProjectPath(params.projectPath);
+        configuration.setProjectPath(params.projectPath);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
 
         //Mutator mutator = new SemanticMutator();
         Mutator mutator = new HeuristicMutator();
 
-        mutationFramework.setMutator(mutator);
+        configuration.setMutator(mutator);
         for (TestCase testCase : testCaseList) {
-            mutationFramework.setTestCase(testCase);
+            configuration.setTestCase(testCase);
             try {
                 mutationFramework.startMutationFramework();
             } catch (RuntimeException e) {
