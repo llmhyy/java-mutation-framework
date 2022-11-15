@@ -17,7 +17,7 @@ public class MutationFrameworkConfig {
     private String microbatConfigPath = String.join(File.separator, DEFAULT_RESOURCES_PATH,
             "microbatConfig.json");
     private TestCase testCase = null; // Needs to be set by manager
-    private MicrobatConfig microbatConfig = MicrobatConfig.parse(microbatConfigPath);
+    private MicrobatConfig microbatConfig = MicrobatConfig.defaultConfig();
     private long startSeed = 1;
     private long endSeed = 1;
     private boolean isAutoSeed = false;
