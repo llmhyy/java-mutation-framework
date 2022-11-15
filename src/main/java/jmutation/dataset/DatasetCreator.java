@@ -23,7 +23,7 @@ public class DatasetCreator {
 
     public static void main(String[] args) {
         String projectPath = String.join(File.separator, "sample", "math_70");
-        String repoPath = "C:\\Users\\bchenghi\\Desktop\\math_70";
+        String repoPath = "C:\\Users\\bchenghi\\Desktop";
         run(projectPath, repoPath);
     }
 
@@ -33,7 +33,8 @@ public class DatasetCreator {
         // Copy from microbat
         // Create a new thread for each test case + command pair
         String projectName = projectPath.substring(projectPath.lastIndexOf(File.separator) + 1);
-        File fixPath = new File(String.join(File.separator, repositoryPath, projectName, WORKING_PROJECT_DIR));
+        String datasetPath = String.join(File.separator, repositoryPath, projectName);
+        File fixPath = new File(String.join(File.separator, datasetPath, WORKING_PROJECT_DIR));
         try {
             FileUtils.deleteDirectory(fixPath);
             FileUtils.copyDirectory(new File(projectPath), fixPath);
@@ -48,8 +49,9 @@ public class DatasetCreator {
         MutationFramework mutationFramework = new MutationFramework();
         mutationFramework.setConfig(mutationFrameworkConfig);
         List<TestCase> testCaseList = mutationFramework.getTestCases();
-        String createdBugsFilePath = String.join(File.separator, repositoryPath, projectName, CREATED_BUGGY_PROJECT_FILE);
+        String createdBugsFilePath = String.join(File.separator, datasetPath, CREATED_BUGGY_PROJECT_FILE);
         JSONObject storedProjects = getStoredProjects(createdBugsFilePath);
+        bugId = storedProjects.length();
         for (TestCase testCase : testCaseList) {
             mutationFrameworkConfig.setTestCase(testCase);
             List<MutationCommand> commands;
@@ -62,7 +64,6 @@ public class DatasetCreator {
                 MutationCommand command = commands.get(i);
                 BuggyProject buggyProject = new BuggyProject(testCase, command, projectName);
                 if (checkBuggyProjectAlreadyCloned(storedProjects, buggyProject)) {
-                    bugId++;
                     continue;
                 }
                 executorService.submit(new BuggyProjectCreator(repositoryPath, projectPath, buggyProject,

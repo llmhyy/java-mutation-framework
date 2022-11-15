@@ -4,6 +4,7 @@ import jmutation.MutationFramework;
 import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.model.mutation.MutationResult;
 import jmutation.mutation.heuristic.HeuristicMutator;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -40,10 +41,10 @@ public class BuggyProjectCreator implements Runnable {
     public void run() {
         MutationFrameworkConfig configuration = new MutationFrameworkConfig();
         MutationFramework mutationFramework = new MutationFramework();
+        mutationFramework.setConfig(configuration);
         configuration.setProjectPath(projectPath);
         configuration.setMutator(new HeuristicMutator());
         StringBuilder mutatedProjPath = new StringBuilder(repositoryPath + File.separator + buggyProject.getProjectName() + File.separator);
-        int mutatedProjPathLen = mutatedProjPath.length();
         int currBugId = increaseAndGetBugId();
         mutatedProjPath.append(currBugId);
         mutatedProjPath.append(File.separator);
@@ -55,7 +56,11 @@ public class BuggyProjectCreator implements Runnable {
         try {
             MutationResult result = mutationFramework.mutate(buggyProject.getCommand());
             if (result.getMutatedPrecheckExecutionResult().testCasePassed()) {
-                mutatedProjPath.delete(mutatedProjPathLen, mutatedProjPath.length());
+                try {
+                    FileUtils.deleteDirectory(new File(mutatedProjPath.toString()));
+                } catch (IOException e) {
+                    // do nothing
+                }
                 return;
             }
             createFile(buggyProject.getTestCase().toString(), mutatedProjPath.toString(), "testcase.txt");
