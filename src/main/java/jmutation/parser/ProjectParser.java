@@ -209,8 +209,6 @@ public class ProjectParser {
 
     public Project parse() {
         if (project == null) {
-            // traverse project differently depending on project type ?
-            // assume Maven project by default for now
             switch (projectType) {
                 case MAVEN:
                     MavenProjectParser mavenProjectParser = new MavenProjectParser(root);

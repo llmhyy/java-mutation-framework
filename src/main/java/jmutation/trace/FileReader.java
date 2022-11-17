@@ -6,6 +6,7 @@ import tracecollection.model.PrecheckResult;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public class FileReader {
@@ -24,7 +25,7 @@ public class FileReader {
     }
 
     public InstrumentationResult readInstrumentation() {
-         return fileStream.readTraceCollection();
+        return fileStream.readTraceCollection();
     }
 
     public Trace readMainTrace() {
@@ -36,5 +37,9 @@ public class FileReader {
             }
         }
         return null;
+    }
+
+    public void close() throws IOException {
+        fileStream.close();
     }
 }

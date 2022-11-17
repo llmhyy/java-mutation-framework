@@ -141,6 +141,11 @@ public class ProjectExecutor extends Executor {
             throw new RuntimeException("File " + dumpFilePath + " not found");
         }
         InstrumentationResult instrumentationResult = fileReader.readInstrumentation();
+        try {
+            fileReader.close();
+        } catch (IOException e) {
+
+        }
         setClassPathsToBreakpoints(instrumentationResult.getMainTrace());
         TraceCollectionResult executionResult = new TraceCollectionResult(executionResultStr, instrumentationResult);
         executionResult.setInstrumentationResult(instrumentationResult);
@@ -160,6 +165,10 @@ public class ProjectExecutor extends Executor {
             throw new RuntimeException("File " + dumpFilePath + " not found");
         }
         PrecheckResult precheckResult = fileReader.readPrecheck();
+        try {
+            fileReader.close();
+        } catch (IOException e) {
+        }
         setClassPathsToClassLocations(precheckResult.getVisitedClassLocations());
         Coverage coverage = new Coverage();
         coverage.formMutationRanges(precheckResult.getVisitedClassLocations(), testCase);
