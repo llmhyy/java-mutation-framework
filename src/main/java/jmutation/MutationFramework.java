@@ -107,8 +107,9 @@ public class MutationFramework {
         if (!setup()) return null;
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
-
-        projectExecutor = new ProjectExecutor(configuration.getMicrobatConfig(), projectConfig);
+        MicrobatConfig updatedMicrobatConfig = configuration.getMicrobatConfig();
+        updatedMicrobatConfig = updatedMicrobatConfig.setDumpFilePath(configuration.getDumpFilePathConfig().getPrecheckFilePath());
+        projectExecutor = new ProjectExecutor(updatedMicrobatConfig, projectConfig);
         // Precheck
         precheckExecutionResult = executePrecheck(projectExecutor);
         System.out.println("Normal precheck done");
@@ -256,12 +257,19 @@ public class MutationFramework {
 
         // Trace with assertions to get output of test case
         MicrobatConfig includeAssertionsMicrobatConfig = addAssertionsToMicrobatConfig(updatedMicrobatConfig);
+        includeAssertionsMicrobatConfig =
+                includeAssertionsMicrobatConfig.setDumpFilePath(
+                        configuration.getDumpFilePathConfig().getTraceWithAssertsFilePath());
         projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
-        TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase);
+        TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase,
+                configuration.isToDeleteTraceFile());
 
         MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
+        includeAssertionsMutationMicrobatConfig =
+                includeAssertionsMutationMicrobatConfig.setDumpFilePath(configuration.getDumpFilePathConfig().getMutatedTraceWithAssertsFilePath());
         mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
-        TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase);
+        TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase,
+                configuration.isToDeleteTraceFile());
 
         Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, configuration.getMutator().getMutationHistory());

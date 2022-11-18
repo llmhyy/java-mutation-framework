@@ -13,6 +13,7 @@ import microbat.model.BreakPoint;
 import microbat.model.ClassLocation;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
+import org.codehaus.plexus.util.FileUtils;
 import tracecollection.model.InstrumentationResult;
 import tracecollection.model.PrecheckResult;
 
@@ -110,7 +111,6 @@ public class ProjectExecutor extends Executor {
     public PrecheckExecutionResult execPrecheck(TestCase testCase) {
         return execPrecheck(testCase, true);
     }
-
 
     public PrecheckExecutionResult execPrecheck(TestCase testCase, boolean shouldDeleteDumpFile) {
         if (!compiled) {
@@ -212,14 +212,20 @@ public class ProjectExecutor extends Executor {
     private InstrumentationCommandBuilder setUpForInstrumentation(TestCase testCase, boolean isPrecheck) {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setPrecheck(isPrecheck);
         String dumpFilePath = updatedMicrobatConfig.getDumpFilePath();
-        try {
-            File microbatDumpFile = new File(dumpFilePath);
-            boolean dumpFileCreated = microbatDumpFile.createNewFile();
-            if (dumpFileCreated) {
-                System.out.println("New dump file created at " + dumpFilePath);
+        File microbatDumpFile = new File(dumpFilePath);
+        if (!microbatDumpFile.exists()) {
+            try {
+                File parentDir = microbatDumpFile.getParentFile();
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
+                boolean dumpFileCreated = microbatDumpFile.createNewFile();
+                if (dumpFileCreated) {
+                    System.out.println("New dump file created at " + dumpFilePath);
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Could not create dump file at " + dumpFilePath);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not create dump file at " + dumpFilePath);
         }
         // include microbat details to instrument run
         InstrumentationCommandBuilder ib = new InstrumentationCommandBuilder(updatedMicrobatConfig, projectConfig.getDropInsDir());
@@ -241,5 +247,15 @@ public class ProjectExecutor extends Executor {
         if (dumpFile.exists()) {
             dumpFile.delete();
         }
+        File excludesInfoFile = getExcludesInfoFile(microbatConfig.getDumpFilePath());
+        if (excludesInfoFile.exists()) {
+            excludesInfoFile.delete();
+        }
+    }
+
+    private File getExcludesInfoFile(String traceFile) {
+        String extension = FileUtils.getExtension(traceFile);
+        String filePrefix = traceFile.substring(0, traceFile.length() - extension.length() - 1);
+        return new File(filePrefix + "_excludes.info");
     }
 }
