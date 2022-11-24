@@ -14,8 +14,7 @@ public class MutationFrameworkConfig {
     private Mutator mutator = new HeuristicMutator();
     private String projectPath = ""; // For creating project config and microbat config
     private String dropInsPath = String.join(File.separator, DEFAULT_RESOURCES_PATH, DEFAULT_DROP_INS_DIR);
-    private String microbatConfigPath = String.join(File.separator, DEFAULT_RESOURCES_PATH,
-            "microbatConfig.json");
+    private String microbatConfigPath;
     private TestCase testCase = null; // Needs to be set by manager
     private MicrobatConfig microbatConfig = MicrobatConfig.defaultConfig();
     private long startSeed = 1;
@@ -24,8 +23,17 @@ public class MutationFrameworkConfig {
     private String mutatedProjectPath = "";
     private boolean toDeleteTraceFile = true;
     private boolean toDeletePrecheckFile = true;
-
     private DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
+
+
+    public MutationFrameworkConfig() {
+        String microbatConfigPath = String.join(File.separator, DEFAULT_RESOURCES_PATH,
+                "microbatConfig.json");
+        if (new File(microbatConfigPath).exists()) {
+            microbatConfig = MicrobatConfig.parse(microbatConfigPath);
+            this.microbatConfigPath = microbatConfigPath;
+        }
+    }
 
     public DumpFilePathConfig getDumpFilePathConfig() {
         return dumpFilePathConfig;
