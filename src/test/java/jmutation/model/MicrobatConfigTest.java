@@ -1,7 +1,8 @@
 package jmutation.model;
 
-import org.junit.jupiter.api.Test;
+import jmutation.model.mutation.DumpFilePathConfig;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,7 +26,7 @@ public class MicrobatConfigTest {
         expectedConfigMap.put("varLayer", Arrays.asList("10"));
         expectedConfigMap.put("working_dir", Arrays.asList(projectPath));
         expectedConfigMap.put("trace_recorder", Arrays.asList("FILE"));
-        expectedConfigMap.put("dump_file_path", Arrays.asList(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
+        expectedConfigMap.put("dump_file_path", Arrays.asList(DumpFilePathConfig.DEFAULT_DUMP_FILE_DIR + DumpFilePathConfig.DEFAULT_TRACE_FILE));
         expectedConfigMap.put("stepLimit", Arrays.asList("400000"));
         MicrobatConfig expectedConfig = new MicrobatConfig(expectedConfigMap);
         Assertions.assertEquals(expectedConfig, actualConfig);
