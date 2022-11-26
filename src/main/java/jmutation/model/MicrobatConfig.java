@@ -1,5 +1,6 @@
 package jmutation.model;
 
+import jmutation.model.mutation.DumpFilePathConfig;
 import jmutation.utils.JSONWrapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -86,7 +87,7 @@ public class MicrobatConfig {
 
     public static MicrobatConfig defaultConfig() {
         Map<String, List<String>> argMap = new HashMap<>();
-        argMap.put(OPT_DUMP_FILE, List.of(System.getProperty("java.io.tmpdir") + "dumpFile.exec"));
+        argMap.put(OPT_DUMP_FILE, List.of(DumpFilePathConfig.DEFAULT_DUMP_FILE_DIR + DumpFilePathConfig.DEFAULT_TRACE_FILE));
         if (System.getenv("JAVA_HOME") != null) {
             argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));
         }

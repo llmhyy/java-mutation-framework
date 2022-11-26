@@ -216,7 +216,7 @@ public class ProjectExecutor extends Executor {
         if (!microbatDumpFile.exists()) {
             try {
                 File parentDir = microbatDumpFile.getParentFile();
-                if (!parentDir.exists()) {
+                if (parentDir != null && !parentDir.exists()) {
                     parentDir.mkdirs();
                 }
                 boolean dumpFileCreated = microbatDumpFile.createNewFile();

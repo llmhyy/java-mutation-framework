@@ -10,18 +10,18 @@ public class DumpFilePathConfig {
     public static final String DEFAULT_BUGGY_TRACE_W_ASSERTS_FILE = "buggy-trace-asserts.exec";
     public static final String DEFAULT_PRECHECK_FILE = "precheck.exec";
     public static final String DEFAULT_BUGGY_PRECHECK_FILE = "buggy-precheck.exec";
-    private final String traceFilePath;
-    private final String mutatedTraceFilePath;
-    private final String traceWithAssertsFilePath;
-    private final String mutatedTraceWithAssertsFilePath;
-    private final String precheckFilePath;
-    private final String mutatedPrecheckFilePath;
+    private String traceFilePath;
+    private String mutatedTraceFilePath;
+    private String traceWithAssertsFilePath;
+    private String mutatedTraceWithAssertsFilePath;
+    private String precheckFilePath;
+    private String mutatedPrecheckFilePath;
 
     public DumpFilePathConfig() {
         traceFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_TRACE_FILE;
-        mutatedPrecheckFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_PRECHECK_FILE;
+        mutatedPrecheckFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_BUGGY_PRECHECK_FILE;
         mutatedTraceFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_BUGGY_TRACE_FILE;
-        precheckFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_BUGGY_PRECHECK_FILE;
+        precheckFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_PRECHECK_FILE;
         traceWithAssertsFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_TRACE_W_ASSERTS_FILE;
         mutatedTraceWithAssertsFilePath = DEFAULT_DUMP_FILE_DIR + DEFAULT_BUGGY_TRACE_W_ASSERTS_FILE;
     }
@@ -39,23 +39,47 @@ public class DumpFilePathConfig {
         return traceFilePath;
     }
 
+    public void setTraceFilePath(String traceFilePath) {
+        this.traceFilePath = traceFilePath;
+    }
+
     public String getMutatedTraceFilePath() {
         return mutatedTraceFilePath;
+    }
+
+    public void setMutatedTraceFilePath(String mutatedTraceFilePath) {
+        this.mutatedTraceFilePath = mutatedTraceFilePath;
     }
 
     public String getPrecheckFilePath() {
         return precheckFilePath;
     }
 
+    public void setPrecheckFilePath(String precheckFilePath) {
+        this.precheckFilePath = precheckFilePath;
+    }
+
     public String getMutatedPrecheckFilePath() {
         return mutatedPrecheckFilePath;
+    }
+
+    public void setMutatedPrecheckFilePath(String mutatedPrecheckFilePath) {
+        this.mutatedPrecheckFilePath = mutatedPrecheckFilePath;
     }
 
     public String getTraceWithAssertsFilePath() {
         return traceWithAssertsFilePath;
     }
 
+    public void setTraceWithAssertsFilePath(String traceWithAssertsFilePath) {
+        this.traceWithAssertsFilePath = traceWithAssertsFilePath;
+    }
+
     public String getMutatedTraceWithAssertsFilePath() {
         return mutatedTraceWithAssertsFilePath;
+    }
+
+    public void setMutatedTraceWithAssertsFilePath(String mutatedTraceWithAssertsFilePath) {
+        this.mutatedTraceWithAssertsFilePath = mutatedTraceWithAssertsFilePath;
     }
 }

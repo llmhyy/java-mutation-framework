@@ -18,7 +18,6 @@ import jmutation.utils.TraceHelper;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -137,11 +136,11 @@ public class MutationFramework {
         if (!setup()) return null;
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
-
-        projectExecutor = new ProjectExecutor(configuration.getMicrobatConfig(), projectConfig);
+        MicrobatConfig updatedMicroBatConfig = configuration.getMicrobatConfig().
+                setDumpFilePath(configuration.getDumpFilePathConfig().getPrecheckFilePath());
+        projectExecutor = new ProjectExecutor(updatedMicroBatConfig, projectConfig);
         // Precheck
         precheckExecutionResult = executePrecheck(projectExecutor);
-        System.out.println("Normal precheck done");
         return configuration.getMutator().analyse(precheckExecutionResult.getCoverage().getRanges(), proj);
     }
 
@@ -204,16 +203,10 @@ public class MutationFramework {
         }
         mutatedProject = configuration.getMutator().mutate(command, clonedProject);
         mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
-
-        try {
-            File dumpFile = File.createTempFile("precheck", "exec");
-            MicrobatConfig microbatConfig = configuration.getMicrobatConfig().setDumpFilePath(dumpFile.getAbsolutePath());
-            mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-            mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
-            dumpFile.delete();
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        MicrobatConfig microbatConfig = configuration.getMicrobatConfig().setDumpFilePath(
+                configuration.getDumpFilePathConfig().getMutatedPrecheckFilePath());
+        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+        mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
     }
 
     private void runWithAutoSeed(Project proj, PrecheckExecutionResult precheckExecutionResult) {
