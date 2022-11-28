@@ -1,9 +1,9 @@
 package jmutation.trace;
 
+import microbat.model.BreakPoint;
 import microbat.model.ClassLocation;
 import microbat.model.ControlScope;
 import microbat.model.SourceScope;
-import microbat.model.BreakPoint;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import microbat.model.value.VarValue;
@@ -287,6 +287,7 @@ public class TraceInputStream extends DataInputStream {
             }
             step.setException(readBoolean());
             step.setBytecode(readString());
+            step.setInvokingMethod(readString());
         }
         readRWVarValues(allSteps, false);
         readRWVarValues(allSteps, true);
