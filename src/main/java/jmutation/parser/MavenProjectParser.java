@@ -1,30 +1,45 @@
 package jmutation.parser;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.List;
-import java.util.function.Predicate;
-
 import jmutation.constants.MavenConstants;
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Predicate;
+
 import static jmutation.parser.ProjectParser.walk;
 
 class MavenProjectParser extends ProjectInfoParser {
     Model model;
     Build build;
+    private String projectName = super.getProjectName();
+    private String srcFolderPath = MavenConstants.SRC_FOLDER;
+    private String testFolderPath = MavenConstants.TEST_FOLDER;
+    private String compiledSrcFolderPath = MavenConstants.COMPILATION_FOLDER + File.separator +
+            MavenConstants.COMPILED_CLASS_FOLDER;
+    private String compiledTestFolderPath = MavenConstants.COMPILATION_FOLDER + File.separator +
+            MavenConstants.TEST_CLASS_FOLDER;
 
     public MavenProjectParser(File root) {
         super(root);
         File pomFile = getPomFile();
         MavenXpp3Reader reader = new MavenXpp3Reader();
-        try {
-            model = reader.read(new FileReader(pomFile));
+        try (FileReader fileReader = new FileReader(pomFile)) {
+            model = reader.read(fileReader);
+            projectName = model.getName() == null ? projectName : model.getName();
             build = model.getBuild();
+            if (build == null) {
+                return;
+            }
+            srcFolderPath = (build.getSourceDirectory() == null) ? srcFolderPath : build.getSourceDirectory();
+            testFolderPath = (build.getTestSourceDirectory() == null) ? testFolderPath : build.getTestSourceDirectory();
+            compiledSrcFolderPath = (build.getOutputDirectory() == null) ? compiledSrcFolderPath : build.getOutputDirectory();
+            compiledTestFolderPath = (build.getTestOutputDirectory() == null) ? compiledTestFolderPath : build.getTestOutputDirectory();
         } catch (XmlPullParserException | IOException e) {
             System.out.println("pom not found");
         }
@@ -32,61 +47,23 @@ class MavenProjectParser extends ProjectInfoParser {
 
     @Override
     String getProjectName() {
-        String projName = model.getName();
-        if (projName == null) {
-            return super.getProjectName();
-        }
-        return projName;
+        return projectName;
     }
 
     String getSrcFolderPath() {
-        String srcFolderPath = MavenConstants.SRC_FOLDER;
-        if (build == null) {
-            return srcFolderPath;
-        }
-        String pomPath = build.getSourceDirectory();
-        if (pomPath == null) {
-            return srcFolderPath;
-        }
-        return pomPath;
+        return srcFolderPath;
     }
 
     String getTestFolderPath() {
-        String testFolderPath = MavenConstants.TEST_FOLDER;
-        if (build == null) {
-            return testFolderPath;
-        }
-        String pomPath = build.getTestSourceDirectory();
-        if (pomPath == null) {
-            return testFolderPath;
-        }
-        return pomPath;
+        return testFolderPath;
     }
 
     String getCompiledSrcFolderPath() {
-        String outputPath = MavenConstants.COMPILATION_FOLDER + File.separator +
-                MavenConstants.COMPILED_CLASS_FOLDER;
-        if (build == null) {
-            return outputPath;
-        }
-        String pomPath = build.getOutputDirectory();
-        if (pomPath == null) {
-            return outputPath;
-        }
-        return pomPath;
+        return compiledSrcFolderPath;
     }
 
     String getCompiledTestFolderPath() {
-        String testOutputPath = MavenConstants.COMPILATION_FOLDER + File.separator +
-                MavenConstants.TEST_CLASS_FOLDER;
-        if (build == null) {
-            return testOutputPath;
-        }
-        String pomPath = build.getTestOutputDirectory();
-        if (pomPath == null) {
-            return testOutputPath;
-        }
-        return pomPath;
+        return compiledTestFolderPath;
     }
 
     private File getPomFile() {
