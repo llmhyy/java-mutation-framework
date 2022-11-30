@@ -15,8 +15,6 @@ import java.util.function.Predicate;
 import static jmutation.parser.ProjectParser.walk;
 
 class MavenProjectParser extends ProjectInfoParser {
-    Model model;
-    Build build;
     private String projectName = super.getProjectName();
     private String srcFolderPath = MavenConstants.SRC_FOLDER;
     private String testFolderPath = MavenConstants.TEST_FOLDER;
@@ -30,9 +28,9 @@ class MavenProjectParser extends ProjectInfoParser {
         File pomFile = getPomFile();
         MavenXpp3Reader reader = new MavenXpp3Reader();
         try (FileReader fileReader = new FileReader(pomFile)) {
-            model = reader.read(fileReader);
+            Model model = reader.read(fileReader);
             projectName = model.getName() == null ? projectName : model.getName();
-            build = model.getBuild();
+            Build build = model.getBuild();
             if (build == null) {
                 return;
             }
