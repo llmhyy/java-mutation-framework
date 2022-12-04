@@ -8,6 +8,7 @@ import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 
 public class Main {
@@ -54,8 +55,8 @@ public class Main {
             configuration.setTestCase(testCase);
             try {
                 mutationFramework.startMutationFramework();
-            } catch (RuntimeException e) {
-                System.out.println(e);
+            } catch (RuntimeException | TimeoutException e) {
+                e.printStackTrace();
             }
         }
     }

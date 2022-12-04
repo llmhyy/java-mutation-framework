@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Set up and calls commands on the project (compile, instrumentation, etc)
@@ -86,6 +87,15 @@ public class ProjectExecutor extends Executor {
     }
 
     public TraceCollectionResult exec(TestCase testCase, boolean shouldDeleteDumpFile) {
+        try {
+            return exec(testCase, shouldDeleteDumpFile, 0);
+        } catch (TimeoutException e) {
+            // Should not happen
+            return null;
+        }
+    }
+
+    public TraceCollectionResult exec(TestCase testCase, boolean shouldDeleteDumpFile, int timeout) throws TimeoutException {
         if (!compiled) {
             TraceCollectionResult out = new TraceCollectionResult(compile(), null);
             if (!out.isSuccessful()) {
@@ -95,7 +105,7 @@ public class ProjectExecutor extends Executor {
         }
 
         InstrumentationCommandBuilder ib = setUpForInstrumentation(testCase, false);
-        TraceCollectionResult result = instrumentationExec(ib);
+        TraceCollectionResult result = instrumentationExec(ib, timeout);
 
         if (shouldDeleteDumpFile) {
             deleteDumpFile();
@@ -128,10 +138,10 @@ public class ProjectExecutor extends Executor {
         return result;
     }
 
-    private TraceCollectionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder) {
+    private TraceCollectionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder, int timeout) throws TimeoutException {
         String commandStr = instrumentationCommandBuilder.generateCommand();
         setOutputHandler(new MicrobatOutputHandler());
-        String executionResultStr = exec(commandStr);
+        String executionResultStr = exec(commandStr, timeout);
         setOutputHandler(new OutputHandler());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         FileReader fileReader;
@@ -144,7 +154,7 @@ public class ProjectExecutor extends Executor {
         try {
             fileReader.close();
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
         setClassPathsToBreakpoints(instrumentationResult.getMainTrace());
         TraceCollectionResult executionResult = new TraceCollectionResult(executionResultStr, instrumentationResult);

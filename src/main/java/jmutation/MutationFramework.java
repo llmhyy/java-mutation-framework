@@ -21,6 +21,7 @@ import microbat.model.trace.TraceNode;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static jmutation.constants.ResourcesPath.DEFAULT_RESOURCES_PATH;
 
@@ -85,7 +86,7 @@ public class MutationFramework {
      *
      * @return MutationResult object.
      */
-    public MutationFrameworkResult startMutationFramework() {
+    public MutationFrameworkResult startMutationFramework() throws TimeoutException {
         configuration.getMutator().clearHistory();
         mutate();
         return runTraceCollection();
@@ -95,7 +96,7 @@ public class MutationFramework {
      * @param command
      * @return
      */
-    public MutationFrameworkResult startMutationFramework(MutationCommand command) {
+    public MutationFrameworkResult startMutationFramework(MutationCommand command) throws TimeoutException {
         configuration.getMutator().clearHistory();
         mutate(command);
         return runTraceCollection();
@@ -234,7 +235,7 @@ public class MutationFramework {
         return config.setIncludes(Arrays.asList(assertionsArr));
     }
 
-    private MutationFrameworkResult runTraceCollection() {
+    private MutationFrameworkResult runTraceCollection() throws TimeoutException {
         // Actual trace
         TestCase testCase = configuration.getTestCase();
         MicrobatConfig microbatConfig = configuration.getMicrobatConfig();
@@ -242,14 +243,16 @@ public class MutationFramework {
         updatedMicrobatConfig = updatedMicrobatConfig.
                 setDumpFilePath(configuration.getDumpFilePathConfig().getTraceFilePath());
         projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
-        TraceCollectionResult result = projectExecutor.exec(testCase, configuration.isToDeleteTraceFile());
+        TraceCollectionResult result = projectExecutor.exec(testCase, configuration.isToDeleteTraceFile(),
+                configuration.getInstrumentationTimeout());
         System.out.println("Normal trace done");
 
         MicrobatConfig updatedMutationMicrobatConfig = microbatConfig.setExpectedSteps(mutatedPrecheckExecutionResult.getTotalSteps());
         updatedMutationMicrobatConfig = updatedMutationMicrobatConfig.
                 setDumpFilePath(configuration.getDumpFilePathConfig().getMutatedTraceFilePath());
         mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
-        TraceCollectionResult mutatedResult = mutatedProjectExecutor.exec(testCase, configuration.isToDeleteTraceFile());
+        TraceCollectionResult mutatedResult = mutatedProjectExecutor.exec(testCase, configuration.isToDeleteTraceFile(),
+                configuration.getInstrumentationTimeout());
         System.out.println("Mutated trace done");
 
         // Trace with assertions to get output of test case
@@ -259,14 +262,14 @@ public class MutationFramework {
                         configuration.getDumpFilePathConfig().getTraceWithAssertsFilePath());
         projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
         TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase,
-                configuration.isToDeleteTraceFile());
+                configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
 
         MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
         includeAssertionsMutationMicrobatConfig =
                 includeAssertionsMutationMicrobatConfig.setDumpFilePath(configuration.getDumpFilePathConfig().getMutatedTraceWithAssertsFilePath());
         mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
         TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase,
-                configuration.isToDeleteTraceFile());
+                configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
 
         Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, configuration.getMutator().getMutationHistory());

@@ -24,6 +24,7 @@ public class MutationFrameworkConfig {
     private boolean toDeleteTraceFile = true;
     private boolean toDeletePrecheckFile = true;
     private DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
+    private int instrumentationTimeout = 0;
 
 
     public MutationFrameworkConfig() {
@@ -144,5 +145,13 @@ public class MutationFrameworkConfig {
 
     public void setMutatedProjectPath(String mutatedProjectPath) {
         this.mutatedProjectPath = mutatedProjectPath;
+    }
+
+    public int getInstrumentationTimeout() {
+        return instrumentationTimeout;
+    }
+
+    public void setInstrumentationTimeout(int instrumentationTimeout) {
+        this.instrumentationTimeout = instrumentationTimeout;
     }
 }
