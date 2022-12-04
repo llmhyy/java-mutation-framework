@@ -38,6 +38,7 @@ public class Main {
         MutationFramework mutationFramework = new MutationFramework();
         MutationFrameworkConfig configuration = new MutationFrameworkConfig();
         mutationFramework.setConfig(configuration);
+        configuration.setInstrumentationTimeout(5);
         if (params.dropInsDir != null) {
             configuration.setDropInsPath(params.dropInsDir);
         }

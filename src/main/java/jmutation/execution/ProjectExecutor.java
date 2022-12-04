@@ -1,7 +1,7 @@
 package jmutation.execution;
 
-import jmutation.execution.output.MicrobatOutputHandler;
-import jmutation.execution.output.OutputHandler;
+import jmutation.execution.output.MicrobatOutputHandler.MicrobatOutputHandlerBuilder;
+import jmutation.execution.output.OutputHandler.OutputHandlerBuilder;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.TestCase;
@@ -140,9 +140,9 @@ public class ProjectExecutor extends Executor {
 
     private TraceCollectionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder, int timeout) throws TimeoutException {
         String commandStr = instrumentationCommandBuilder.generateCommand();
-        setOutputHandler(new MicrobatOutputHandler());
+        setOutputHandlerBuilder(new MicrobatOutputHandlerBuilder());
         String executionResultStr = exec(commandStr, timeout);
-        setOutputHandler(new OutputHandler());
+        setOutputHandlerBuilder(new OutputHandlerBuilder());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         FileReader fileReader;
         try {
@@ -164,9 +164,9 @@ public class ProjectExecutor extends Executor {
 
     private PrecheckExecutionResult precheckExec(InstrumentationCommandBuilder instrumentationCommandBuilder, TestCase testCase) {
         String commandStr = instrumentationCommandBuilder.generateCommand();
-        setOutputHandler(new MicrobatOutputHandler());
+        setOutputHandlerBuilder(new MicrobatOutputHandlerBuilder());
         String executionResultStr = exec(commandStr);
-        setOutputHandler(new OutputHandler());
+        setOutputHandlerBuilder(new OutputHandlerBuilder());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         FileReader fileReader;
         try {
