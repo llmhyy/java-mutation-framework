@@ -98,7 +98,7 @@ public class Executor {
             // Terminate process, then await termination on output handler thread
             boolean isComplete = true;
             if (timeout > 0) {
-                process.waitFor(timeout, TimeUnit.SECONDS);
+                process.waitFor(timeout, TimeUnit.MINUTES);
                 isComplete = !process.isAlive();
                 destroyProcessAndChildren(process);
             }
