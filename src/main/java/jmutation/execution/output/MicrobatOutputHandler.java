@@ -2,6 +2,10 @@ package jmutation.execution.output;
 
 public class MicrobatOutputHandler extends OutputHandler {
     final private String PROGRESS_HEADER = "$progress";
+
+    private MicrobatOutputHandler() {
+    }
+
     @Override
     public void output(String outputString) {
         if (outputString.startsWith(PROGRESS_HEADER)) {
@@ -13,7 +17,7 @@ public class MicrobatOutputHandler extends OutputHandler {
     }
 
     private void printProgress(int currentStepNum, int totalStepNum) {
-        if(totalStepNum == 0) {
+        if (totalStepNum == 0) {
             return;
         }
 
@@ -36,7 +40,7 @@ public class MicrobatOutputHandler extends OutputHandler {
         }
         System.out.print(buffer);
 
-        int[] percentiles = { 10, 20, 30, 40, 50, 60, 70, 80, 90 };
+        int[] percentiles = {10, 20, 30, 40, 50, 60, 70, 80, 90};
         for (int i = 0; i < percentiles.length; i++) {
             int percentile = percentiles[i];
             if (preP < percentile && percentile <= prog) {
@@ -45,6 +49,12 @@ public class MicrobatOutputHandler extends OutputHandler {
         }
         if (currentStepNum == totalStepNum) {
             System.out.println("|");
+        }
+    }
+
+    public static class MicrobatOutputHandlerBuilder extends OutputHandler.OutputHandlerBuilder {
+        public MicrobatOutputHandlerBuilder() {
+            handler = new MicrobatOutputHandler();
         }
     }
 }
