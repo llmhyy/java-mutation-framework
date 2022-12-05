@@ -9,6 +9,9 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class JSONWrapper {
+    private JSONWrapper() {
+    }
+
     public static JSONObject getJSONObjectFromFile(String filePath) {
         File configFile = new File(filePath);
         if (!configFile.exists()) {

@@ -188,10 +188,12 @@ public class HeuristicMutator extends Mutator {
         return retriever.getNodes();
     }
 
+    @Override
     public List<MutationCommand> getMutationHistory() {
         return mutationHistory;
     }
 
+    @Override
     public void clearHistory() {
         mutationHistory = new ArrayList<>();
     }

@@ -8,9 +8,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ConditionalOperator {
+    static Set<InfixExpression.Operator> operatorSet = new HashSet<>(Arrays.asList(Operator.LESS, Operator.LESS_EQUALS, Operator.GREATER, Operator.GREATER_EQUALS, Operator.EQUALS, Operator.NOT_EQUALS));
+
+    private ConditionalOperator() {
+    }
+
     public static Set<Operator> getOperatorSet() {
         return operatorSet;
     }
-
-    static Set<InfixExpression.Operator> operatorSet = new HashSet<>(Arrays.asList(Operator.LESS, Operator.LESS_EQUALS, Operator.GREATER, Operator.GREATER_EQUALS, Operator.EQUALS, Operator.NOT_EQUALS));
 }

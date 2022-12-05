@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TraceHelperTest {
+class TraceHelperTest {
     MutationTestHelper helper = new MutationTestHelper();
 
     @Test
-    public void getMutatedTraceNodes_validMutationCommand_findsCorrectTraceNode() {
+    void getMutatedTraceNodes_validMutationCommand_findsCorrectTraceNode() {
         List<TraceNode> executionList = new ArrayList<>();
         String className = "main.Main";
         String methodSignature = "methodSignature";
@@ -50,7 +50,7 @@ public class TraceHelperTest {
         List<MutationCommand> mutationHistory = new ArrayList<>();
         mutationHistory.add(command);
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(trace, mutationHistory);
-        Assertions.assertEquals(rootCauses.size(), 1);
+        Assertions.assertEquals(1, rootCauses.size());
         Assertions.assertEquals(traceNode, rootCauses.get(0));
     }
 }

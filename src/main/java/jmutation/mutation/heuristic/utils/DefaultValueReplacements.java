@@ -7,6 +7,9 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 
 public class DefaultValueReplacements {
+    private DefaultValueReplacements() {
+    }
+
     public static Expression getDefaultReplacementExpression(Type type) {
         AST ast = type.getAST();
         if (type instanceof PrimitiveType) {

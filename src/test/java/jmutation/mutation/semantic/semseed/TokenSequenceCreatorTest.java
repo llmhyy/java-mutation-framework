@@ -13,11 +13,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TokenSequenceCreatorTest {
+class TokenSequenceCreatorTest {
     MutationTestHelper helper = new MutationTestHelper();
 
     @Test
-    public void visit_infixExpressionWithIdentifierAndString_shouldGetTokenSequences() {
+    void visit_infixExpressionWithIdentifierAndString_shouldGetTokenSequences() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "String a = \"string\";" +

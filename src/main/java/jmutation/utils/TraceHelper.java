@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 public class TraceHelper {
+    private TraceHelper() {
+    }
+
     /**
      * Gets TraceNodes that matches the mutation history i.e. root cause of bugs
      *
