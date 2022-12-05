@@ -5,20 +5,20 @@ import jmutation.mutation.explainable.doc.model.JavaComment;
 public class WordFilter extends ProjectParserFilter {
 
     private static final String[] DEFAULT_REQUIRED_WORDS = new String[]{"if", "check"};
-    private final String[] NEEDED_WORDS;
+    private final String[] requiredWords;
 
     public WordFilter() {
-        NEEDED_WORDS = DEFAULT_REQUIRED_WORDS;
+        requiredWords = DEFAULT_REQUIRED_WORDS;
     }
 
     public WordFilter(String[] requiredWords) {
-        NEEDED_WORDS = requiredWords;
+        this.requiredWords = requiredWords;
     }
 
     @Override
     protected boolean privateHandle(JavaComment comment, Request request) {
         String commentStr = comment.getComment();
-        for (String word : NEEDED_WORDS) {
+        for (String word : requiredWords) {
             if (commentStr.contains(word)) {
                 return true;
             }
