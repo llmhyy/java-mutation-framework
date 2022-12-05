@@ -3,6 +3,7 @@ package jmutation.mutation.semantic.semseed.model;
 import jmutation.mutation.semantic.semseed.constants.TokenScope;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class StaticAnalysisResult {
@@ -49,6 +50,11 @@ public class StaticAnalysisResult {
                 topOccurringLiterals.equals(otherResult.topOccurringLiterals) &&
                 identifiersByFiles.equals(otherResult.identifiersByFiles) &&
                 literalsByFiles.equals(otherResult.literalsByFiles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(topOccurringIdentifiers, topOccurringLiterals, identifiersByFiles, literalsByFiles, identifiersByMethods, literalsByMethods);
     }
 
     public Set<String> getTokens(TokenScope scope, boolean isIdentifiers, String key) {

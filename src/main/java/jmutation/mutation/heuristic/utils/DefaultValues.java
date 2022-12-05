@@ -1,11 +1,24 @@
 package jmutation.mutation.heuristic.utils;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Type;
 
 public class DefaultValues {
+    private DefaultValues() {
+    }
+
     /**
-     *  Returns expression representing the default value for given type
-     *  i.e. 0 for int byte short long types, false for boolean, etc.
+     * Returns expression representing the default value for given type
+     * i.e. 0 for int byte short long types, false for boolean, etc.
      */
     public static Expression getDefaultExpression(Type type) {
         AST ast = type.getAST();
@@ -28,7 +41,7 @@ public class DefaultValues {
                 return characterLiteral;
             }
         } else if (type instanceof SimpleType || type instanceof ArrayType) {
-                return ast.newNullLiteral();
+            return ast.newNullLiteral();
         }
         return null;
     }
@@ -41,10 +54,12 @@ public class DefaultValues {
     private static class DefaultExpressionChecker extends ASTVisitor {
         private boolean isDefault = false;
         private boolean visited = false;
+
         @Override
         public void preVisit(ASTNode node) {
             isDefault = false;
         }
+
         @Override
         public boolean preVisit2(ASTNode node) {
             if (visited) {
@@ -52,6 +67,7 @@ public class DefaultValues {
             }
             return super.preVisit2(node);
         }
+
         @Override
         public boolean visit(NumberLiteral numberLiteral) {
             String token = numberLiteral.getToken();
@@ -69,11 +85,13 @@ public class DefaultValues {
             }
             return false;
         }
+
         @Override
         public boolean visit(CharacterLiteral characterLiteral) {
             isDefault = characterLiteral.getEscapedValue().equals('\u0000');
             return false;
         }
+
         @Override
         public boolean visit(BooleanLiteral booleanLiteral) {
             isDefault = !booleanLiteral.booleanValue();

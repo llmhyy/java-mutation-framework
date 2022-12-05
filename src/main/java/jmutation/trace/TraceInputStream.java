@@ -74,13 +74,11 @@ public class TraceInputStream extends DataInputStream {
         try {
             String header = readString();
             String programMsg;
-            int expectedSteps = 0;
-            int collectedSteps = 0;
             InstrumentationResult result = new InstrumentationResult();
             if (TRACE_HEADER.equals(header)) {
                 programMsg = readString();
-                expectedSteps = readInt();
-                collectedSteps = readInt();
+                readInt();
+                readInt();
             } else {
                 programMsg = header; // for compatible reason with old version. TO BE REMOVED.
             }

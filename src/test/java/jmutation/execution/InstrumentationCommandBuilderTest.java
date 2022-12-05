@@ -7,7 +7,7 @@ import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class InstrumentationCommandBuilderTest {
+class InstrumentationCommandBuilderTest {
     @Test
     void generateCommand_validMicrobatConfig_generatesCorrectCommand() {
         String validConfigFilePath = "src/test/files/jmutation/execution/validMicrobatConfigTest.json";

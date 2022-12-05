@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class StrongMutationParserTest {
+class StrongMutationParserTest {
 
     MutationTestHelper helper = new MutationTestHelper();
 
     @Test
-    public void createMutationCommand_blockNode_createsCommand() {
+    void createMutationCommand_blockNode_createsCommand() {
         String documentStr = "public class Main {" +
                 "public static void main(String[] args) {" +
                 "int a = 0;" +

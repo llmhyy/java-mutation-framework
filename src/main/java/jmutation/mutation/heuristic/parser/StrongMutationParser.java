@@ -32,7 +32,7 @@ public class StrongMutationParser extends MutationParser {
         possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
         possibleCommands.add(new MutationReturnMathCommand(node));
         possibleCommands.add(new MutationReturnStmtCommand(node));
-        possibleCommands = possibleCommands.stream().filter(command -> command.canExecute()).collect(Collectors.toList());
+        possibleCommands = possibleCommands.stream().filter(MutationCommand::canExecute).collect(Collectors.toList());
         if (possibleCommands.isEmpty()) {
             return true;
         }
