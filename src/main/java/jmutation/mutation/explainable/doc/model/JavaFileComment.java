@@ -6,6 +6,11 @@ import java.util.Objects;
 
 public class JavaFileComment {
     private final List<JavaComment> comments = new ArrayList<>();
+    private final String filePath;
+
+    public JavaFileComment(String filePath) {
+        this.filePath = filePath;
+    }
 
     public void addComment(JavaComment comment) {
         this.comments.add(comment);
@@ -13,6 +18,10 @@ public class JavaFileComment {
 
     public List<JavaComment> getComments() {
         return comments;
+    }
+
+    public String getFilePath() {
+        return filePath;
     }
 
     @Override

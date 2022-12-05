@@ -3,7 +3,9 @@ package jmutation.mutation.explainable.doc.parser;
 import jmutation.mutation.explainable.doc.model.JavaComment;
 import jmutation.mutation.explainable.doc.model.JavaFileComment;
 import jmutation.mutation.explainable.doc.model.Project;
+import jmutation.mutation.explainable.doc.parser.handler.FirstFilter;
 import jmutation.mutation.explainable.doc.parser.handler.ProjectParserFilter;
+import jmutation.mutation.explainable.doc.parser.handler.Request;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -21,18 +23,14 @@ import java.util.List;
  */
 public class ProjectParser {
     private final Project project;
-    private final List<ProjectParserFilter> filters;
+    private final ProjectParserFilter filters;
 
-    private ProjectParser(Project project) {
+    private ProjectParser(Project project, ProjectParserFilter filters) {
         this.project = project;
-        filters = new ArrayList<>();
+        this.filters = filters;
     }
 
-    private void addFilter(ProjectParserFilter filter) {
-        filters.add(filter);
-    }
-
-    public Iterator<JavaFileComment> parse() throws IOException {
+    public Iterator<JavaFileComment> parse() {
         Iterator<File> javaFiles = project.getJavaFiles();
         return new Iterator<>() {
             @Override
@@ -49,9 +47,14 @@ public class ProjectParser {
                     String contents = Files.readString(path);
                     CompilationUnit unit = jmutation.parser.ProjectParser.parseCompilationUnit(contents);
                     List<Comment> comments = unit.getCommentList();
-                    JavaFileComment result = new JavaFileComment();
+                    JavaFileComment result = new JavaFileComment(canonicalPath);
                     for (Comment comment : comments) {
-                        result.addComment(convert(comment, unit, canonicalPath, contents));
+                        JavaComment jComment = convert(comment, unit, canonicalPath, contents);
+                        Request request = new Request();
+                        filters.handle(jComment, request);
+                        if (request.wasSuccessful()) {
+                            result.addComment(jComment);
+                        }
                     }
                     return result;
                 } catch (IOException e) {
@@ -72,23 +75,23 @@ public class ProjectParser {
 
     public static class ProjectParserBuilder {
         private final Project project;
-        private final List<ProjectParserFilter> filters;
+        private final List<ProjectParserFilter> remainingFilters;
+        private ProjectParserFilter firstFilter = new FirstFilter();
 
         public ProjectParserBuilder(Project project) {
             this.project = project;
-            filters = new ArrayList<>();
+            remainingFilters = new ArrayList<>();
         }
 
-        public void setFilter(ProjectParserFilter filter) {
-            filters.add(filter);
+        public ProjectParserBuilder addFilter(ProjectParserFilter filter) {
+            remainingFilters.add(filter);
+            return this;
         }
 
         public ProjectParser build() {
-            ProjectParser result = new ProjectParser(project);
-            for (ProjectParserFilter filter : filters) {
-                result.addFilter(filter);
-            }
-            return result;
+            ProjectParserFilter.setup(firstFilter,
+                    remainingFilters.toArray(new ProjectParserFilter[remainingFilters.size()]));
+            return new ProjectParser(project, firstFilter);
         }
     }
 }

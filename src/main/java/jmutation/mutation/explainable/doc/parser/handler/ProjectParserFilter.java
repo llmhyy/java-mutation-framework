@@ -14,11 +14,11 @@ public abstract class ProjectParserFilter {
         curr.nextHandler = new BaseFilter();
     }
 
-    public void handle(JavaComment comment) {
-        if (privateHandle(comment)) {
-            nextHandler.handle(comment);
+    public void handle(JavaComment comment, Request request) {
+        if (privateHandle(comment, request)) {
+            nextHandler.handle(comment, request);
         }
     }
 
-    protected abstract boolean privateHandle(JavaComment comment);
+    protected abstract boolean privateHandle(JavaComment comment, Request request);
 }
