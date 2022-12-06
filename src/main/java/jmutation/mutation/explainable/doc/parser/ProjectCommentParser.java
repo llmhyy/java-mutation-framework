@@ -21,11 +21,11 @@ import java.util.List;
 /**
  * Parses a project to obtain its documentation
  */
-public class ProjectParser {
+public class ProjectCommentParser {
     private final Project project;
     private final ProjectParserFilter filters;
 
-    private ProjectParser(Project project, ProjectParserFilter filters) {
+    private ProjectCommentParser(Project project, ProjectParserFilter filters) {
         this.project = project;
         this.filters = filters;
     }
@@ -88,10 +88,10 @@ public class ProjectParser {
             return this;
         }
 
-        public ProjectParser build() {
+        public ProjectCommentParser build() {
             ProjectParserFilter.setup(firstFilter,
                     remainingFilters.toArray(new ProjectParserFilter[remainingFilters.size()]));
-            return new ProjectParser(project, firstFilter);
+            return new ProjectCommentParser(project, firstFilter);
         }
     }
 }

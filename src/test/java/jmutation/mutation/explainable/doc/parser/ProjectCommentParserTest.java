@@ -3,7 +3,7 @@ package jmutation.mutation.explainable.doc.parser;
 import jmutation.mutation.explainable.doc.model.JavaComment;
 import jmutation.mutation.explainable.doc.model.JavaFileComment;
 import jmutation.mutation.explainable.doc.model.Project;
-import jmutation.mutation.explainable.doc.parser.ProjectParser.ProjectParserBuilder;
+import jmutation.mutation.explainable.doc.parser.ProjectCommentParser.ProjectParserBuilder;
 import jmutation.mutation.explainable.doc.parser.handler.WordFilter;
 import org.junit.jupiter.api.Test;
 
@@ -15,14 +15,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class ProjectParserTest {
+class ProjectCommentParserTest {
     private static final String SAMPLE_PROJECT_PATH = String.join(File.separator, "src", "test", "files",
             "jmutation", "mutation", "explainable", "doc", "parser", "sample-project");
 
     @Test
     void parse_validProject_obtainsCorrectDocumentation() throws IOException {
         Project project = new Project(SAMPLE_PROJECT_PATH);
-        ProjectParser parser = new ProjectParserBuilder(project).build();
+        ProjectCommentParser parser = new ProjectParserBuilder(project).build();
         Iterator<JavaFileComment> javaCommentIterator = parser.parse();
         List<JavaFileComment> expectedJavaComments = new ArrayList<>();
         String sampleCanonicalPath = new File(String.join(File.separator,
@@ -53,7 +53,7 @@ class ProjectParserTest {
     void parse_validProjectWithFilter_obtainsCorrectDocumentation() throws IOException {
         Project project = new Project(SAMPLE_PROJECT_PATH);
         WordFilter wordFilter = new WordFilter(new String[]{"param"});
-        ProjectParser parser = new ProjectParserBuilder(project).addFilter(wordFilter).build();
+        ProjectCommentParser parser = new ProjectParserBuilder(project).addFilter(wordFilter).build();
         Iterator<JavaFileComment> javaCommentIterator = parser.parse();
         List<JavaFileComment> expectedJavaComments = new ArrayList<>();
         String sampleCanonicalPath = new File(String.join(File.separator,
