@@ -40,7 +40,7 @@ public class FastTextWrapper {
         this.jft = jft;
     }
 
-    private static double cosineDistance(List<Float> vectorA, List<Float> vectorB) {
+    public static double cosineDistance(List<Float> vectorA, List<Float> vectorB) {
         double dotProduct = 0.0;
         double normA = 0.0;
         double normB = 0.0;
@@ -125,6 +125,10 @@ public class FastTextWrapper {
             result = addOrSubtractVec(result, vectors.get(i), true);
         }
         return result;
+    }
+
+    public List<Float> getVector(String str) {
+        return jft.getVector(str);
     }
 
 }

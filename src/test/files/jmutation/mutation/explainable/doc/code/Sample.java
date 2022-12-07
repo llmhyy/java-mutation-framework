@@ -8,6 +8,9 @@ public class Sample {
         if (a == 0) {
             throw new RuntimeException("0 is not allowed");
         }
+        if (a > 1) {
+            b++;
+        }
         return b;
     }
 }
