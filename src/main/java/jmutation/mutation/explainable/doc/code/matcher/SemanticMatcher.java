@@ -1,7 +1,6 @@
 package jmutation.mutation.explainable.doc.code.matcher;
 
 import jmutation.model.ast.JdtMethodRetriever;
-import jmutation.mutation.explainable.doc.code.CommentCodeMatcher;
 import jmutation.mutation.explainable.doc.model.CodeChunk;
 import jmutation.mutation.explainable.doc.model.JavaComment;
 import jmutation.parser.ProjectParser;
@@ -28,7 +27,7 @@ public class SemanticMatcher extends CommentCodeMatcher {
         // 3. Create code chunk from the line (ASTVisitor)
         try {
             MethodDeclaration method = getMethodDeclaration(comment, filePath);
-            ASTNode mostSimilarNode = new JaccardSemanticSimilarityCalculator(focusedComment, method).start();
+            ASTNode mostSimilarNode = new JaccardSemanticSimilarityCalculator(focusedComment, comment, method).start();
             return new CodeChunk(filePath, mostSimilarNode);
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,6 +55,4 @@ public class SemanticMatcher extends CommentCodeMatcher {
         }
         return null;
     }
-
-
 }

@@ -1,4 +1,4 @@
-package jmutation.mutation.explainable.doc.code;
+package jmutation.mutation.explainable.doc.code.matcher;
 
 import jmutation.mutation.explainable.doc.model.CodeChunk;
 import jmutation.mutation.explainable.doc.model.JavaComment;

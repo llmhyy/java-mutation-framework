@@ -21,11 +21,27 @@ class SemanticMatcherTest {
             "mutation", "explainable", "doc", "code", "Sample.java");
 
     @Test
-    void match_givenCornerCaseCommentAndCode_matchesCorrectly() throws IOException {
+    void match_givenCornerCaseJavaDocAndCode_matchesCorrectly() throws IOException {
         String focusedComment = "corner case: 0 is not allowed";
         JavaComment jComment = new JavaComment(String.join(System.lineSeparator(), "/**",
                 "* Some description", "* " + focusedComment, "*/"),
                 2, 5, javaFilePath);
+        String targetFilePath = javaFilePath;
+        SemanticMatcher matcher = new SemanticMatcher();
+        CodeChunk chunk = matcher.match(focusedComment, jComment, targetFilePath);
+        String documentStr = Files.readString(Path.of(javaFilePath));
+        helper.parseDocStr(documentStr);
+        MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
+        IfStatement ifStatement = (IfStatement) methodDeclaration.getBody().statements().get(1);
+        CodeChunk expectedChunk = new CodeChunk(javaFilePath, ifStatement);
+        assertEquals(expectedChunk, chunk);
+    }
+
+    @Test
+    void match_givenCornerCaseInlineCommentAndCode_matchesCorrectly() throws IOException {
+        String focusedComment = "corner case: 0 is not allowed";
+        JavaComment jComment = new JavaComment("// " + focusedComment,
+                8, 8, javaFilePath);
         String targetFilePath = javaFilePath;
         SemanticMatcher matcher = new SemanticMatcher();
         CodeChunk chunk = matcher.match(focusedComment, jComment, targetFilePath);
