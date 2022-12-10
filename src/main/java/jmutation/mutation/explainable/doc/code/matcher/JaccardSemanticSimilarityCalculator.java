@@ -1,6 +1,7 @@
 package jmutation.mutation.explainable.doc.code.matcher;
 
 
+import jmutation.mutation.explainable.doc.model.JavaComment;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IfStatement;
 
@@ -13,8 +14,8 @@ public class JaccardSemanticSimilarityCalculator extends SemanticSimilarityCalcu
     private double largestSimilarity = -Double.MAX_VALUE;
 
 
-    public JaccardSemanticSimilarityCalculator(String commentStr, ASTNode rootNode) {
-        super(commentStr, rootNode);
+    public JaccardSemanticSimilarityCalculator(String commentStr, JavaComment javaComment, ASTNode rootNode) {
+        super(commentStr, javaComment, rootNode);
         wordsInComment = commentStr.split(" ");
     }
 
@@ -38,7 +39,6 @@ public class JaccardSemanticSimilarityCalculator extends SemanticSimilarityCalcu
 
     private class JaccardCalculator {
         private int intersectionCount = 0;
-        private int unionCount = 0;
 
         private double[] calculate(ASTNode node) {
             String nodeStr = node.toString();

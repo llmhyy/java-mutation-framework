@@ -1,16 +1,19 @@
 package jmutation.mutation.explainable.doc.code.matcher;
 
+import jmutation.mutation.explainable.doc.model.JavaComment;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 
 public abstract class SemanticSimilarityCalculator extends ASTVisitor {
     protected final String commentStr;
+    protected final JavaComment javaComment;
     protected final ASTNode rootNode;
     protected ASTNode resultNode;
 
-    public SemanticSimilarityCalculator(String commentStr, ASTNode rootNode) {
+    protected SemanticSimilarityCalculator(String commentStr, JavaComment javaComment, ASTNode rootNode) {
         this.commentStr = commentStr;
         this.rootNode = rootNode;
+        this.javaComment = javaComment;
     }
 
     public abstract ASTNode start();
