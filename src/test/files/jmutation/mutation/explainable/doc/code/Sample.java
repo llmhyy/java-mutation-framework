@@ -5,6 +5,7 @@ public class Sample {
      */
     public int method(int a) {
         int b = a + 1;
+        // corner case: 0 is not allowed
         if (a == 0) {
             throw new RuntimeException("0 is not allowed");
         }

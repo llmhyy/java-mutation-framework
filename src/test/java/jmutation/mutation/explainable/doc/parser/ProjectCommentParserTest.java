@@ -13,22 +13,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static jmutation.mutation.explainable.doc.ExplainableMutationTestConstants.PARSER_SAMPLE_PROJECT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ProjectCommentParserTest {
-    private static final String SAMPLE_PROJECT_PATH = String.join(File.separator, "src", "test", "files",
-            "jmutation", "mutation", "explainable", "doc", "parser", "sample-project");
+
 
     @Test
     void parse_validProject_obtainsCorrectDocumentation() throws IOException {
-        Project project = new Project(SAMPLE_PROJECT_PATH);
+        Project project = new Project(PARSER_SAMPLE_PROJECT_PATH);
         ProjectCommentParser parser = new ProjectParserBuilder(project).build();
         Iterator<JavaFileComment> javaCommentIterator = parser.parse();
         List<JavaFileComment> expectedJavaComments = new ArrayList<>();
         String sampleCanonicalPath = new File(String.join(File.separator,
-                SAMPLE_PROJECT_PATH, "Sample.java")).getCanonicalPath();
+                PARSER_SAMPLE_PROJECT_PATH, "Sample.java")).getCanonicalPath();
         String sample1CanonicalPath = new File(String.join(File.separator,
-                SAMPLE_PROJECT_PATH, "Sample1.java")).getCanonicalPath();
+                PARSER_SAMPLE_PROJECT_PATH, "Sample1.java")).getCanonicalPath();
         JavaFileComment sampleComments = new JavaFileComment(sampleCanonicalPath);
         JavaFileComment sample1Comments = new JavaFileComment(sample1CanonicalPath);
         sampleComments.addComment(new JavaComment(String.join(System.lineSeparator(), "/**",
@@ -51,15 +51,15 @@ class ProjectCommentParserTest {
 
     @Test
     void parse_validProjectWithFilter_obtainsCorrectDocumentation() throws IOException {
-        Project project = new Project(SAMPLE_PROJECT_PATH);
+        Project project = new Project(PARSER_SAMPLE_PROJECT_PATH);
         WordFilter wordFilter = new WordFilter(new String[]{"param"});
         ProjectCommentParser parser = new ProjectParserBuilder(project).addFilter(wordFilter).build();
         Iterator<JavaFileComment> javaCommentIterator = parser.parse();
         List<JavaFileComment> expectedJavaComments = new ArrayList<>();
         String sampleCanonicalPath = new File(String.join(File.separator,
-                SAMPLE_PROJECT_PATH, "Sample.java")).getCanonicalPath();
+                PARSER_SAMPLE_PROJECT_PATH, "Sample.java")).getCanonicalPath();
         String sample1CanonicalPath = new File(String.join(File.separator,
-                SAMPLE_PROJECT_PATH, "Sample1.java")).getCanonicalPath();
+                PARSER_SAMPLE_PROJECT_PATH, "Sample1.java")).getCanonicalPath();
         JavaFileComment sampleComments = new JavaFileComment(sampleCanonicalPath);
         JavaFileComment sample1Comments = new JavaFileComment(sample1CanonicalPath);
         sample1Comments.addComment(new JavaComment(String.join(System.lineSeparator(), "/**",
