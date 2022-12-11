@@ -18,6 +18,7 @@ import jmutation.mutation.explainable.doc.parser.ProjectCommentParser;
 import jmutation.mutation.explainable.doc.parser.ProjectCommentParser.ProjectParserBuilder;
 import jmutation.mutation.explainable.doc.parser.handler.CoverageFilter;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,10 +30,9 @@ public class ExplainableMutator extends Mutator {
         // Only mutate coverage
         // go through the coverage
         // Only parse from files in coverage
-        Project clonedProject = project.cloneToOtherPath();
         try {
             jmutation.mutation.explainable.doc.model.Project projectForParser =
-                    new jmutation.mutation.explainable.doc.model.Project(clonedProject.getRoot().getCanonicalPath());
+                    new jmutation.mutation.explainable.doc.model.Project(project.getRoot().getCanonicalPath());
             CoverageFilter coverageFilter = new CoverageFilter(coverage);
             ProjectCommentParser projectCommentParser = new ProjectParserBuilder(projectForParser).
                     addFilter(coverageFilter).
@@ -46,20 +46,22 @@ public class ExplainableMutator extends Mutator {
                 for (JavaComment comment : comments) {
                     List<CodeChunk> codeChunks = codeChunkGetter.get(comment, comment.getFilePath());
                     for (CodeChunk codeChunk : codeChunks) {
-                        MutationCommand command = parseCodeAndCommentIntoMutation(codeChunk, comment);
-                        if (!command.canExecute()) {
+                        MutationCommand mutationCommand = parseCodeAndCommentIntoMutation(codeChunk, comment);
+                        if (!mutationCommand.canExecute()) {
                             continue;
                         }
-                        command.executeMutation();
-                        if (!compileProject(clonedProject)) {
+                        mutationCommand.executeMutation();
+                        mutationHistory.add(mutationCommand);
+                        File file = new File(comment.getFilePath());
+                        writeToFile(mutationCommand.getRewriter(), file);
+                        if (!compileProject(project)) {
                             continue;
                         }
-                        mutationHistory.add(command);
-                        return clonedProject;
+                        return project;
                     }
                 }
             }
-            return clonedProject;
+            return project;
         } catch (IOException e) {
             e.printStackTrace();
         }

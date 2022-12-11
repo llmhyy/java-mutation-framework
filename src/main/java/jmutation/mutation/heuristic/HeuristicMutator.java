@@ -68,47 +68,18 @@ public class HeuristicMutator extends Mutator {
 
     private void mutate(List<MutationRange> ranges, Project project, boolean isRandomRetrieval) {
         int numberOfExecutedMutations = 0;
-        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
-        for (MutationRange range : ranges) {
-            String className = range.getClassName();
-            List<MutationRange> rangesForClass;
-            if (classToRange.containsKey(className)) {
-                rangesForClass = classToRange.get(className);
-            } else {
-                rangesForClass = new ArrayList<>();
-            }
-            rangesForClass.add(range);
-            classToRange.put(className, rangesForClass);
-        }
+        Map<String, List<MutationRange>> classToRange = mapClassToMutationRanges(ranges);
         for (Entry<String, List<MutationRange>> entry : classToRange.entrySet()) {
             List<MutationRange> rangesForClass = entry.getValue();
             String className = entry.getKey();
             File file = retrieveFileFromClassName(className, project);
-            String fileContent;
-            try {
-                fileContent = Files.readString(file.toPath());
-            } catch (IOException e) {
-                throw new RuntimeException("Could not read file at " + file.toPath());
-            }
-
+            String fileContent = readFile(file);
             CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
-
             unit.recordModifications();
             for (MutationRange range : rangesForClass) {
                 // Attempt random retrieval.
                 List<ASTNode> nodes = parseRangeToNodes(unit, range, isRandomRetrieval);
-                if (nodes.isEmpty()) {
-                    // If mutation for node types in mutation range not implemented, skip to next mutation range
-                    continue;
-                }
-                List<MutationCommand> newMutationCommands = new ArrayList<>();
-                for (ASTNode node : nodes) {
-                    MutationCommand mutationCommand = mutationParser.parse(node);
-                    if (mutationCommand == null) {
-                        continue;
-                    }
-                    newMutationCommands.add(mutationCommand);
-                }
+                List<MutationCommand> newMutationCommands = parseNodesToCommands(nodes);
 
                 for (MutationCommand mutationCommand : newMutationCommands) {
                     ASTNode node = mutationCommand.getOriginalNode();
@@ -131,18 +102,7 @@ public class HeuristicMutator extends Mutator {
     public List<MutationCommand> analyse(List<MutationRange> ranges, Project project) {
         // Get all ASTNodes within the ranges, create mutation command.
         // If canExecute, add to result.
-        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
-        for (MutationRange range : ranges) {
-            String className = range.getClassName();
-            List<MutationRange> rangesForClass;
-            if (classToRange.containsKey(className)) {
-                rangesForClass = classToRange.get(className);
-            } else {
-                rangesForClass = new ArrayList<>();
-            }
-            rangesForClass.add(range);
-            classToRange.put(className, rangesForClass);
-        }
+        Map<String, List<MutationRange>> classToRange = mapClassToMutationRanges(ranges);
         List<MutationCommand> result = new ArrayList<>();
         for (Entry<String, List<MutationRange>> entry : classToRange.entrySet()) {
             List<MutationRange> rangesForClass = entry.getValue();
@@ -196,5 +156,43 @@ public class HeuristicMutator extends Mutator {
     @Override
     public void clearHistory() {
         mutationHistory = new ArrayList<>();
+    }
+
+    private Map<String, List<MutationRange>> mapClassToMutationRanges(List<MutationRange> ranges) {
+        Map<String, List<MutationRange>> classToRange = new LinkedHashMap<>();
+        for (MutationRange range : ranges) {
+            String className = range.getClassName();
+            List<MutationRange> rangesForClass;
+            if (classToRange.containsKey(className)) {
+                rangesForClass = classToRange.get(className);
+            } else {
+                rangesForClass = new ArrayList<>();
+            }
+            rangesForClass.add(range);
+            classToRange.put(className, rangesForClass);
+        }
+        return classToRange;
+    }
+
+    private String readFile(File file) {
+        String fileContent;
+        try {
+            fileContent = Files.readString(file.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not read file at " + file.toPath());
+        }
+        return fileContent;
+    }
+
+    private List<MutationCommand> parseNodesToCommands(List<ASTNode> nodes) {
+        List<MutationCommand> result = new ArrayList<>();
+        for (ASTNode node : nodes) {
+            MutationCommand mutationCommand = mutationParser.parse(node);
+            if (mutationCommand == null) {
+                continue;
+            }
+            result.add(mutationCommand);
+        }
+        return result;
     }
 }

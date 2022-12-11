@@ -1,5 +1,6 @@
 package jmutation.model.project;
 
+import jmutation.constants.MavenConstants;
 import jmutation.constants.ProjectType;
 import jmutation.model.TestCase;
 import org.apache.commons.io.FileUtils;
@@ -17,6 +18,14 @@ public class MavenProject extends Project {
     private static final String PACKAGE_ALL_FMT = "%s package";
     private static final String COMPILE_NO_RUN_TEST_FMT = "%s install -DskipTests";
 
+    public MavenProject(String name, File root, List<TestCase> testCases) {
+        this(name, root, testCases, MavenConstants.SRC_FOLDER,
+                MavenConstants.TEST_FOLDER,
+                MavenConstants.COMPILATION_FOLDER + File.separator +
+                        MavenConstants.COMPILED_CLASS_FOLDER,
+                MavenConstants.COMPILATION_FOLDER + File.separator +
+                        MavenConstants.TEST_CLASS_FOLDER);
+    }
 
     public MavenProject(String name, File root, List<TestCase> testCases,
                         String srcFolderPath, String testFolderPath,
