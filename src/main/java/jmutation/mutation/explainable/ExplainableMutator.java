@@ -38,8 +38,7 @@ public class ExplainableMutator extends Mutator {
                     addFilter(coverageFilter).
                     build();
             Iterator<JavaFileComment> commentsInFiles = projectCommentParser.parse();
-            CornerCaseCommentFocus focus = new CornerCaseCommentFocus();
-            CodeChunkGetter codeChunkGetter = new CodeChunkGetter(focus, new SemanticMatcher());
+            CodeChunkGetter codeChunkGetter = new CodeChunkGetter(new CornerCaseCommentFocus(), new SemanticMatcher());
             while (commentsInFiles.hasNext()) {
                 JavaFileComment fileComments = commentsInFiles.next();
                 List<JavaComment> comments = fileComments.getComments();

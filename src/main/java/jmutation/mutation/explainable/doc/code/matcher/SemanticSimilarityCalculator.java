@@ -4,6 +4,9 @@ import jmutation.mutation.explainable.doc.model.JavaComment;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 
+/**
+ * Obtains the most semantically similar ASTNode in an AST given a comment string
+ */
 public abstract class SemanticSimilarityCalculator extends ASTVisitor {
     protected final String commentStr;
     protected final JavaComment javaComment;
