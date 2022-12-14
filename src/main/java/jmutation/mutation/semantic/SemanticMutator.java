@@ -1,10 +1,8 @@
 package jmutation.mutation.semantic;
 
 import jmutation.execution.Coverage;
-import jmutation.execution.ProjectExecutor;
 import jmutation.model.mutation.MutationRange;
 import jmutation.model.project.Project;
-import jmutation.model.project.ProjectConfig;
 import jmutation.mutation.MutationASTNodeRetriever;
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
@@ -167,12 +165,5 @@ public class SemanticMutator extends Mutator {
             }
         }
         return result;
-    }
-
-    public boolean compileProject(Project project) {
-        ProjectConfig config = new ProjectConfig(project);
-        ProjectExecutor projectExecutor = new ProjectExecutor(null, config);
-        String output = projectExecutor.compile();
-        return output.contains("BUILD SUCCESS");
     }
 }

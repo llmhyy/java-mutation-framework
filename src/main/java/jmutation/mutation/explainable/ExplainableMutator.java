@@ -1,10 +1,8 @@
 package jmutation.mutation.explainable;
 
 import jmutation.execution.Coverage;
-import jmutation.execution.ProjectExecutor;
 import jmutation.model.mutation.MutationRange;
 import jmutation.model.project.Project;
-import jmutation.model.project.ProjectConfig;
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.explainable.doc.DocumentBasedMutationCommand;
@@ -19,7 +17,9 @@ import jmutation.mutation.explainable.doc.parser.ProjectCommentParser.ProjectPar
 import jmutation.mutation.explainable.doc.parser.handler.CoverageFilter;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -52,8 +52,12 @@ public class ExplainableMutator extends Mutator {
                         mutationCommand.executeMutation();
                         mutationHistory.add(mutationCommand);
                         File file = new File(comment.getFilePath());
+                        String originalSource = Files.readString(file.toPath());
                         writeToFile(mutationCommand.getRewriter(), file);
                         if (!compileProject(project)) {
+                            try (FileWriter writer = new FileWriter(file)) {
+                                writer.write(originalSource);
+                            }
                             continue;
                         }
                         return project;
@@ -76,12 +80,5 @@ public class ExplainableMutator extends Mutator {
     public List<MutationCommand> analyse(List<MutationRange> ranges, Project project) {
         // TODO: Implement this
         return new ArrayList<>();
-    }
-
-    public boolean compileProject(Project project) {
-        ProjectConfig config = new ProjectConfig(project);
-        ProjectExecutor projectExecutor = new ProjectExecutor(null, config);
-        String output = projectExecutor.compile();
-        return output.contains("BUILD SUCCESS");
     }
 }

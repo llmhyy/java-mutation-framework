@@ -1,8 +1,10 @@
 package jmutation.mutation;
 
 import jmutation.execution.Coverage;
+import jmutation.execution.ProjectExecutor;
 import jmutation.model.mutation.MutationRange;
 import jmutation.model.project.Project;
+import jmutation.model.project.ProjectConfig;
 import jmutation.parser.ProjectParser;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -119,12 +121,17 @@ public abstract class Mutator {
         } catch (MalformedTreeException | BadLocationException e) {
             e.printStackTrace();
         }
-        try {
-            FileWriter fw = new FileWriter(file);
+        try (FileWriter fw = new FileWriter(file)) {
             fw.write(document.get());
-            fw.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean compileProject(Project project) {
+        ProjectConfig config = new ProjectConfig(project);
+        ProjectExecutor projectExecutor = new ProjectExecutor(null, config);
+        String output = projectExecutor.compile();
+        return output.contains("BUILD SUCCESS");
     }
 }
