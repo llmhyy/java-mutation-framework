@@ -46,8 +46,45 @@ class ExplainableMutatorTest {
         assertEquals(expectedFileContent, actualFileContent);
     }
 
+    @Test
+    void mutate_compilationFailed_rewritesTheOriginalFileBack() throws IOException {
+        // If compilation fails, the mutation should be reverted
+        ExplainableMutator explainableMutator = new ExplainableMutatorWithCompilationFail();
+        Coverage coverage = new Coverage();
+        Set<ClassLocation> classLocationSet = new HashSet<>();
+        ClassLocation classLocation = new ClassLocation("Sample", "someMethod", 1);
+        classLocationSet.add(classLocation);
+        TestCase testCase = new TestCase("someMethodTest", 0, 0, "someMethodTest", "SampleTest", null);
+        coverage.formMutationRanges(classLocationSet, testCase);
+        List<TestCase> testCaseList = new ArrayList<>();
+        testCaseList.add(testCase);
+        Project project = new MavenProject("sample", PROJECT_TO_MUTATE_ROOT_FILE, testCaseList);
+        explainableMutator.mutate(coverage, project);
+        File sourceFile = new File(PROJECT_TO_MUTATE_ROOT_FILE, String.join(File.separator, "src", "main", "java", "Sample.java"));
+        String actualFileContent = Files.readString(sourceFile.toPath());
+        String expectedFileContent = String.join(System.lineSeparator(), "public class Sample {", "    /**",
+                "     * Adds 1 to the input value.",
+                "     * corner case: If a is 0, it returns 0",
+                "     *", "     * @param a the input integer",
+                "     * @return a + 1, unless a is 0",
+                "     */", "    public int someMethod(int a) {",
+                "        int b = a + 1;",
+                "        if (a == 0) {",
+                "            return 0;",
+                "        }",
+                "        return b;", "    }", "}");
+        assertEquals(expectedFileContent, actualFileContent);
+    }
+
     @AfterEach
     void afterEach() throws IOException {
         FileUtils.copyDirectory(PROJECT_ROOT_FILE, PROJECT_TO_MUTATE_ROOT_FILE);
+    }
+
+    private class ExplainableMutatorWithCompilationFail extends ExplainableMutator {
+        @Override
+        public boolean compileProject(Project project) {
+            return false;
+        }
     }
 }
