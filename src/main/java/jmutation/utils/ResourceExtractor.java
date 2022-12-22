@@ -8,7 +8,9 @@ import java.io.InputStream;
 public class ResourceExtractor {
     public static void extractFile(String name, String outputPath) throws IOException {
         File target = new File(outputPath, name);
-
+        if (target.exists()) {
+            return;
+        }
         target.getParentFile().mkdirs();
         FileOutputStream out = new FileOutputStream(target);
         ClassLoader cl = ResourceExtractor.class.getClassLoader();

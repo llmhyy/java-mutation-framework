@@ -20,7 +20,6 @@
         </repository>
     </repositories>
     <build>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -164,8 +163,22 @@
             <version>6.7.0</version>
         </dependency>
 
-        <!-- Below are the external jar files brought over from the Microbat project to read the traces -->
-        <!-- To update them, see https://maven.apache.org/general.html#importing-jars -->
+        <!--
+        Below are the external jar files brought over from the Microbat project to read the traces.
+        To update them, replace the fields in the cmd below with the correct values and run.
+        See https://maven.apache.org/general.html#importing-jars for more details.
+
+        mvn install:install-file
+            -Dfile=src/main/resources/lib/instrumentator.jar
+            -DgroupId=microbat
+            -DartifactId=instrumentator
+            -Dversion=0.0.1
+            -Dpackaging=jar
+            -DgeneratePom=true
+            -DlocalRepositoryPath=lib
+            -DcreateChecksum=true -U
+
+        -->
         <dependency>
             <groupId>microbat</groupId>
             <artifactId>instrumentator</artifactId>
