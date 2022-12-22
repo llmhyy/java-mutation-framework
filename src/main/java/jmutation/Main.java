@@ -7,6 +7,7 @@ import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -36,6 +37,14 @@ public class Main {
         JCommander.newBuilder().addObject(params).build().parse(args);
 
         MutationFramework mutationFramework = new MutationFramework();
+
+        try {
+            mutationFramework.extractResources();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         MutationFrameworkConfig configuration = new MutationFrameworkConfig();
         mutationFramework.setConfig(configuration);
         configuration.setInstrumentationTimeout(5);

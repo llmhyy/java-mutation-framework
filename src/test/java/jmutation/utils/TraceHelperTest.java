@@ -30,7 +30,7 @@ class TraceHelperTest {
         breakPoint = new BreakPoint(className, methodSignature, lineNum);
         traceNode = new TraceNode(breakPoint, null, 1, null, "");
         executionList.add(traceNode);
-        Trace trace = new Trace("1");
+        Trace trace = new Trace(null);
         trace.setExecutionList(executionList);
 
         String documentStr = String.join("\n", "package main;",

@@ -4,6 +4,7 @@ import jmutation.model.MicrobatConfig;
 import jmutation.model.project.ProjectConfig;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class ProjectExecutorTest {
 
     @Test
+    // Enabled only in GitHub actions, as it takes very long to run locally
+    @EnabledIf("jmutation.utils.MiscellaneousTestUtils#isRunningInGitHubActions")
     void findJars() {
         String projectPath = "./sample/spoon";
         String dropInsDir = "./lib";

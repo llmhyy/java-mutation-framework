@@ -3,9 +3,9 @@ package jmutation.model.mutation;
 import jmutation.model.TestCase;
 import jmutation.model.project.Project;
 import jmutation.mutation.MutationCommand;
+import microbat.instrumentation.output.RunningInfo;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
-import tracecollection.model.InstrumentationResult;
 
 import java.util.List;
 
@@ -13,13 +13,13 @@ import java.util.List;
  * Result to pass to Tregression or other debugging framework.
  */
 public class MutationFrameworkResult {
-    InstrumentationResult originalResult;
-    InstrumentationResult mutatedResult;
+    RunningInfo originalResult;
+    RunningInfo mutatedResult;
 
     // Used in obtaining output of a trace (using call to assert)
-    InstrumentationResult originalResultWithAssertions;
+    RunningInfo originalResultWithAssertions;
 
-    InstrumentationResult mutatedResultWithAssertions;
+    RunningInfo mutatedResultWithAssertions;
 
     List<MutationCommand> mutationHistory;
 
@@ -33,8 +33,8 @@ public class MutationFrameworkResult {
 
     boolean testCasePassed;
 
-    public MutationFrameworkResult(InstrumentationResult originalResult, InstrumentationResult mutatedResult,
-                                   InstrumentationResult originalResultWithAssertions, InstrumentationResult mutatedResultWithAssertions,
+    public MutationFrameworkResult(RunningInfo originalResult, RunningInfo mutatedResult,
+                                   RunningInfo originalResultWithAssertions, RunningInfo mutatedResultWithAssertions,
                                    List<MutationCommand> mutationHistory, Project originalProject,
                                    Project mutatedProject, List<TraceNode> rootCauses, boolean testCasePassed, TestCase testCase) {
         this.originalResult = originalResult;
@@ -50,19 +50,19 @@ public class MutationFrameworkResult {
         testSimpleName = testCase.simpleName;
     }
 
-    public InstrumentationResult getOriginalResult() {
+    public RunningInfo getOriginalResult() {
         return originalResult;
     }
 
-    public InstrumentationResult getMutatedResult() {
+    public RunningInfo getMutatedResult() {
         return mutatedResult;
     }
 
-    public InstrumentationResult getOriginalResultWithAssertions() {
+    public RunningInfo getOriginalResultWithAssertions() {
         return originalResultWithAssertions;
     }
 
-    public InstrumentationResult getMutatedResultWithAssertions() {
+    public RunningInfo getMutatedResultWithAssertions() {
         return mutatedResultWithAssertions;
     }
 

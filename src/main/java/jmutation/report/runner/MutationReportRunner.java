@@ -41,10 +41,10 @@ public class MutationReportRunner extends ReportRunner {
                     MutationResult result = mutationFramework.mutate(command);
                     report.record(new MutationTrial("math_70", testCase,
                             command,
-                            result.getFixedPrecheckExecutionResult().getPrecheckResult().getProgramMessage(),
-                            result.getMutatedPrecheckExecutionResult().getPrecheckResult().getProgramMessage(),
+                            result.getFixedPrecheckExecutionResult().getPrecheckInfo().getProgramMsg(),
+                            result.getMutatedPrecheckExecutionResult().getPrecheckInfo().getProgramMsg(),
                             result.getFixedPrecheckExecutionResult().getTotalSteps(),
-                            result.getMutatedPrecheckExecutionResult().getPrecheckResult().getTotalSteps()));
+                            result.getMutatedPrecheckExecutionResult().getPrecheckInfo().getStepTotal()));
                 }
             } catch (RuntimeException e) {
                 report.record(new MutationTrial("math_70", testCase,
