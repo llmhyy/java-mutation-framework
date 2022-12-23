@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 
 import static jmutation.mutation.explainable.doc.ExplainableMutationTestConstants.PARSER_SAMPLE_PROJECT_PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,7 +24,7 @@ class ProjectCommentParserTest {
         Project project = new Project(PARSER_SAMPLE_PROJECT_PATH);
         ProjectCommentParser parser = new ProjectParserBuilder(project).build();
         Iterator<JavaFileComment> javaCommentIterator = parser.parse();
-        List<JavaFileComment> expectedJavaComments = new ArrayList<>();
+        Set<JavaFileComment> expectedJavaComments = new HashSet<>();
         String sampleCanonicalPath = new File(String.join(File.separator,
                 PARSER_SAMPLE_PROJECT_PATH, "Sample.java")).getCanonicalPath();
         String sample1CanonicalPath = new File(String.join(File.separator,
@@ -41,12 +41,12 @@ class ProjectCommentParserTest {
                 sample1CanonicalPath));
         expectedJavaComments.add(sampleComments);
         expectedJavaComments.add(sample1Comments);
-        int idx = 0;
+        Set<JavaFileComment> actualJavaComments = new HashSet<>();
         while (javaCommentIterator.hasNext()) {
             JavaFileComment comment = javaCommentIterator.next();
-            assertEquals(expectedJavaComments.get(idx), comment);
-            idx++;
+            actualJavaComments.add(comment);
         }
+        assertEquals(expectedJavaComments, actualJavaComments);
     }
 
     @Test
@@ -55,7 +55,7 @@ class ProjectCommentParserTest {
         WordFilter wordFilter = new WordFilter(new String[]{"param"});
         ProjectCommentParser parser = new ProjectParserBuilder(project).addFilter(wordFilter).build();
         Iterator<JavaFileComment> javaCommentIterator = parser.parse();
-        List<JavaFileComment> expectedJavaComments = new ArrayList<>();
+        Set<JavaFileComment> expectedJavaComments = new HashSet<>();
         String sampleCanonicalPath = new File(String.join(File.separator,
                 PARSER_SAMPLE_PROJECT_PATH, "Sample.java")).getCanonicalPath();
         String sample1CanonicalPath = new File(String.join(File.separator,
@@ -68,11 +68,11 @@ class ProjectCommentParserTest {
                 sample1CanonicalPath));
         expectedJavaComments.add(sampleComments);
         expectedJavaComments.add(sample1Comments);
-        int idx = 0;
+        Set<JavaFileComment> actualJavaComments = new HashSet<>();
         while (javaCommentIterator.hasNext()) {
             JavaFileComment comment = javaCommentIterator.next();
-            assertEquals(expectedJavaComments.get(idx), comment);
-            idx++;
+            actualJavaComments.add(comment);
         }
+        assertEquals(expectedJavaComments, actualJavaComments);
     }
 }
