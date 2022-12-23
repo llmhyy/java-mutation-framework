@@ -19,6 +19,7 @@ import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -29,7 +30,7 @@ import static jmutation.constants.ResourcesPath.DEFAULT_RESOURCES_PATH;
  * API class for usage as an external library
  */
 public class MutationFramework {
-    private MutationFrameworkConfig configuration = new MutationFrameworkConfig();
+    private final MutationFrameworkConfig configuration;
     private ProjectConfig projectConfig;
     private PrecheckExecutionResult mutatedPrecheckExecutionResult = null; // Instead of storing, should pass it into the trace collection method as argument
     private ProjectExecutor mutatedProjectExecutor = null;
@@ -38,9 +39,9 @@ public class MutationFramework {
     private ProjectConfig mutatedProjConfig;
     private PrecheckExecutionResult precheckExecutionResult; // Instead of storing, should pass it into the trace collection method as argument
     private ProjectExecutor projectExecutor;
-    private Project proj;
+    private Project project;
 
-    public void setConfig(MutationFrameworkConfig config) {
+    public MutationFramework(MutationFrameworkConfig config) {
         configuration = config;
     }
 
@@ -50,7 +51,7 @@ public class MutationFramework {
      * @return A list of test case objects.
      */
     public List<TestCase> getTestCases() {
-        projectConfig = new ProjectConfig(configuration.getProjectPath(), configuration.getDropInsPath()); // Contains class paths
+        generateProjectConfiguration();
         Project proj = projectConfig.getProject();
         return proj.getTestCases();
     }
@@ -63,8 +64,10 @@ public class MutationFramework {
      * Generates ProjectConfig for use by mutation framework.
      * This method should be called after updating the project path or drop ins directory.
      */
-    public void generateProjectConfiguration() {
-        projectConfig = new ProjectConfig(configuration.getProjectPath(), configuration.getDropInsPath()); // Contains class paths
+    private void generateProjectConfiguration() {
+        if (projectConfig == null) {
+            projectConfig = new ProjectConfig(configuration.getProjectPath(), configuration.getDropInsPath()); // Contains class paths
+        }
     }
 
     public void extractResources() throws IOException {
@@ -119,9 +122,9 @@ public class MutationFramework {
         System.out.println("Normal precheck done");
 
         if (configuration.isAutoSeed()) {
-            runWithAutoSeed(proj, precheckExecutionResult);
+            runWithAutoSeed(project, precheckExecutionResult);
         } else {
-            runMutation(proj, precheckExecutionResult);
+            runMutation(project, precheckExecutionResult);
         }
         System.out.println("Mutated precheck done");
         return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, configuration.getTestCase(),
@@ -134,7 +137,7 @@ public class MutationFramework {
      * @return
      */
     public List<MutationCommand> analyse() {
-        if (!setup()) return null;
+        if (!setup()) return new ArrayList<>();
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
         MicrobatConfig updatedMicroBatConfig = configuration.getMicrobatConfig().
@@ -142,7 +145,7 @@ public class MutationFramework {
         projectExecutor = new ProjectExecutor(updatedMicroBatConfig, projectConfig);
         // Precheck
         precheckExecutionResult = executePrecheck(projectExecutor);
-        return configuration.getMutator().analyse(precheckExecutionResult.getCoverage().getRanges(), proj);
+        return configuration.getMutator().analyse(precheckExecutionResult.getCoverage().getRanges(), project);
     }
 
     /**
@@ -153,7 +156,7 @@ public class MutationFramework {
      */
     public MutationResult mutate(MutationCommand command) {
         if (!setup()) return null;
-        runMutation(proj, command);
+        runMutation(project, command);
 
         System.out.println("Mutated precheck done");
         return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, configuration.getTestCase(),
@@ -165,27 +168,23 @@ public class MutationFramework {
             generateProjectConfiguration();
         }
 
-        proj = projectConfig.getProject();
-        return configuration.isReady();
+        project = projectConfig.getProject();
+        return configuration.getTestCase() != null;
     }
 
     private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) {
-        PrecheckExecutionResult precheckExecutionResult = projectExecutor.execPrecheck(configuration.getTestCase(),
+        PrecheckExecutionResult precheckResult = projectExecutor.execPrecheck(configuration.getTestCase(),
                 configuration.isToDeletePrecheckFile());
-        if (precheckExecutionResult.isOverLong()) {
+        if (precheckResult.isOverLong()) {
             throw new RuntimeException("Precheck for test case " + configuration.getTestCase() +
                     " was over long as step limit was " + configuration.getMicrobatConfig().getStepLimit() +
-                    " but had " + precheckExecutionResult.getTotalSteps() + " steps");
+                    " but had " + precheckResult.getTotalSteps() + " steps");
         }
-        return precheckExecutionResult;
+        return precheckResult;
     }
 
     private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
-        if (configuration.getMutatedProjectPath().isEmpty()) {
-            clonedProject = proj.cloneToOtherPath();
-        } else {
-            clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
-        }
+        clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
         mutatedProject = configuration.getMutator().mutate(precheckExecutionResult.getCoverage(), clonedProject);
         mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
         MicrobatConfig precheckMicrobatConfig = configuration.getMicrobatConfig();
@@ -197,11 +196,7 @@ public class MutationFramework {
     }
 
     private void runMutation(Project proj, MutationCommand command) {
-        if (configuration.getMutatedProjectPath().isEmpty()) {
-            clonedProject = proj.cloneToOtherPath();
-        } else {
-            clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
-        }
+        clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
         mutatedProject = configuration.getMutator().mutate(command, clonedProject);
         mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
         MicrobatConfig microbatConfig = configuration.getMicrobatConfig().setDumpFilePath(
@@ -264,9 +259,12 @@ public class MutationFramework {
         TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase,
                 configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
 
-        MicrobatConfig includeAssertionsMutationMicrobatConfig = addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
+        MicrobatConfig includeAssertionsMutationMicrobatConfig =
+                addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
         includeAssertionsMutationMicrobatConfig =
-                includeAssertionsMutationMicrobatConfig.setDumpFilePath(configuration.getDumpFilePathConfig().getMutatedTraceWithAssertsFilePath());
+                includeAssertionsMutationMicrobatConfig.setDumpFilePath(
+                        configuration.getDumpFilePathConfig().getMutatedTraceWithAssertsFilePath()
+                );
         mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
         TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase,
                 configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
@@ -278,8 +276,9 @@ public class MutationFramework {
 
 
         return new MutationFrameworkResult(result.getInstrumentationResult(),
-                mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(), mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
-                configuration.getMutator().getMutationHistory(), proj, mutatedProject, rootCauses,
+                mutatedResult.getInstrumentationResult(), originalResultWithAssertionsInTrace.getInstrumentationResult(),
+                mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
+                configuration.getMutator().getMutationHistory(), project, mutatedProject, rootCauses,
                 wasSuccessful, testCase);
     }
 }

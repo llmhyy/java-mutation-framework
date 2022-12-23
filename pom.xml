@@ -13,9 +13,13 @@
             <id>repo.gradle.org</id>
             <url>https://repo.gradle.org/gradle/libs-releases</url>
         </repository>
+        <repository>
+            <id>in-project</id>
+            <name>In Project Repo</name>
+            <url>file://${project.basedir}/lib</url>
+        </repository>
     </repositories>
     <build>
-        <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -98,11 +102,6 @@
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
         </dependency>
-        <dependency>
-            <groupId>trace-model</groupId>
-            <artifactId>trace-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.maven/maven-model -->
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -162,6 +161,45 @@
             <groupId>io.github.cdimascio</groupId>
             <artifactId>java-dotenv</artifactId>
             <version>5.2.2</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20220924</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.bcel/bcel -->
+        <dependency>
+            <groupId>org.apache.bcel</groupId>
+            <artifactId>bcel</artifactId>
+            <version>6.7.0</version>
+        </dependency>
+
+        <!--
+        Below are the external jar files brought over from the Microbat project to read the traces.
+        To update them, replace the fields in the cmd below with the correct values and run.
+        See https://maven.apache.org/general.html#importing-jars for more details.
+
+        mvn install:install-file
+            -Dfile=src/main/resources/lib/instrumentator.jar
+            -DgroupId=microbat
+            -DartifactId=instrumentator
+            -Dversion=0.0.1
+            -Dpackaging=jar
+            -DgeneratePom=true
+            -DlocalRepositoryPath=lib
+            -DcreateChecksum=true -U
+
+        -->
+        <dependency>
+            <groupId>microbat</groupId>
+            <artifactId>instrumentator</artifactId>
+            <version>0.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>microbat</groupId>
+            <artifactId>sav.commons.simplified</artifactId>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
 </project>

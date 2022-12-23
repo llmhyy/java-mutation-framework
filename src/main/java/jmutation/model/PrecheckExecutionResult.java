@@ -1,27 +1,27 @@
 package jmutation.model;
 
 import jmutation.execution.Coverage;
-import tracecollection.model.PrecheckResult;
+import microbat.instrumentation.precheck.PrecheckInfo;
 
 public class PrecheckExecutionResult extends ExecutionResult {
-    private final PrecheckResult precheckResult;
+    private final PrecheckInfo precheckInfo;
     private Coverage coverage;
 
-    public PrecheckExecutionResult(String consoleOut, PrecheckResult precheckResult) {
+    public PrecheckExecutionResult(String consoleOut, PrecheckInfo precheckInfo) {
         super(consoleOut);
-        this.precheckResult = precheckResult;
+        this.precheckInfo = precheckInfo;
     }
 
     public boolean isOverLong() {
-        return precheckResult.isOverLong();
+        return precheckInfo.isOverLong();
     }
 
     public int getTotalSteps() {
-        return precheckResult.getTotalSteps();
+        return precheckInfo.getStepTotal();
     }
 
     public boolean testCasePassed() {
-        return precheckResult.getProgramMessage().startsWith("true;");
+        return precheckInfo.getProgramMsg().startsWith("true;");
     }
 
     public Coverage getCoverage() {
@@ -32,7 +32,7 @@ public class PrecheckExecutionResult extends ExecutionResult {
         this.coverage = coverage;
     }
 
-    public PrecheckResult getPrecheckResult() {
-        return precheckResult;
+    public PrecheckInfo getPrecheckInfo() {
+        return precheckInfo;
     }
 }

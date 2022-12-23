@@ -8,17 +8,15 @@ import jmutation.model.TestCase;
 import jmutation.model.TraceCollectionResult;
 import jmutation.model.project.ProjectConfig;
 import jmutation.parser.ProjectParser;
-import jmutation.trace.FileReader;
+import microbat.instrumentation.output.RunningInfo;
+import microbat.instrumentation.precheck.PrecheckInfo;
 import microbat.model.BreakPoint;
 import microbat.model.ClassLocation;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import org.codehaus.plexus.util.FileUtils;
-import tracecollection.model.InstrumentationResult;
-import tracecollection.model.PrecheckResult;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,21 +142,10 @@ public class ProjectExecutor extends Executor {
         String executionResultStr = exec(commandStr, timeout);
         setOutputHandlerBuilder(new OutputHandlerBuilder());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
-        FileReader fileReader;
-        try {
-            fileReader = new FileReader(dumpFilePath);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("File " + dumpFilePath + " not found");
-        }
-        InstrumentationResult instrumentationResult = fileReader.readInstrumentation();
-        try {
-            fileReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        setClassPathsToBreakpoints(instrumentationResult.getMainTrace());
-        TraceCollectionResult executionResult = new TraceCollectionResult(executionResultStr, instrumentationResult);
-        executionResult.setInstrumentationResult(instrumentationResult);
+        RunningInfo runningInfo = RunningInfo.readFromFile(dumpFilePath);
+        setClassPathsToBreakpoints(runningInfo.getMainTrace());
+        TraceCollectionResult executionResult = new TraceCollectionResult(executionResultStr, runningInfo);
+        executionResult.setInstrumentationResult(runningInfo);
         return executionResult;
     }
 
@@ -168,21 +155,11 @@ public class ProjectExecutor extends Executor {
         String executionResultStr = exec(commandStr);
         setOutputHandlerBuilder(new OutputHandlerBuilder());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
-        FileReader fileReader;
-        try {
-            fileReader = new FileReader(dumpFilePath);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException("File " + dumpFilePath + " not found");
-        }
-        PrecheckResult precheckResult = fileReader.readPrecheck();
-        try {
-            fileReader.close();
-        } catch (IOException e) {
-        }
-        setClassPathsToClassLocations(precheckResult.getVisitedClassLocations());
+        PrecheckInfo precheckInfo = PrecheckInfo.readFromFile(dumpFilePath);
+        setClassPathsToClassLocations(precheckInfo.getVisitedLocs());
         Coverage coverage = new Coverage();
-        coverage.formMutationRanges(precheckResult.getVisitedClassLocations(), testCase);
-        PrecheckExecutionResult executionResult = new PrecheckExecutionResult(executionResultStr, precheckResult);
+        coverage.formMutationRanges(precheckInfo.getVisitedLocs(), testCase);
+        PrecheckExecutionResult executionResult = new PrecheckExecutionResult(executionResultStr, precheckInfo);
         executionResult.setCoverage(coverage);
         return executionResult;
     }

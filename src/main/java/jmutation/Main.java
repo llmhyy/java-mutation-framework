@@ -4,9 +4,11 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import jmutation.model.TestCase;
 import jmutation.model.mutation.MutationFrameworkConfig;
+import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -14,6 +16,9 @@ import java.util.concurrent.TimeoutException;
 public class Main {
     @Parameter(names = "-projectPath", description = "Path to project directory", required = true)
     private String projectPath;
+
+    @Parameter(names = "-testCase", description = "Test case name", required = true)
+    private String testCase;
 
     @Parameter(names = "-dropInsDir", description = "Path to instrumentation dependencies")
     private String dropInsDir;
@@ -35,30 +40,44 @@ public class Main {
         Main params = new Main();
         JCommander.newBuilder().addObject(params).build().parse(args);
 
-        MutationFramework mutationFramework = new MutationFramework();
-        MutationFrameworkConfig configuration = new MutationFrameworkConfig();
-        mutationFramework.setConfig(configuration);
-        configuration.setInstrumentationTimeout(5);
+
+        MutationFrameworkConfigBuilder configurationBuilder = new MutationFrameworkConfigBuilder();
+
+        configurationBuilder.setInstrumentationTimeout(5);
         if (params.dropInsDir != null) {
-            configuration.setDropInsPath(params.dropInsDir);
+            configurationBuilder.setDropInsPath(params.dropInsDir);
         }
         if (params.microbatConfigPath != null) {
-            configuration.setMicrobatConfigPath(params.microbatConfigPath);
+            configurationBuilder.setMicrobatConfigPath(params.microbatConfigPath);
         }
-        configuration.setProjectPath(params.projectPath);
-        List<TestCase> testCaseList = mutationFramework.getTestCases();
+        configurationBuilder.setProjectPath(params.projectPath);
 
         //Mutator mutator = new SemanticMutator();
         Mutator mutator = new HeuristicMutator();
 
-        configuration.setMutator(mutator);
+        configurationBuilder.setMutator(mutator);
+        MutationFrameworkConfig configuration = configurationBuilder.build();
+        MutationFramework mutationFramework = new MutationFramework(configuration);
+
+        try {
+            mutationFramework.extractResources();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        List<TestCase> testCaseList = mutationFramework.getTestCases();
         for (TestCase testCase : testCaseList) {
-            configuration.setTestCase(testCase);
-            try {
-                mutationFramework.startMutationFramework();
-            } catch (RuntimeException | TimeoutException e) {
-                e.printStackTrace();
+            if (testCase.qualifiedName().equals(params.testCase)) {
+                configuration.setTestCase(testCase);
+                try {
+                    mutationFramework.startMutationFramework();
+                    return;
+                } catch (RuntimeException | TimeoutException e) {
+                    e.printStackTrace();
+                }
             }
         }
+        throw new IllegalArgumentException("Test case " + params.testCase + " not found");
     }
 }
