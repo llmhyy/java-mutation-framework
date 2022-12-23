@@ -34,7 +34,7 @@ public class MiningManager {
             MiningManager m = new MiningManager(GitHub.connect(), "some file");
             m.run();
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
     }
 
