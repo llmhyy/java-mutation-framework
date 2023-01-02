@@ -38,7 +38,7 @@ public class ParameterConfusionFactory extends ConfusionMutationCommandFactory {
         }
         MethodDeclaration expandedMethod = expandMethod(methodDeclaration);
         ASTNode nodeToMutate = alignSentenceWithCode(expandedMethod, sentenceToMutate);
-        return new ConfusionMutationCommand(nodeToMutate);
+        return new ConfusionMutationCommand(nodeToMutate, parameterToReplace, replacement);
     }
 
     private List<Parameter> getMostSimilarParameters() {
