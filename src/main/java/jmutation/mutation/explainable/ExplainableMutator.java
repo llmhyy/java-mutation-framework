@@ -25,6 +25,14 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ExplainableMutator extends Mutator {
+
+    /**
+     * Obtains comments in files, the aligned code, generates a mutation command and executes it
+     *
+     * @param coverage
+     * @param project
+     * @return
+     */
     @Override
     public Project mutate(Coverage coverage, Project project) {
         // Only mutate coverage
@@ -54,13 +62,12 @@ public class ExplainableMutator extends Mutator {
                         File file = new File(comment.getFilePath());
                         String originalSource = Files.readString(file.toPath());
                         writeToFile(mutationCommand.getRewriter(), file);
-                        if (!compileProject(project)) {
-                            try (FileWriter writer = new FileWriter(file)) {
-                                writer.write(originalSource);
-                            }
-                            continue;
+                        if (compileProject(project)) {
+                            return project;
                         }
-                        return project;
+                        try (FileWriter writer = new FileWriter(file)) {
+                            writer.write(originalSource);
+                        }
                     }
                 }
             }
