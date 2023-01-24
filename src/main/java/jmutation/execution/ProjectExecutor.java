@@ -7,23 +7,18 @@ import jmutation.model.PrecheckExecutionResult;
 import jmutation.model.TestCase;
 import jmutation.model.TraceCollectionResult;
 import jmutation.model.project.ProjectConfig;
-import jmutation.parser.ProjectParser;
 import microbat.instrumentation.output.RunningInfo;
 import microbat.instrumentation.precheck.PrecheckInfo;
-import microbat.model.BreakPoint;
-import microbat.model.ClassLocation;
-import microbat.model.trace.Trace;
-import microbat.model.trace.TraceNode;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeoutException;
+
+import static jmutation.utils.TraceHelper.setClassPathsToBreakpoints;
+import static jmutation.utils.TraceHelper.setClassPathsToClassLocations;
 
 /**
  * Set up and calls commands on the project (compile, instrumentation, etc)
@@ -143,7 +138,7 @@ public class ProjectExecutor extends Executor {
         setOutputHandlerBuilder(new OutputHandlerBuilder());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         RunningInfo runningInfo = RunningInfo.readFromFile(dumpFilePath);
-        setClassPathsToBreakpoints(runningInfo.getMainTrace());
+        setClassPathsToBreakpoints(runningInfo.getMainTrace(), projectConfig.getProjectRoot());
         TraceCollectionResult executionResult = new TraceCollectionResult(executionResultStr, runningInfo);
         executionResult.setInstrumentationResult(runningInfo);
         return executionResult;
@@ -156,7 +151,7 @@ public class ProjectExecutor extends Executor {
         setOutputHandlerBuilder(new OutputHandlerBuilder());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         PrecheckInfo precheckInfo = PrecheckInfo.readFromFile(dumpFilePath);
-        setClassPathsToClassLocations(precheckInfo.getVisitedLocs());
+        setClassPathsToClassLocations(precheckInfo.getVisitedLocs(), projectConfig.getProjectRoot());
         Coverage coverage = new Coverage();
         coverage.formMutationRanges(precheckInfo.getVisitedLocs(), testCase);
         PrecheckExecutionResult executionResult = new PrecheckExecutionResult(executionResultStr, precheckInfo);
@@ -164,37 +159,6 @@ public class ProjectExecutor extends Executor {
         return executionResult;
     }
 
-    private void setClassPathsToBreakpoints(Trace trace) {
-        Map<String, String> classNameToFilePath = new HashMap<>();
-        List<TraceNode> executionList = trace.getExecutionList();
-        for (TraceNode traceNode : executionList) {
-            BreakPoint breakPoint = traceNode.getBreakPoint();
-            String classCanonicalName = breakPoint.getClassCanonicalName();
-            if (classNameToFilePath.containsKey(classCanonicalName)) {
-                breakPoint.setFullJavaFilePath(classNameToFilePath.get(classCanonicalName));
-                continue;
-            }
-            File breakPointFile = ProjectParser.getFileOfClass(classCanonicalName, projectConfig.getProjectRoot());
-            String breakPointFilePath = breakPointFile.getAbsolutePath();
-            breakPoint.setFullJavaFilePath(breakPointFilePath);
-            classNameToFilePath.put(classCanonicalName, breakPointFilePath);
-        }
-    }
-
-    private void setClassPathsToClassLocations(Set<ClassLocation> classLocationSet) {
-        Map<String, String> classNameToFilePath = new HashMap<>();
-        for (ClassLocation classLocation : classLocationSet) {
-            String classCanonicalName = classLocation.getClassCanonicalName();
-            if (classNameToFilePath.containsKey(classCanonicalName)) {
-                classLocation.setFullJavaFilePath(classNameToFilePath.get(classCanonicalName));
-                continue;
-            }
-            File breakPointFile = ProjectParser.getFileOfClass(classCanonicalName, projectConfig.getProjectRoot());
-            String breakPointFilePath = breakPointFile.getAbsolutePath();
-            classLocation.setFullJavaFilePath(breakPointFilePath);
-            classNameToFilePath.put(classCanonicalName, breakPointFilePath);
-        }
-    }
 
     private InstrumentationCommandBuilder setUpForInstrumentation(TestCase testCase, boolean isPrecheck) {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setPrecheck(isPrecheck);

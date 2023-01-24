@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -38,14 +37,7 @@ public class Executor {
 
     public static OperatingSystem getOS() {
         if (operatingSystem == null) {
-            String osString = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-            if (osString.contains("mac") || osString.contains("darwin")) {
-                operatingSystem = OperatingSystem.MACOS;
-            } else if (osString.contains("win")) {
-                operatingSystem = OperatingSystem.WINDOWS;
-            } else {
-                operatingSystem = OperatingSystem.LINUX;
-            }
+            operatingSystem = OperatingSystem.getOS();
         }
         return operatingSystem;
     }

@@ -2,7 +2,9 @@ package jmutation.utils;
 
 import jmutation.model.ast.ASTNodeParentRetriever;
 import jmutation.mutation.MutationCommand;
+import jmutation.parser.ProjectParser;
 import microbat.model.BreakPoint;
+import microbat.model.ClassLocation;
 import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -10,9 +12,12 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class TraceHelper {
@@ -51,5 +56,37 @@ public class TraceHelper {
         }
 
         return new ArrayList<>(result);
+    }
+
+    public static void setClassPathsToBreakpoints(Trace trace, File root) {
+        Map<String, String> classNameToFilePath = new HashMap<>();
+        List<TraceNode> executionList = trace.getExecutionList();
+        for (TraceNode traceNode : executionList) {
+            BreakPoint breakPoint = traceNode.getBreakPoint();
+            String classCanonicalName = breakPoint.getClassCanonicalName();
+            if (classNameToFilePath.containsKey(classCanonicalName)) {
+                breakPoint.setFullJavaFilePath(classNameToFilePath.get(classCanonicalName));
+                continue;
+            }
+            File breakPointFile = ProjectParser.getFileOfClass(classCanonicalName, root);
+            String breakPointFilePath = breakPointFile.getAbsolutePath();
+            breakPoint.setFullJavaFilePath(breakPointFilePath);
+            classNameToFilePath.put(classCanonicalName, breakPointFilePath);
+        }
+    }
+
+    public static void setClassPathsToClassLocations(Set<ClassLocation> classLocationSet, File root) {
+        Map<String, String> classNameToFilePath = new HashMap<>();
+        for (ClassLocation classLocation : classLocationSet) {
+            String classCanonicalName = classLocation.getClassCanonicalName();
+            if (classNameToFilePath.containsKey(classCanonicalName)) {
+                classLocation.setFullJavaFilePath(classNameToFilePath.get(classCanonicalName));
+                continue;
+            }
+            File breakPointFile = ProjectParser.getFileOfClass(classCanonicalName, root);
+            String breakPointFilePath = breakPointFile.getAbsolutePath();
+            classLocation.setFullJavaFilePath(breakPointFilePath);
+            classNameToFilePath.put(classCanonicalName, breakPointFilePath);
+        }
     }
 }
