@@ -37,7 +37,7 @@ public class MutationParserTest {
         VariableDeclarationFragment frag = (VariableDeclarationFragment) varDecStmt.fragments().get(0);
         ASTNode mathPowInvocation = frag.getInitializer();
         MutationParser parser = new MutationParser();
-        MutationCommand command = parser.parse(mathPowInvocation);
-        assertTrue(command instanceof MutationMathLibCommand);
+        List<MutationCommand> commands = parser.parse(mathPowInvocation);
+        assertTrue(commands.get(0) instanceof MutationMathLibCommand);
     }
 }

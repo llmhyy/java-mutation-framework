@@ -51,6 +51,13 @@ public abstract class Mutator {
         return project;
     }
 
+    /**
+     * Obtains all possible mutation commands that can be executed
+     *
+     * @param mutationRanges
+     * @param project
+     * @return
+     */
     public abstract List<MutationCommand> analyse(List<MutationRange> mutationRanges, Project project);
 
     public List<MutationCommand> getMutationHistory() {

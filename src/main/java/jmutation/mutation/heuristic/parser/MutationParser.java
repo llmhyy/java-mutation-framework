@@ -6,7 +6,6 @@ import jmutation.mutation.heuristic.commands.MutationMathLibCommand;
 import jmutation.mutation.heuristic.commands.MutationReturnMathCommand;
 import jmutation.mutation.heuristic.commands.MutationReturnStmtLiteralCommand;
 import jmutation.mutation.heuristic.commands.MutationWhileLoopToIfCommand;
-import jmutation.utils.RandomSingleton;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -23,60 +22,47 @@ import java.util.stream.Collectors;
  * Returns a mutation command to execute for a given ASTNode
  */
 public class MutationParser extends ASTVisitor {
-    MutationCommand command;
+    List<MutationCommand> commands = new ArrayList<>();
 
-    public MutationCommand parse(ASTNode node) {
+    public List<MutationCommand> parse(ASTNode node) {
         node.accept(this);
-        if (command == null) {
-            return null;
-        }
-        if (command.canExecute()) {
-            return command;
-        }
-        return null;
+        return commands.stream().filter(MutationCommand::canExecute).collect(Collectors.toList());
     }
 
     @Override
     public void preVisit(ASTNode node) {
-        command = null;
+        commands = new ArrayList<>();
     }
 
     @Override
     public boolean visit(InfixExpression node) {
-        command = MutationInfixExpressionParser.parse(node);
+        commands.addAll(MutationInfixExpressionParser.parseAllCommands(node));
         return false;
     }
 
     @Override
     public boolean visit(WhileStatement node) {
-        command = new MutationWhileLoopToIfCommand(node);
+        commands.add(new MutationWhileLoopToIfCommand(node));
         return false;
     }
 
     @Override
     public boolean visit(ForStatement node) {
-        command = new MutationForLoopToIfCommand(node);
+        commands.add(new MutationForLoopToIfCommand(node));
         return false;
     }
 
     @Override
     public boolean visit(ReturnStatement node) {
-        List<MutationCommand> possibleCommands = new ArrayList<>();
-        possibleCommands.add(new MutationReturnMathCommand(node));
-        possibleCommands.add(new MutationReturnStmtLiteralCommand(node));
-        possibleCommands = possibleCommands.stream().filter(command -> command.canExecute()).collect(Collectors.toList());
-        if (possibleCommands.isEmpty()) {
-            return true;
-        }
-        possibleCommands = RandomSingleton.getSingleton().shuffle(possibleCommands);
-        command = possibleCommands.get(0);
+        commands.add(new MutationReturnMathCommand(node));
+        commands.add(new MutationReturnStmtLiteralCommand(node));
         return false;
     }
 
     @Override
     public boolean visit(MethodInvocation node) {
         if (node.getExpression() != null && node.getExpression().toString().equals("Math")) {
-            command = new MutationMathLibCommand(node);
+            commands.add(new MutationMathLibCommand(node));
         }
         return false;
     }

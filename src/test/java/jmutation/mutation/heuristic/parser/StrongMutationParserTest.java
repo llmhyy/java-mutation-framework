@@ -7,6 +7,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class StrongMutationParserTest {
@@ -25,7 +27,7 @@ class StrongMutationParserTest {
         MethodDeclaration methodDeclaration = (MethodDeclaration) helper.getBodyDeclarations().get(0);
         ASTNode methodBody = (ASTNode) methodDeclaration.getStructuralProperty(MethodDeclaration.BODY_PROPERTY);
         MutationParser parser = new StrongMutationParser();
-        MutationCommand command = parser.parse(methodBody);
-        assertTrue(command instanceof MutationBlockRemovalCommand);
+        List<MutationCommand> commands = parser.parse(methodBody);
+        assertTrue(commands.get(0) instanceof MutationBlockRemovalCommand);
     }
 }
