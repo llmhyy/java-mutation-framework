@@ -103,6 +103,7 @@ public class MutationFrameworkConfig {
     }
 
     public void setTestCase(TestCase testCase) {
+        if (testCase == null) throw new IllegalArgumentException("Test case cannot be null");
         this.testCase = testCase;
     }
 

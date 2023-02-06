@@ -2,6 +2,7 @@ package jmutation;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import jmutation.MutationFramework.MutationFrameworkBuilder;
 import jmutation.model.TestCase;
 import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
@@ -57,7 +58,7 @@ public class Main {
 
         configurationBuilder.setMutator(mutator);
         MutationFrameworkConfig configuration = configurationBuilder.build();
-        MutationFramework mutationFramework = new MutationFramework(configuration);
+        MutationFramework mutationFramework = new MutationFrameworkBuilder(configuration).build();
 
         try {
             mutationFramework.extractResources();
@@ -69,7 +70,7 @@ public class Main {
         List<TestCase> testCaseList = mutationFramework.getTestCases();
         for (TestCase testCase : testCaseList) {
             if (testCase.qualifiedName().equals(params.testCase)) {
-                configuration.setTestCase(testCase);
+                mutationFramework.setTestCase(testCase);
                 try {
                     mutationFramework.startMutationFramework();
                     return;

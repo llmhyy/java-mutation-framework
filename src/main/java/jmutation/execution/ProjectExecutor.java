@@ -25,7 +25,7 @@ import static jmutation.utils.TraceHelper.setClassPathsToClassLocations;
  */
 public class ProjectExecutor extends Executor {
     private final ProjectConfig projectConfig;
-    private MicrobatConfig microbatConfig;
+    private final MicrobatConfig microbatConfig;
     private boolean compiled = false;
 
     public ProjectExecutor(MicrobatConfig microbatConfig, ProjectConfig proj) {
@@ -54,8 +54,8 @@ public class ProjectExecutor extends Executor {
         return jarFiles;
     }
 
-    public void setMicrobatConfig(MicrobatConfig microbatConfig) {
-        this.microbatConfig = microbatConfig;
+    public ProjectExecutor setMicrobatConfig(MicrobatConfig microbatConfig) {
+        return new ProjectExecutor(microbatConfig, projectConfig);
     }
 
     /**

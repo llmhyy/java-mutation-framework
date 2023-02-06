@@ -1,6 +1,7 @@
 package jmutation;
 
 import jmutation.constants.ExternalLibrary;
+import jmutation.execution.Coverage;
 import jmutation.execution.ProjectExecutor;
 import jmutation.model.MicrobatConfig;
 import jmutation.model.PrecheckExecutionResult;
@@ -19,7 +20,6 @@ import microbat.model.trace.Trace;
 import microbat.model.trace.TraceNode;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -35,14 +35,15 @@ public class MutationFramework {
     private PrecheckExecutionResult mutatedPrecheckExecutionResult = null; // Instead of storing, should pass it into the trace collection method as argument
     private ProjectExecutor mutatedProjectExecutor = null;
     private Project mutatedProject = null;
-    private Project clonedProject;
     private ProjectConfig mutatedProjConfig;
     private PrecheckExecutionResult precheckExecutionResult; // Instead of storing, should pass it into the trace collection method as argument
     private ProjectExecutor projectExecutor;
     private Project project;
 
-    public MutationFramework(MutationFrameworkConfig config) {
+    private MutationFramework(MutationFrameworkConfig config, ProjectConfig projectConfig) {
         configuration = config;
+        this.projectConfig = projectConfig;
+        project = projectConfig.getProject();
     }
 
     /**
@@ -84,6 +85,10 @@ public class MutationFramework {
         // ResourceExtractor.extractFile("semantic/token-embeddings-FT.bin", path);
     }
 
+    public void setTestCase(TestCase testCase) {
+        configuration.setTestCase(testCase);
+    }
+
     /**
      * Starts trace collection on the chosen test case, mutates the covered code, and runs trace collection on the mutated test case.
      *
@@ -111,7 +116,7 @@ public class MutationFramework {
      * @return
      */
     public MutationResult mutate() {
-        if (!setup()) return null;
+        testCaseIsNotNull();
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
         MicrobatConfig updatedMicrobatConfig = configuration.getMicrobatConfig();
@@ -136,16 +141,26 @@ public class MutationFramework {
      *
      * @return
      */
-    public List<MutationCommand> analyse() {
-        if (!setup()) return new ArrayList<>();
+    public List<MutationCommand> analyse(Coverage coverage) {
+        testCaseIsNotNull();
+        return configuration.getMutator().analyse(coverage.getRanges(), project);
+    }
+
+    /**
+     * Runs precheck.
+     * Checks whether test case passed and coverage to be used for creating possible mutations in analyse
+     *
+     * @return
+     */
+    public PrecheckExecutionResult runPrecheck() {
+        testCaseIsNotNull();
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
         MicrobatConfig updatedMicroBatConfig = configuration.getMicrobatConfig().
                 setDumpFilePath(configuration.getDumpFilePathConfig().getPrecheckFilePath());
-        projectExecutor = new ProjectExecutor(updatedMicroBatConfig, projectConfig);
+        ProjectExecutor projectExecutor = new ProjectExecutor(updatedMicroBatConfig, projectConfig);
         // Precheck
-        precheckExecutionResult = executePrecheck(projectExecutor);
-        return configuration.getMutator().analyse(precheckExecutionResult.getCoverage().getRanges(), project);
+        return executePrecheck(projectExecutor);
     }
 
     /**
@@ -155,7 +170,7 @@ public class MutationFramework {
      * @return
      */
     public MutationResult mutate(MutationCommand command) {
-        if (!setup()) return null;
+        testCaseIsNotNull();
         runMutation(project, command);
 
         System.out.println("Mutated precheck done");
@@ -163,13 +178,9 @@ public class MutationFramework {
                 configuration.getMutator().getMutationHistory());
     }
 
-    public boolean setup() {
-        if (projectConfig == null) {
-            generateProjectConfiguration();
-        }
-
-        project = projectConfig.getProject();
-        return configuration.getTestCase() != null;
+    private void testCaseIsNotNull() {
+        if (configuration.getTestCase() == null)
+            throw new IllegalStateException("Test case cannot be null");
     }
 
     private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) {
@@ -184,7 +195,7 @@ public class MutationFramework {
     }
 
     private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
-        clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
+        Project clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
         mutatedProject = configuration.getMutator().mutate(precheckExecutionResult.getCoverage(), clonedProject);
         mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
         MicrobatConfig precheckMicrobatConfig = configuration.getMicrobatConfig();
@@ -196,13 +207,13 @@ public class MutationFramework {
     }
 
     private void runMutation(Project proj, MutationCommand command) {
-        clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
-        mutatedProject = configuration.getMutator().mutate(command, clonedProject);
-        mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
+        Project clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
+        Project mutatedProject = configuration.getMutator().mutate(command, clonedProject);
+        ProjectConfig mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
         MicrobatConfig microbatConfig = configuration.getMicrobatConfig().setDumpFilePath(
                 configuration.getDumpFilePathConfig().getMutatedPrecheckFilePath());
-        mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-        mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
+        ProjectExecutor mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
+        executePrecheck(mutatedProjectExecutor);
     }
 
     private void runWithAutoSeed(Project proj, PrecheckExecutionResult precheckExecutionResult) {
@@ -237,7 +248,7 @@ public class MutationFramework {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setExpectedSteps(precheckExecutionResult.getTotalSteps());
         updatedMicrobatConfig = updatedMicrobatConfig.
                 setDumpFilePath(configuration.getDumpFilePathConfig().getTraceFilePath());
-        projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
+        projectExecutor = projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
         TraceCollectionResult result = projectExecutor.exec(testCase, configuration.isToDeleteTraceFile(),
                 configuration.getInstrumentationTimeout());
         System.out.println("Normal trace done");
@@ -245,7 +256,7 @@ public class MutationFramework {
         MicrobatConfig updatedMutationMicrobatConfig = microbatConfig.setExpectedSteps(mutatedPrecheckExecutionResult.getTotalSteps());
         updatedMutationMicrobatConfig = updatedMutationMicrobatConfig.
                 setDumpFilePath(configuration.getDumpFilePathConfig().getMutatedTraceFilePath());
-        mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
+        mutatedProjectExecutor = mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
         TraceCollectionResult mutatedResult = mutatedProjectExecutor.exec(testCase, configuration.isToDeleteTraceFile(),
                 configuration.getInstrumentationTimeout());
         System.out.println("Mutated trace done");
@@ -255,7 +266,7 @@ public class MutationFramework {
         includeAssertionsMicrobatConfig =
                 includeAssertionsMicrobatConfig.setDumpFilePath(
                         configuration.getDumpFilePathConfig().getTraceWithAssertsFilePath());
-        projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
+        projectExecutor = projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
         TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase,
                 configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
 
@@ -265,7 +276,7 @@ public class MutationFramework {
                 includeAssertionsMutationMicrobatConfig.setDumpFilePath(
                         configuration.getDumpFilePathConfig().getMutatedTraceWithAssertsFilePath()
                 );
-        mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
+        mutatedProjectExecutor = mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
         TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase,
                 configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
 
@@ -280,5 +291,19 @@ public class MutationFramework {
                 mutatedResultWithAssertionsInTrace.getInstrumentationResult(),
                 configuration.getMutator().getMutationHistory(), project, mutatedProject, rootCauses,
                 wasSuccessful, testCase);
+    }
+
+    public static class MutationFrameworkBuilder {
+        private MutationFrameworkConfig mutationFrameworkConfig;
+
+        public MutationFrameworkBuilder(MutationFrameworkConfig mutationFrameworkConfig) {
+            this.mutationFrameworkConfig = mutationFrameworkConfig;
+        }
+
+        public MutationFramework build() {
+            ProjectConfig projectConfig = new ProjectConfig(mutationFrameworkConfig.getProjectPath(),
+                    mutationFrameworkConfig.getDropInsPath());
+            return new MutationFramework(mutationFrameworkConfig, projectConfig);
+        }
     }
 }

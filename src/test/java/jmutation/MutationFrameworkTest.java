@@ -1,5 +1,6 @@
 package jmutation;
 
+import jmutation.MutationFramework.MutationFrameworkBuilder;
 import jmutation.constants.ExternalLibrary;
 import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
 import org.apache.commons.io.FileUtils;
@@ -29,8 +30,8 @@ public class MutationFrameworkTest {
         Invoker invoker = new DefaultInvoker();
         invoker.execute(request);
         MutationFrameworkConfigBuilder configBuilder = new MutationFrameworkConfigBuilder();
-        configBuilder.setProjectPath("project path");
-        MutationFramework mf = new MutationFramework(configBuilder.build());
+        configBuilder.setProjectPath("sample/math_70");
+        MutationFramework mf = new MutationFrameworkBuilder(configBuilder.build()).build();
         mf.extractResources(tempDirPath);
         for (ExternalLibrary externalLibrary : ExternalLibrary.values()) {
             assertTrue(new File(tempDir, "lib" + File.separator + externalLibrary.getName() + ".jar").exists());
