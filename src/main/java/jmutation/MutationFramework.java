@@ -57,10 +57,6 @@ public class MutationFramework {
         return proj.getTestCases();
     }
 
-    public MutationFrameworkConfig getConfiguration() {
-        return configuration;
-    }
-
     /**
      * Generates ProjectConfig for use by mutation framework.
      * This method should be called after updating the project path or drop ins directory.
