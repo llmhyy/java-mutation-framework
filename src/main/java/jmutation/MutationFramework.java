@@ -101,16 +101,6 @@ public class MutationFramework {
     }
 
     /**
-     * @param command
-     * @return
-     */
-    public MutationFrameworkResult startMutationFramework(MutationCommand command) throws TimeoutException {
-        configuration.getMutator().clearHistory();
-        mutate(command);
-        return runTraceCollection();
-    }
-
-    /**
      * Obtains coverage, clones the project, and randomly mutates part of the coverage
      *
      * @return
@@ -169,9 +159,10 @@ public class MutationFramework {
      * @param command
      * @return
      */
-    public MutationResult mutate(MutationCommand command) {
+    public MutationResult mutate(MutationCommand command, PrecheckExecutionResult precheckExecutionResult) {
         testCaseIsNotNull();
-        runMutation(project, command);
+        ProjectExecutor projectExecutor = createProjectExecutor(project, command);
+        PrecheckExecutionResult mutatedPrecheckExecutionResult = executePrecheck(projectExecutor);
 
         System.out.println("Mutated precheck done");
         return new MutationResult(precheckExecutionResult, mutatedPrecheckExecutionResult, configuration.getTestCase(),
@@ -194,6 +185,15 @@ public class MutationFramework {
         return precheckResult;
     }
 
+    private ProjectExecutor createProjectExecutor(Project project, MutationCommand command) {
+        Project clonedProject = project.cloneToOtherPath(configuration.getMutatedProjectPath());
+        Project mutatedProject = configuration.getMutator().mutate(command, clonedProject);
+        ProjectConfig mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
+        MicrobatConfig microbatConfig = configuration.getMicrobatConfig().setDumpFilePath(
+                configuration.getDumpFilePathConfig().getMutatedPrecheckFilePath());
+        return new ProjectExecutor(microbatConfig, mutatedProjConfig);
+    }
+
     private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
         Project clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
         mutatedProject = configuration.getMutator().mutate(precheckExecutionResult.getCoverage(), clonedProject);
@@ -204,16 +204,6 @@ public class MutationFramework {
         mutatedProjectExecutor = new ProjectExecutor(precheckMicrobatConfig, mutatedProjConfig);
 
         mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
-    }
-
-    private void runMutation(Project proj, MutationCommand command) {
-        Project clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
-        Project mutatedProject = configuration.getMutator().mutate(command, clonedProject);
-        ProjectConfig mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
-        MicrobatConfig microbatConfig = configuration.getMicrobatConfig().setDumpFilePath(
-                configuration.getDumpFilePathConfig().getMutatedPrecheckFilePath());
-        ProjectExecutor mutatedProjectExecutor = new ProjectExecutor(microbatConfig, mutatedProjConfig);
-        executePrecheck(mutatedProjectExecutor);
     }
 
     private void runWithAutoSeed(Project proj, PrecheckExecutionResult precheckExecutionResult) {

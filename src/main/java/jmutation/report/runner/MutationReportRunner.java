@@ -34,7 +34,7 @@ public class MutationReportRunner extends ReportRunner {
                 PrecheckExecutionResult precheckExecutionResult = mutationFramework.runPrecheck();
                 List<MutationCommand> commands = mutationFramework.analyse(precheckExecutionResult.getCoverage());
                 for (MutationCommand command : commands) {
-                    MutationResult result = mutationFramework.mutate(command);
+                    MutationResult result = mutationFramework.mutate(command, precheckExecutionResult);
                     report.record(new MutationTrial("math_70", testCase,
                             command,
                             result.getFixedPrecheckExecutionResult().getPrecheckInfo().getProgramMsg(),
