@@ -6,8 +6,10 @@ import jmutation.execution.output.OutputHandler.OutputHandlerBuilder;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -75,7 +77,13 @@ public class Executor {
         pb.redirectErrorStream(true); //redirect error stream to standard stream
         try {
             if (getOS() == OperatingSystem.WINDOWS) {
-                pb.command("cmd.exe", "/c", cmd);
+                if (cmd.length() > 8100) { // If command is too long, write to bat file and execute it
+                    File batFile = writeCmdToTempBatFile(cmd);
+                    pb.command("cmd.exe", "/c", batFile.getCanonicalPath());
+                    Files.delete(batFile.toPath());
+                } else {
+                    pb.command("cmd.exe", "/c", cmd);
+                }
             } else {
                 pb.command("bash", "-c", cmd);
             }
@@ -168,5 +176,20 @@ public class Executor {
             return;
         }
         destroyProcessAndChildren(optionalProcessHandle.get());
+    }
+
+    private File writeCmdToTempBatFile(String cmd) {
+        File tempFile = new File("");
+        try {
+            tempFile = Files.createTempFile("cmd", "bat").toFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try (FileWriter fileWriter = new FileWriter(tempFile)) {
+            fileWriter.write(cmd);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempFile;
     }
 }

@@ -15,7 +15,6 @@ public class InstrumentationCommandBuilder {
     private final MicrobatConfig microbatConfig;
     List<String> classPaths = new ArrayList<>();
     private String workingDirectory = "";
-    private List<String> externalLibPaths = new ArrayList<>();
     private Optional<String> testClass = Optional.empty();
     private Optional<String> testMethod = Optional.empty();
 
@@ -33,9 +32,7 @@ public class InstrumentationCommandBuilder {
     public String generateCommand() {
         // Project paths are added to classPaths by project executor.
         generateSystemJars(dropInsDir);
-        List<String> classPathsAndExternalLibs = new ArrayList<>(classPaths);
-        classPathsAndExternalLibs.addAll(externalLibPaths);
-        MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(classPathsAndExternalLibs);
+        MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(classPaths);
         if (testClass.isEmpty()) {
             microbatConfig.setLaunchClass("");
         } else {
@@ -70,10 +67,6 @@ public class InstrumentationCommandBuilder {
         this.classPaths.add(FilenameUtils.normalize(classPath.getAbsolutePath()));
     }
 
-    public void addExternalLibPath(File file) {
-        this.externalLibPaths.add(FilenameUtils.normalize(file.getAbsolutePath()));
-    }
-
     public void setWorkingDirectory(File workingDirectory) {
         this.workingDirectory = FilenameUtils.normalize(workingDirectory.getAbsolutePath());
     }
@@ -94,13 +87,12 @@ public class InstrumentationCommandBuilder {
         return Objects.equals(dropInsDir, that.dropInsDir) && Objects.equals(microbatConfig, that.microbatConfig) &&
                 Objects.equals(classPaths, that.classPaths) &&
                 Objects.equals(workingDirectory, that.workingDirectory) &&
-                Objects.equals(externalLibPaths, that.externalLibPaths) &&
                 Objects.equals(testClass, that.testClass) && Objects.equals(testMethod, that.testMethod);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dropInsDir, microbatConfig, classPaths, workingDirectory, externalLibPaths, testClass,
+        return Objects.hash(dropInsDir, microbatConfig, classPaths, workingDirectory, testClass,
                 testMethod);
     }
 }

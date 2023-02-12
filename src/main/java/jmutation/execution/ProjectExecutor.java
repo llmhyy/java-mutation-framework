@@ -123,6 +123,7 @@ public class ProjectExecutor extends Executor {
     public PrecheckExecutionResult execPrecheck(TestCase testCase, boolean shouldDeleteDumpFile) {
         if (!compiled) {
             PrecheckExecutionResult out = new PrecheckExecutionResult(compile(), null);
+            setupDependencies();
             if (!out.isSuccessful()) {
                 return out;
             }
@@ -183,17 +184,19 @@ public class ProjectExecutor extends Executor {
                 throw new RuntimeException("Could not create dump file at " + dumpFilePath);
             }
         }
-        // include microbat details to instrument run
+
         InstrumentationCommandBuilder ib = new InstrumentationCommandBuilder(updatedMicrobatConfig, projectConfig.getDropInsDir());
+
+        findJars().forEach(file -> { // add jar files
+            ib.addClassPath(file);
+        });
+
+        // include microbat details to instrument run
         ib.setTestCase(testCase.testClass, testCase.simpleName); // set class and method name
         ib.addClassPath(projectConfig.getCompiledTestFolder()); // add target/test-classes
         ib.addClassPath(projectConfig.getCompiledClassFolder()); // add target/classes
         ib.setWorkingDirectory(projectConfig.getProjectRoot());
 
-        findJars().forEach(file -> { // add jar files
-            ib.addClassPath(file);
-            ib.addExternalLibPath(file);
-        });
 
         return ib;
     }
