@@ -16,13 +16,13 @@ public class MavenProject extends Project {
     private static final String CLEAN_FMT = "%s clean";
     private static final String PACKAGE_ALL_FMT = "%s package";
     private static final String COMPILE_NO_RUN_TEST_FMT = "%s install -DskipTests";
+    private static final String COPY_DEPENDENCIES_FMT = "%s dependency:copy-dependencies";
 
 
     public MavenProject(String name, File root, List<TestCase> testCases,
                         String srcFolderPath, String testFolderPath,
-                        String compiledSrcFolderPath, String compiledTestFolderPath, List<File> externalLibs) {
-        super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath,
-                externalLibs);
+                        String compiledSrcFolderPath, String compiledTestFolderPath) {
+        super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath);
     }
 
     @Override
@@ -43,6 +43,11 @@ public class MavenProject extends Project {
     @Override
     public String cleanCommand() {
         return String.format(CLEAN_FMT, MVN_CMD);
+    }
+
+    @Override
+    public String setupDependenciesCommand() {
+        return String.format(COPY_DEPENDENCIES_FMT, MVN_CMD);
     }
 
     @Override
@@ -91,11 +96,6 @@ public class MavenProject extends Project {
             throw new RuntimeException("Failed to clone project to " + dest.getAbsolutePath());
         }
         return new MavenProject(getProjectName(), dest, getTestCases(), srcFolderPath, testFolderPath,
-                compileSrcFolderPath, compileTestFolderPath, externalLibs);
-    }
-
-    @Override
-    public List<File> getExternalLibs() {
-        return externalLibs;
+                compileSrcFolderPath, compileTestFolderPath);
     }
 }

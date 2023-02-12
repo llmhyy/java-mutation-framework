@@ -1,7 +1,6 @@
-package jmutation.model;
+package jmutation.model.project;
 
-import jmutation.model.project.Project;
-import jmutation.model.project.ProjectConfig;
+import jmutation.model.TestCase;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

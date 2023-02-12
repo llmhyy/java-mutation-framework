@@ -24,9 +24,9 @@ class ProjectExecutorTest {
     @Test
     // Enabled only in GitHub actions, as it takes very long to run locally
     @EnabledIf("jmutation.utils.MiscellaneousTestUtils#isRunningInGitHubActions")
-    void findJars() {
+    void findJars_ContainsJarsInTargetDir_GetsAllJarsInTargetDir() {
         String projectPath = "./sample/spoon";
-        String dropInsDir = "./lexpectedResult";
+        String dropInsDir = "./expectedResult";
         ProjectConfig config = new ProjectConfig(projectPath, dropInsDir);
         ProjectExecutor pe = new ProjectExecutor(MicrobatConfig.defaultConfig(projectPath), config);
         pe.packageProj();
@@ -41,7 +41,7 @@ class ProjectExecutorTest {
     }
 
     @Test
-    void setUpForInstrumentation_ProjectWithDependencies_CreateCorrectInstrumentationCommandBuilder(@TempDir File tempDir)
+    void setUpForInstrumentation_ARegularProject_CreateCorrectInstrumentationCommandBuilder(@TempDir File tempDir)
             throws IOException {
         String dropInsDir = "dropInsDir";
         ProjectConfig projectConfig = mock(ProjectConfig.class);
@@ -49,14 +49,11 @@ class ProjectExecutorTest {
         File compiledTestClassFolder = new File(tempDir, "compiledTestClassFolder");
         File compiledFolder = new File(tempDir, "compiledFolder");
         File projectRoot = new File(tempDir, "root");
-        List<File> externalLibs = new ArrayList<>();
-        externalLibs.add(new File(tempDir, "externalLib.jar"));
         when(projectConfig.getDropInsDir()).thenReturn(dropInsDir);
         when(projectConfig.getCompiledFolder()).thenReturn(compiledFolder);
         when(projectConfig.getCompiledClassFolder()).thenReturn(compiledClassFolder);
         when(projectConfig.getCompiledTestFolder()).thenReturn(compiledTestClassFolder);
         when(projectConfig.getProjectRoot()).thenReturn(projectRoot);
-        when(projectConfig.getExtLibs()).thenReturn(externalLibs);
 
         MicrobatConfig microbatConfig = mock(MicrobatConfig.class);
         when(microbatConfig.setPrecheck(false)).thenReturn(microbatConfig);
@@ -74,10 +71,6 @@ class ProjectExecutorTest {
         expectedResult.addClassPath(projectConfig.getCompiledClassFolder()); // add target/classes
         expectedResult.setWorkingDirectory(projectConfig.getProjectRoot());
 
-        externalLibs.forEach(file -> { // add jar files
-            expectedResult.addClassPath(file);
-            expectedResult.addExternalLibPath(file);
-        });
         assertEquals(expectedResult, instrumentationCommandBuilder);
     }
 }

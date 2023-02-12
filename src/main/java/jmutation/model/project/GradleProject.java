@@ -6,7 +6,6 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static jmutation.constants.GradleConstants.COMPILATION_FOLDER;
@@ -22,8 +21,7 @@ public class GradleProject extends Project {
     public GradleProject(String name, File root, List<TestCase> testCases,
                          String srcFolderPath, String testFolderPath,
                          String compiledSrcFolderPath, String compiledTestFolderPath) {
-        super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath,
-                new ArrayList<>());
+        super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath);
     }
 
     @Override
@@ -95,9 +93,8 @@ public class GradleProject extends Project {
                 compileSrcFolderPath, compileTestFolderPath);
     }
 
-    // TODO
     @Override
-    public List<File> getExternalLibs() {
-        return null;
+    public String setupDependenciesCommand() {
+        return "";
     }
 }

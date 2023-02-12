@@ -26,7 +26,7 @@ public abstract class Project {
 
     public Project(String name, File root, List<TestCase> testCases,
                    String srcFolderPath, String testFolderPath,
-                   String compiledSrcFolderPath, String compiledTestFolderPath, List<File> externalLibs) {
+                   String compiledSrcFolderPath, String compiledTestFolderPath) {
         this.name = name;
         this.root = root;
         this.testCases = testCases;
@@ -34,7 +34,6 @@ public abstract class Project {
         this.testFolderPath = testFolderPath;
         this.compileSrcFolderPath = compiledSrcFolderPath;
         this.compileTestFolderPath = compiledTestFolderPath;
-        this.externalLibs = externalLibs;
     }
 
 
@@ -64,6 +63,8 @@ public abstract class Project {
 
     public abstract String cleanCommand();
 
+    public abstract String setupDependenciesCommand();
+
     public abstract File getCompiledTestFolder();
 
     public abstract File getCompiledClassFolder();
@@ -73,7 +74,4 @@ public abstract class Project {
     public abstract Project cloneToOtherPath();
 
     public abstract Project cloneToOtherPath(String path);
-
-    public abstract List<File> getExternalLibs();
-
 }

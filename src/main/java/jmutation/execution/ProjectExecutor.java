@@ -67,6 +67,10 @@ public class ProjectExecutor extends Executor {
         return exec(projectConfig.getCompileCommand());
     }
 
+    public String setupDependencies() {
+        return exec(projectConfig.getSetupExternalDependenciesCommand());
+    }
+
     public String clean() {
         return exec(projectConfig.getCleanCommand());
     }
@@ -91,6 +95,7 @@ public class ProjectExecutor extends Executor {
     public TraceCollectionResult exec(TestCase testCase, boolean shouldDeleteDumpFile, int timeout) throws TimeoutException {
         if (!compiled) {
             TraceCollectionResult out = new TraceCollectionResult(compile(), null);
+            setupDependencies();
             if (!out.isSuccessful()) {
                 return out;
             }
@@ -108,9 +113,7 @@ public class ProjectExecutor extends Executor {
     }
 
     public List<File> findJars() {
-        List<File> jarsInCompiledDir = walk(projectConfig.getCompiledFolder());
-        jarsInCompiledDir.addAll(projectConfig.getExtLibs());
-        return jarsInCompiledDir;
+        return walk(projectConfig.getCompiledFolder());
     }
 
     public PrecheckExecutionResult execPrecheck(TestCase testCase) {
