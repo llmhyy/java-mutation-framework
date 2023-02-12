@@ -35,7 +35,7 @@ public class InstrumentationCommandBuilder {
         generateSystemJars(dropInsDir);
         List<String> classPathsAndExternalLibs = new ArrayList<>(classPaths);
         classPathsAndExternalLibs.addAll(externalLibPaths);
-        MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(externalLibPaths);
+        MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(classPathsAndExternalLibs);
         if (testClass.isEmpty()) {
             microbatConfig.setLaunchClass("");
         } else {
