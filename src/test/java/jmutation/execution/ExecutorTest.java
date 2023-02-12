@@ -2,6 +2,7 @@ package jmutation.execution;
 
 import org.codehaus.plexus.util.FileUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -9,15 +10,23 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExecutorTest {
     private File fileToDelete = new File("");
+    @TempDir
+    private File tempDir;
+    private Executor executor;
+
+    @BeforeEach
+    void setup() {
+        executor = new Executor(tempDir);
+    }
 
     @Test
-    void writeCmdToTempBatFile_DummyCmd_CreatesBatFile(@TempDir File tempDir) throws IOException {
-        Executor executor = new Executor(tempDir);
+    void writeCmdToTempBatFile_DummyCmd_CreatesBatFile() throws IOException {
         String dummyCmd = "dummy cmd";
         File batFile = executor.writeCmdToTempBatFile(dummyCmd);
         fileToDelete = batFile;
@@ -28,5 +37,23 @@ class ExecutorTest {
     @AfterEach
     void tearDown() {
         fileToDelete.delete();
+    }
+
+    @Test
+    void exec_VeryLongCmd_ExecutesSuccessfully() {
+        String cmdThatDoesNothing = "cd .";
+        StringBuilder longCmd = new StringBuilder(cmdThatDoesNothing);
+        for (int i = 0; i < 3000; i++) {
+            longCmd.append(" & ");
+            longCmd.append(cmdThatDoesNothing);
+        }
+        assertTrue(longCmd.length() > Executor.MAX_WIN_CMD_LEN);
+        assertDoesNotThrow(() -> executor.exec(longCmd.toString()));
+    }
+
+    @Test
+    void exec_normalCmd_ExecutesSuccessfully() {
+        String cmdThatDoesNothing = "cd .";
+        assertDoesNotThrow(() -> executor.exec(cmdThatDoesNothing));
     }
 }

@@ -27,10 +27,9 @@ import java.util.stream.Collectors;
  * @author knightsong
  */
 public class Executor {
+    public static final int MAX_WIN_CMD_LEN = 8191;
     private static OperatingSystem operatingSystem;
-
     private final ProcessBuilder pb = new ProcessBuilder();
-
     private OutputHandlerBuilder outputHandlerBuilder = new OutputHandlerBuilder();
 
     public Executor(File root) {
@@ -68,19 +67,19 @@ public class Executor {
      * @param cmd command line
      * @return return result by exec command
      */
-    protected String exec(String cmd, int timeout) throws TimeoutException {
+    String exec(String cmd, int timeout) throws TimeoutException {
         String output = "";
         Process process = null;
         InputStreamReader inputStr = null;
         BufferedReader bufferReader = null;
         ExecutorService executorService = null;
         pb.redirectErrorStream(true); //redirect error stream to standard stream
+        File batFile = new File("");
         try {
             if (getOS() == OperatingSystem.WINDOWS) {
-                if (cmd.length() > 8100) { // If command is too long, write to bat file and execute it
-                    File batFile = writeCmdToTempBatFile(cmd);
+                if (cmd.length() > MAX_WIN_CMD_LEN - 20) { // If command is too long, write to bat file and execute it
+                    batFile = writeCmdToTempBatFile(cmd);
                     pb.command("cmd.exe", "/c", batFile.getCanonicalPath());
-                    Files.delete(batFile.toPath());
                 } else {
                     pb.command("cmd.exe", "/c", cmd);
                 }
@@ -111,6 +110,7 @@ public class Executor {
             ex.printStackTrace();
         } finally {
             try {
+                if (batFile.exists()) Files.delete(batFile.toPath());
                 if (process != null) {
                     destroyProcessAndChildren(process);
                 }
