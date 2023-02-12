@@ -178,10 +178,10 @@ public class Executor {
         destroyProcessAndChildren(optionalProcessHandle.get());
     }
 
-    private File writeCmdToTempBatFile(String cmd) {
+    File writeCmdToTempBatFile(String cmd) {
         File tempFile = new File("");
         try {
-            tempFile = Files.createTempFile("cmd", "bat").toFile();
+            tempFile = Files.createTempFile("cmd", ".bat").toFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
