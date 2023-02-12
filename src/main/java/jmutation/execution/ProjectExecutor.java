@@ -108,7 +108,9 @@ public class ProjectExecutor extends Executor {
     }
 
     public List<File> findJars() {
-        return walk(projectConfig.getCompiledFolder());
+        List<File> jarsInCompiledDir = walk(projectConfig.getCompiledFolder());
+        jarsInCompiledDir.addAll(projectConfig.getExtLibs());
+        return jarsInCompiledDir;
     }
 
     public PrecheckExecutionResult execPrecheck(TestCase testCase) {
@@ -160,7 +162,7 @@ public class ProjectExecutor extends Executor {
     }
 
 
-    private InstrumentationCommandBuilder setUpForInstrumentation(TestCase testCase, boolean isPrecheck) {
+    public InstrumentationCommandBuilder setUpForInstrumentation(TestCase testCase, boolean isPrecheck) {
         MicrobatConfig updatedMicrobatConfig = microbatConfig.setPrecheck(isPrecheck);
         String dumpFilePath = updatedMicrobatConfig.getDumpFilePath();
         File microbatDumpFile = new File(dumpFilePath);

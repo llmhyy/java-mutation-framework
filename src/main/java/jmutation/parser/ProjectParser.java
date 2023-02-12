@@ -214,7 +214,8 @@ public class ProjectParser {
                     MavenProjectParser mavenProjectParser = new MavenProjectParser(root);
                     this.project = new MavenProject(mavenProjectParser.getProjectName(), root, walk(root),
                             mavenProjectParser.getSrcFolderPath(), mavenProjectParser.getTestFolderPath(),
-                            mavenProjectParser.getCompiledSrcFolderPath(), mavenProjectParser.getCompiledTestFolderPath());
+                            mavenProjectParser.getCompiledSrcFolderPath(),
+                            mavenProjectParser.getCompiledTestFolderPath(), mavenProjectParser.getExternalLibs());
                     break;
                 case GRADLE:
                     GradleProjectParser gradleProjectParser = new GradleProjectParser(root);

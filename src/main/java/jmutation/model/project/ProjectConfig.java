@@ -3,6 +3,8 @@ package jmutation.model.project;
 import jmutation.parser.ProjectParser;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectConfig {
     private final Project project;
@@ -69,5 +71,9 @@ public class ProjectConfig {
 
     public File getCompiledFolder() {
         return this.project.getCompiledFolder();
+    }
+
+    public List<File> getExtLibs() {
+        return new ArrayList<>();
     }
 }

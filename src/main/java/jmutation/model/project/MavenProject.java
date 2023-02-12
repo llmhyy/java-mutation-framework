@@ -20,8 +20,9 @@ public class MavenProject extends Project {
 
     public MavenProject(String name, File root, List<TestCase> testCases,
                         String srcFolderPath, String testFolderPath,
-                        String compiledSrcFolderPath, String compiledTestFolderPath) {
-        super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath);
+                        String compiledSrcFolderPath, String compiledTestFolderPath, List<File> externalLibs) {
+        super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath,
+                externalLibs);
     }
 
     @Override
@@ -90,6 +91,11 @@ public class MavenProject extends Project {
             throw new RuntimeException("Failed to clone project to " + dest.getAbsolutePath());
         }
         return new MavenProject(getProjectName(), dest, getTestCases(), srcFolderPath, testFolderPath,
-                compileSrcFolderPath, compileTestFolderPath);
+                compileSrcFolderPath, compileTestFolderPath, externalLibs);
+    }
+
+    @Override
+    public List<File> getExternalLibs() {
+        return externalLibs;
     }
 }

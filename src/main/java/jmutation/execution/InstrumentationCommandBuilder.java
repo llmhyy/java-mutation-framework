@@ -7,6 +7,7 @@ import org.apache.commons.io.FilenameUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class InstrumentationCommandBuilder {
@@ -32,7 +33,9 @@ public class InstrumentationCommandBuilder {
     public String generateCommand() {
         // Project paths are added to classPaths by project executor.
         generateSystemJars(dropInsDir);
-        MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(classPaths);
+        List<String> classPathsAndExternalLibs = new ArrayList<>(classPaths);
+        classPathsAndExternalLibs.addAll(externalLibPaths);
+        MicrobatConfig updatedMicrobatConfig = microbatConfig.setClassPaths(externalLibPaths);
         if (testClass.isEmpty()) {
             microbatConfig.setLaunchClass("");
         } else {
@@ -81,5 +84,23 @@ public class InstrumentationCommandBuilder {
 
     public boolean isPrecheck() {
         return microbatConfig.getPrecheck();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InstrumentationCommandBuilder that = (InstrumentationCommandBuilder) o;
+        return Objects.equals(dropInsDir, that.dropInsDir) && Objects.equals(microbatConfig, that.microbatConfig) &&
+                Objects.equals(classPaths, that.classPaths) &&
+                Objects.equals(workingDirectory, that.workingDirectory) &&
+                Objects.equals(externalLibPaths, that.externalLibPaths) &&
+                Objects.equals(testClass, that.testClass) && Objects.equals(testMethod, that.testMethod);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dropInsDir, microbatConfig, classPaths, workingDirectory, externalLibPaths, testClass,
+                testMethod);
     }
 }
