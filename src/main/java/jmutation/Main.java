@@ -8,6 +8,7 @@ import jmutation.model.mutation.MutationFrameworkConfig;
 import jmutation.model.mutation.MutationFrameworkConfig.MutationFrameworkConfigBuilder;
 import jmutation.mutation.Mutator;
 import jmutation.mutation.heuristic.HeuristicMutator;
+import jmutation.mutation.heuristic.parser.StrongMutationParser;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,8 +54,7 @@ public class Main {
         }
         configurationBuilder.setProjectPath(params.projectPath);
 
-        //Mutator mutator = new SemanticMutator();
-        Mutator mutator = new HeuristicMutator();
+        Mutator mutator = new HeuristicMutator(new StrongMutationParser());
 
         configurationBuilder.setMutator(mutator);
         MutationFrameworkConfig configuration = configurationBuilder.build();

@@ -1,6 +1,7 @@
 package jmutation.model.mutation;
 
 import java.io.File;
+import java.util.Objects;
 
 public class DumpFilePathConfig {
     public static final String DEFAULT_DUMP_FILE_DIR = System.getProperty("java.io.tmpdir") + "trace-files" + File.separator;
@@ -81,5 +82,24 @@ public class DumpFilePathConfig {
 
     public void setMutatedTraceWithAssertsFilePath(String mutatedTraceWithAssertsFilePath) {
         this.mutatedTraceWithAssertsFilePath = mutatedTraceWithAssertsFilePath;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DumpFilePathConfig that = (DumpFilePathConfig) o;
+        return Objects.equals(traceFilePath, that.traceFilePath) &&
+                Objects.equals(mutatedTraceFilePath, that.mutatedTraceFilePath) &&
+                Objects.equals(traceWithAssertsFilePath, that.traceWithAssertsFilePath) &&
+                Objects.equals(mutatedTraceWithAssertsFilePath, that.mutatedTraceWithAssertsFilePath) &&
+                Objects.equals(precheckFilePath, that.precheckFilePath) &&
+                Objects.equals(mutatedPrecheckFilePath, that.mutatedPrecheckFilePath);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(traceFilePath, mutatedTraceFilePath, traceWithAssertsFilePath,
+                mutatedTraceWithAssertsFilePath, precheckFilePath, mutatedPrecheckFilePath);
     }
 }

@@ -74,15 +74,9 @@ public class Executor {
         BufferedReader bufferReader = null;
         ExecutorService executorService = null;
         pb.redirectErrorStream(true); //redirect error stream to standard stream
-        File batFile = new File("");
         try {
             if (getOS() == OperatingSystem.WINDOWS) {
-                if (cmd.length() > MAX_WIN_CMD_LEN - 20) { // If command is too long, write to bat file and execute it
-                    batFile = writeCmdToTempBatFile(cmd);
-                    pb.command("cmd.exe", "/c", batFile.getCanonicalPath());
-                } else {
-                    pb.command("cmd.exe", "/c", cmd);
-                }
+                pb.command("cmd.exe", "/c", cmd);
             } else {
                 pb.command("bash", "-c", cmd);
             }
@@ -110,7 +104,6 @@ public class Executor {
             ex.printStackTrace();
         } finally {
             try {
-                if (batFile.exists()) Files.delete(batFile.toPath());
                 if (process != null) {
                     destroyProcessAndChildren(process);
                 }

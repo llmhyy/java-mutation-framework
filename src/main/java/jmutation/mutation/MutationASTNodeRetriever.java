@@ -78,7 +78,7 @@ public class MutationASTNodeRetriever extends ASTVisitor {
 
     @Override
     public boolean visit(IfStatement node) {
-        addNodeToList(node);
+        addNodeToList(node, node.getExpression()); // Since the only command for if stmts modifies the expression only.
         return true;
     }
 
@@ -96,6 +96,21 @@ public class MutationASTNodeRetriever extends ASTVisitor {
      */
     protected boolean addNodeToList(ASTNode node) {
         if (!nodeIsWithinRange(node)) {
+            return false;
+        }
+        if (isRandomRetrieval) {
+            double randomValue = RandomSingleton.getSingleton().random();
+            boolean shouldNotAdd = randomValue > mutationProbabilityCalculator.getProbability(node);
+            if (shouldNotAdd) {
+                return false;
+            }
+        }
+        nodes.add(node);
+        return true;
+    }
+
+    protected boolean addNodeToList(ASTNode node, ASTNode nodeToCheckRange) {
+        if (!nodeIsWithinRange(nodeToCheckRange)) {
             return false;
         }
         if (isRandomRetrieval) {

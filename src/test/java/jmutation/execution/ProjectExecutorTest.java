@@ -11,8 +11,10 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -72,5 +74,26 @@ class ProjectExecutorTest {
         expectedResult.setWorkingDirectory(projectConfig.getProjectRoot());
 
         assertEquals(expectedResult, instrumentationCommandBuilder);
+    }
+
+    @Test
+    void aggregateFileLocations_FilesWithDifferentParents_GetsCorrectAggregate() throws IOException {
+        ProjectConfig projectMock = mock(ProjectConfig.class);
+        when(projectMock.getProjectRoot()).thenReturn(new File(""));
+        ProjectExecutor projectExecutor = new ProjectExecutor(null, projectMock);
+        File dir = new File("dir");
+        File dirInDir = new File(dir, "dir");
+        File fileInDir = new File(dir, "file.txt");
+        File fileInDir1 = new File(dir, "file1.txt");
+        File fileInInnerDir = new File(dirInDir, "file.txt");
+        List<File> filesToAggregate = new ArrayList<>();
+        filesToAggregate.add(fileInDir);
+        filesToAggregate.add(fileInDir1);
+        filesToAggregate.add(fileInInnerDir);
+        Set<String> actualResult = projectExecutor.aggregateFileLocations(filesToAggregate);
+        Set<String> expectedResult = new HashSet<>();
+        expectedResult.add(dir.getCanonicalPath() + File.separator + "*");
+        expectedResult.add(dirInDir.getCanonicalPath() + File.separator + "*");
+        assertEquals(expectedResult, actualResult);
     }
 }

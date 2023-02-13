@@ -40,18 +40,6 @@ class ExecutorTest {
     }
 
     @Test
-    void exec_VeryLongCmd_ExecutesSuccessfully() {
-        String cmdThatDoesNothing = "cd .";
-        StringBuilder longCmd = new StringBuilder(cmdThatDoesNothing);
-        for (int i = 0; i < 3000; i++) {
-            longCmd.append(" & ");
-            longCmd.append(cmdThatDoesNothing);
-        }
-        assertTrue(longCmd.length() > Executor.MAX_WIN_CMD_LEN);
-        assertDoesNotThrow(() -> executor.exec(longCmd.toString()));
-    }
-
-    @Test
     void exec_normalCmd_ExecutesSuccessfully() {
         String cmdThatDoesNothing = "cd .";
         assertDoesNotThrow(() -> executor.exec(cmdThatDoesNothing));

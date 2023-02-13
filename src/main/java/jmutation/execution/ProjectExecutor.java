@@ -14,7 +14,9 @@ import org.codehaus.plexus.util.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import static jmutation.utils.TraceHelper.setClassPathsToBreakpoints;
@@ -186,10 +188,12 @@ public class ProjectExecutor extends Executor {
         }
 
         InstrumentationCommandBuilder ib = new InstrumentationCommandBuilder(updatedMicrobatConfig, projectConfig.getDropInsDir());
+        List<File> externalJars = findJars();
+        Set<String> aggregatedJarClassPaths = aggregateFileLocations(externalJars);
 
-        findJars().forEach(file -> { // add jar files
-            ib.addClassPath(file);
-        });
+        for (String aggregatedJarClassPath : aggregatedJarClassPaths) {
+            ib.addClassPath(aggregatedJarClassPath);
+        }
 
         // include microbat details to instrument run
         ib.setTestCase(testCase.testClass, testCase.simpleName); // set class and method name
@@ -216,5 +220,21 @@ public class ProjectExecutor extends Executor {
         String extension = FileUtils.getExtension(traceFile);
         String filePrefix = traceFile.substring(0, traceFile.length() - extension.length() - 1);
         return new File(filePrefix + "_excludes.info");
+    }
+
+    public Set<String> aggregateFileLocations(List<File> files) {
+        Set<String> setOfParentDirs = new HashSet<>();
+        for (File file : files) {
+            try {
+                String parentPath = String.join(File.separator, file.getParentFile().getCanonicalPath(), "*");
+                if (setOfParentDirs.contains(parentPath)) {
+                    continue;
+                }
+                setOfParentDirs.add(parentPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return setOfParentDirs;
     }
 }

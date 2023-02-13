@@ -67,6 +67,10 @@ public class InstrumentationCommandBuilder {
         this.classPaths.add(FilenameUtils.normalize(classPath.getAbsolutePath()));
     }
 
+    public void addClassPath(String classPathStr) {
+        classPaths.add(classPathStr);
+    }
+
     public void setWorkingDirectory(File workingDirectory) {
         this.workingDirectory = FilenameUtils.normalize(workingDirectory.getAbsolutePath());
     }
