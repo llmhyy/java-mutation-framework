@@ -101,7 +101,7 @@ public class MutationFramework {
      *
      * @return
      */
-    public MutationResult mutate() {
+    public MutationResult mutate() throws TimeoutException {
         testCaseIsNotNull();
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
@@ -138,7 +138,7 @@ public class MutationFramework {
      *
      * @return
      */
-    public PrecheckExecutionResult runPrecheck() {
+    public PrecheckExecutionResult runPrecheck() throws TimeoutException {
         testCaseIsNotNull();
         // Do precheck for normal + mutation to catch issues
         // If no issues, collect trace for normal + mutation, and return them in mutation result
@@ -155,7 +155,8 @@ public class MutationFramework {
      * @param command
      * @return
      */
-    public MutationResult mutate(MutationCommand command, PrecheckExecutionResult precheckExecutionResult) {
+    public MutationResult mutate(MutationCommand command, PrecheckExecutionResult precheckExecutionResult)
+            throws TimeoutException {
         testCaseIsNotNull();
         ProjectExecutor projectExecutor = createProjectExecutor(project, command);
         PrecheckExecutionResult mutatedPrecheckExecutionResult = executePrecheck(projectExecutor);
@@ -170,9 +171,9 @@ public class MutationFramework {
             throw new IllegalStateException("Test case cannot be null");
     }
 
-    private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) {
+    private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) throws TimeoutException {
         PrecheckExecutionResult precheckResult = projectExecutor.execPrecheck(configuration.getTestCase(),
-                configuration.isToDeletePrecheckFile());
+                configuration.isToDeletePrecheckFile(), configuration.getInstrumentationTimeout());
         if (precheckResult.isOverLong()) {
             throw new RuntimeException("Precheck for test case " + configuration.getTestCase() +
                     " was over long as step limit was " + configuration.getMicrobatConfig().getStepLimit() +
@@ -190,7 +191,7 @@ public class MutationFramework {
         return new ProjectExecutor(microbatConfig, mutatedProjConfig);
     }
 
-    private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) {
+    private void runMutation(Project proj, PrecheckExecutionResult precheckExecutionResult) throws TimeoutException {
         Project clonedProject = proj.cloneToOtherPath(configuration.getMutatedProjectPath());
         mutatedProject = configuration.getMutator().mutate(precheckExecutionResult.getCoverage(), clonedProject);
         mutatedProjConfig = new ProjectConfig(projectConfig, mutatedProject);
@@ -202,7 +203,7 @@ public class MutationFramework {
         mutatedPrecheckExecutionResult = executePrecheck(mutatedProjectExecutor);
     }
 
-    private void runWithAutoSeed(Project proj, PrecheckExecutionResult precheckExecutionResult) {
+    private void runWithAutoSeed(Project proj, PrecheckExecutionResult precheckExecutionResult) throws TimeoutException {
         boolean hasFailed = false;
         for (long i = configuration.getStartSeed(); i <= configuration.getEndSeed(); i++) {
             RandomSingleton.getSingleton().setSeed(i);

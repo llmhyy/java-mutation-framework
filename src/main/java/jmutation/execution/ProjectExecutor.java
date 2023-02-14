@@ -118,11 +118,8 @@ public class ProjectExecutor extends Executor {
         return walk(projectConfig.getCompiledFolder());
     }
 
-    public PrecheckExecutionResult execPrecheck(TestCase testCase) {
-        return execPrecheck(testCase, true);
-    }
-
-    public PrecheckExecutionResult execPrecheck(TestCase testCase, boolean shouldDeleteDumpFile) {
+    public PrecheckExecutionResult execPrecheck(TestCase testCase, boolean shouldDeleteDumpFile, int timeout)
+            throws TimeoutException{
         if (!compiled) {
             PrecheckExecutionResult out = new PrecheckExecutionResult(compile(), null);
             setupDependencies();
@@ -132,14 +129,15 @@ public class ProjectExecutor extends Executor {
             compiled = true;
         }
         InstrumentationCommandBuilder ib = setUpForInstrumentation(testCase, true);
-        PrecheckExecutionResult result = precheckExec(ib, testCase);
+        PrecheckExecutionResult result = precheckExec(ib, testCase, timeout);
         if (shouldDeleteDumpFile) {
             deleteDumpFile();
         }
         return result;
     }
 
-    private TraceCollectionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder, int timeout) throws TimeoutException {
+    private TraceCollectionResult instrumentationExec(InstrumentationCommandBuilder instrumentationCommandBuilder,
+                                                      int timeout) throws TimeoutException {
         String commandStr = instrumentationCommandBuilder.generateCommand();
         setOutputHandlerBuilder(new MicrobatOutputHandlerBuilder());
         String executionResultStr = exec(commandStr, timeout);
@@ -152,10 +150,11 @@ public class ProjectExecutor extends Executor {
         return executionResult;
     }
 
-    private PrecheckExecutionResult precheckExec(InstrumentationCommandBuilder instrumentationCommandBuilder, TestCase testCase) {
+    private PrecheckExecutionResult precheckExec(InstrumentationCommandBuilder instrumentationCommandBuilder,
+                                                 TestCase testCase, int timeout) throws TimeoutException {
         String commandStr = instrumentationCommandBuilder.generateCommand();
         setOutputHandlerBuilder(new MicrobatOutputHandlerBuilder());
-        String executionResultStr = exec(commandStr);
+        String executionResultStr = exec(commandStr, timeout);
         setOutputHandlerBuilder(new OutputHandlerBuilder());
         String dumpFilePath = instrumentationCommandBuilder.getDumpFilePath();
         PrecheckInfo precheckInfo = PrecheckInfo.readFromFile(dumpFilePath);
