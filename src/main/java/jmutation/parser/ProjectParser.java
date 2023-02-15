@@ -124,7 +124,7 @@ public class ProjectParser {
         List<TestCase> methods = new ArrayList<>();
         JdtMethodRetriever retriever = new JdtMethodRetriever();
         CompilationUnit unit = parseCompilationUnit(codeContent);
-        boolean isJUnit4 = isJUnit4(unit);
+        boolean isJUnit3 = isJUnit3(unit);
         unit.accept(retriever);
         List<MethodDeclaration> methodNodes = retriever.getMethods();
         PackageDeclaration packageDeclaration = unit.getPackage();
@@ -138,10 +138,11 @@ public class ProjectParser {
             if (!(node.getParent().getParent() instanceof CompilationUnit)) {
                 continue;
             }
-            if ((isJUnit4 && (isIgnoredMethod(node) || !isTestMethod(node))) ||
-                    (!isJunit3TestMethod(node))) {
+            if (isIgnoredMethod(node) || !isTestMethod(node) &&
+                    (!isJUnit3 || !isJunit3TestMethod(node))) {
                 // skip nodes with @Ignore annotation
                 // skip nodes without @Test annotation
+                // skip nodes that are not junit3 tests
                 continue;
             }
 
@@ -213,15 +214,14 @@ public class ProjectParser {
         return null;
     }
 
-    public static boolean isJUnit4(CompilationUnit unit) {
+    public static boolean isJUnit3(CompilationUnit unit) {
         List<ImportDeclaration> imports = unit.imports();
+        boolean hasJUnit3Import = false;
         for (ImportDeclaration currImport : imports) {
             String importName = currImport.getName().toString();
             if (importName.startsWith("junit")) {
-                return false;
-            }
-            if (importName.startsWith("org.junit")) {
-                return true;
+                hasJUnit3Import = true;
+                break;
             }
         }
         List<AbstractTypeDeclaration> types = unit.types();
@@ -231,14 +231,15 @@ public class ProjectParser {
             }
             TypeDeclaration typeDeclaration = (TypeDeclaration) type;
             Type parentType = typeDeclaration.getSuperclassType();
-            if (parentType != null) {
+            if (parentType == null) {
                 continue;
             }
-            if (parentType.toString().equals("TestCase") || parentType.toString().equals("junit.framework.TestCase")) {
-                return false;
+            if ((hasJUnit3Import && parentType.toString().equals("TestCase")) ||
+                    parentType.toString().equals("junit.framework.TestCase")) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     static boolean isJunit3TestMethod(MethodDeclaration node) {

@@ -86,7 +86,7 @@ public class ProjectParserTest {
     }
 
     @Test
-    void isJUnit4_JUnit3TestCases_ReturnsFalse() {
+    void isJUnit3_JUnit3TestCases_ReturnsTrue() {
         String fileContent = String.join(System.lineSeparator(),
                 "package some.package;",
                 "import junit.framework.TestCase;",
@@ -104,11 +104,32 @@ public class ProjectParserTest {
                 "}"
         );
         CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
-        assertFalse(ProjectParser.isJUnit4(unit));
+        assertTrue(ProjectParser.isJUnit3(unit));
     }
 
     @Test
-    void isJUnit4_JUnit4TestCases_GetsThemCorrectly() {
+    void isJUnit3_JUnit3TestCasesAndNoImports_ReturnsTrue() {
+        String fileContent = String.join(System.lineSeparator(),
+                "package some.package;",
+                "public class SomeClass extends junit.framework.TestCase {",
+                "public void setUp() {",
+                "}",
+                "public void tearDown() {",
+                "}",
+                "public void test() {",
+                "}",
+                "void test2() {",
+                "}",
+                "public void test1() {",
+                "}",
+                "}"
+        );
+        CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
+        assertTrue(ProjectParser.isJUnit3(unit));
+    }
+
+    @Test
+    void isJUnit3_JUnit4TestCases_GetsThemCorrectly() {
         String fileContent = String.join(System.lineSeparator(),
                 "package some.package;",
                 "import org.junit.Test;",
@@ -122,6 +143,21 @@ public class ProjectParserTest {
                 "}"
         );
         CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
-        assertTrue(ProjectParser.isJUnit4(unit));
+        assertFalse(ProjectParser.isJUnit3(unit));
+    }
+
+    @Test
+    void getAllMethods_NotTestFile_ShouldBeEmpty() {
+        String fileContent = String.join(System.lineSeparator(),
+                "package some.package;",
+                "public class SomeClass {",
+                "public void test() {",
+                "}",
+                "public void test1() {",
+                "}",
+                "}"
+        );
+        List<TestCase> actualTestCases = ProjectParser.getAllMethod(fileContent);
+        assertTrue(actualTestCases.isEmpty());
     }
 }
