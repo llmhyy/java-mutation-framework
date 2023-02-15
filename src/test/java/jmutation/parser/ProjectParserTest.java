@@ -1,12 +1,18 @@
 package jmutation.parser;
 
+import jmutation.model.TestCase;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProjectParserTest {
     @Test
@@ -31,5 +37,91 @@ public class ProjectParserTest {
         File expectedFile = new File(pathToTestProj + "/src/main/java/org/apache/commons/math/optimization/SimpleScalarValueChecker.java");
         String expectedContents = Files.readString(expectedFile.toPath());
         assertEquals(expectedContents, actualContents);
+    }
+
+    @Test
+    void getAllMethod_JUnit4TestCases_GetsThemCorrectly() {
+        String fileContent = String.join(System.lineSeparator(),
+                "package some.package;",
+                "import org.junit.Test;",
+                "public class SomeClass {",
+                "@Test",
+                "public void test() {",
+                "}",
+                "@Test",
+                "public void test1() {",
+                "}",
+                "}"
+        );
+        List<TestCase> actualTestCases = ProjectParser.getAllMethod(fileContent);
+        List<TestCase> expectedTestCases = new ArrayList<>();
+        expectedTestCases.add(new TestCase("test()", 3, 5, "test", "SomeClass", null));
+        expectedTestCases.add(new TestCase("test1()", 6, 8, "test1", "SomeClass", null));
+        assertEquals(expectedTestCases, actualTestCases);
+    }
+
+    @Test
+    void getAllMethods_JUnit3TestCases_GetsThemCorrectly() {
+        String fileContent = String.join(System.lineSeparator(),
+                "package some.package;",
+                "import junit.framework.TestCase;",
+                "public class SomeClass extends TestCase {",
+                "public void setUp() {",
+                "}",
+                "public void tearDown() {",
+                "}",
+                "public void test() {",
+                "}",
+                "void test2() {",
+                "}",
+                "public void test1() {",
+                "}",
+                "}"
+        );
+        List<TestCase> actualTestCases = ProjectParser.getAllMethod(fileContent);
+        List<TestCase> expectedTestCases = new ArrayList<>();
+        expectedTestCases.add(new TestCase("test()", 7, 8, "test", "SomeClass", null));
+        expectedTestCases.add(new TestCase("test1()", 11, 12, "test1", "SomeClass", null));
+        assertEquals(expectedTestCases, actualTestCases);
+    }
+
+    @Test
+    void isJUnit4_JUnit3TestCases_ReturnsFalse() {
+        String fileContent = String.join(System.lineSeparator(),
+                "package some.package;",
+                "import junit.framework.TestCase;",
+                "public class SomeClass extends TestCase {",
+                "public void setUp() {",
+                "}",
+                "public void tearDown() {",
+                "}",
+                "public void test() {",
+                "}",
+                "void test2() {",
+                "}",
+                "public void test1() {",
+                "}",
+                "}"
+        );
+        CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
+        assertFalse(ProjectParser.isJUnit4(unit));
+    }
+
+    @Test
+    void isJUnit4_JUnit4TestCases_GetsThemCorrectly() {
+        String fileContent = String.join(System.lineSeparator(),
+                "package some.package;",
+                "import org.junit.Test;",
+                "public class SomeClass {",
+                "@Test",
+                "public void test() {",
+                "}",
+                "@Test",
+                "public void test1() {",
+                "}",
+                "}"
+        );
+        CompilationUnit unit = ProjectParser.parseCompilationUnit(fileContent);
+        assertTrue(ProjectParser.isJUnit4(unit));
     }
 }

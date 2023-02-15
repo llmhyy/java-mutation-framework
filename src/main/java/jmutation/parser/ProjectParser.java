@@ -9,13 +9,18 @@ import jmutation.model.project.Project;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,10 +121,10 @@ public class ProjectParser {
      * @return List of methods
      */
     public static List<TestCase> getAllMethod(String codeContent) {
-        // code taken from regminer
         List<TestCase> methods = new ArrayList<>();
         JdtMethodRetriever retriever = new JdtMethodRetriever();
         CompilationUnit unit = parseCompilationUnit(codeContent);
+        boolean isJUnit4 = isJUnit4(unit);
         unit.accept(retriever);
         List<MethodDeclaration> methodNodes = retriever.getMethods();
         PackageDeclaration packageDeclaration = unit.getPackage();
@@ -133,7 +138,8 @@ public class ProjectParser {
             if (!(node.getParent().getParent() instanceof CompilationUnit)) {
                 continue;
             }
-            if (isIgnoredMethod(node) || !isTestMethod(node)) {
+            if ((isJUnit4 && (isIgnoredMethod(node) || !isTestMethod(node))) ||
+                    (!isJunit3TestMethod(node))) {
                 // skip nodes with @Ignore annotation
                 // skip nodes without @Test annotation
                 continue;
@@ -205,6 +211,41 @@ public class ProjectParser {
             }
         }
         return null;
+    }
+
+    public static boolean isJUnit4(CompilationUnit unit) {
+        List<ImportDeclaration> imports = unit.imports();
+        for (ImportDeclaration currImport : imports) {
+            String importName = currImport.getName().toString();
+            if (importName.startsWith("junit")) {
+                return false;
+            }
+            if (importName.startsWith("org.junit")) {
+                return true;
+            }
+        }
+        List<AbstractTypeDeclaration> types = unit.types();
+        for (AbstractTypeDeclaration type : types) {
+            if (!(type instanceof TypeDeclaration)) {
+                continue;
+            }
+            TypeDeclaration typeDeclaration = (TypeDeclaration) type;
+            Type parentType = typeDeclaration.getSuperclassType();
+            if (parentType != null) {
+                continue;
+            }
+            if (parentType.toString().equals("TestCase") || parentType.toString().equals("junit.framework.TestCase")) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static boolean isJunit3TestMethod(MethodDeclaration node) {
+        int modifier = node.getModifiers();
+        if (modifier != Modifier.PUBLIC) return false;
+        String name = node.getName().toString();
+        return !name.equals("setUp") && !name.equals("tearDown");
     }
 
     public Project parse() {
