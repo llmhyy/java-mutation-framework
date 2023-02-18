@@ -28,6 +28,8 @@ public class Main {
     @Parameter(names = "-microbatConfig", description = "Path to JSON settings for Microbat")
     private String microbatConfigPath;
 
+    @Parameter(names = "-debug", description = "Run Microbat Jar in Debug Mode")
+    private boolean microbatDebug = false;
 
     /**
      * Given a project, we
@@ -51,6 +53,9 @@ public class Main {
         }
         if (params.microbatConfigPath != null) {
             configurationBuilder.setMicrobatConfigPath(params.microbatConfigPath);
+        }
+        if (params.microbatDebug) {
+            configurationBuilder.setInstrumentationDebug(true);
         }
         configurationBuilder.setProjectPath(params.projectPath);
 

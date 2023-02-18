@@ -173,7 +173,8 @@ public class MutationFramework {
 
     private PrecheckExecutionResult executePrecheck(ProjectExecutor projectExecutor) throws TimeoutException {
         PrecheckExecutionResult precheckResult = projectExecutor.execPrecheck(configuration.getTestCase(),
-                configuration.isToDeletePrecheckFile(), configuration.getInstrumentationTimeout());
+                configuration.isToDeletePrecheckFile(), configuration.getInstrumentationTimeout(),
+                configuration.isInstrumentationDebug());
         if (precheckResult.isOverLong()) {
             throw new RuntimeException("Precheck for test case " + configuration.getTestCase() +
                     " was over long as step limit was " + configuration.getMicrobatConfig().getStepLimit() +
@@ -237,7 +238,7 @@ public class MutationFramework {
                 setDumpFilePath(configuration.getDumpFilePathConfig().getTraceFilePath());
         projectExecutor = projectExecutor.setMicrobatConfig(updatedMicrobatConfig);
         TraceCollectionResult result = projectExecutor.exec(testCase, configuration.isToDeleteTraceFile(),
-                configuration.getInstrumentationTimeout());
+                configuration.getInstrumentationTimeout(), configuration.isInstrumentationDebug());
         System.out.println("Normal trace done");
 
         MicrobatConfig updatedMutationMicrobatConfig = microbatConfig.setExpectedSteps(mutatedPrecheckExecutionResult.getTotalSteps());
@@ -245,7 +246,7 @@ public class MutationFramework {
                 setDumpFilePath(configuration.getDumpFilePathConfig().getMutatedTraceFilePath());
         mutatedProjectExecutor = mutatedProjectExecutor.setMicrobatConfig(updatedMutationMicrobatConfig);
         TraceCollectionResult mutatedResult = mutatedProjectExecutor.exec(testCase, configuration.isToDeleteTraceFile(),
-                configuration.getInstrumentationTimeout());
+                configuration.getInstrumentationTimeout(), configuration.isInstrumentationDebug());
         System.out.println("Mutated trace done");
 
         // Trace with assertions to get output of test case
@@ -255,7 +256,8 @@ public class MutationFramework {
                         configuration.getDumpFilePathConfig().getTraceWithAssertsFilePath());
         projectExecutor = projectExecutor.setMicrobatConfig(includeAssertionsMicrobatConfig);
         TraceCollectionResult originalResultWithAssertionsInTrace = projectExecutor.exec(testCase,
-                configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
+                configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout(),
+                configuration.isInstrumentationDebug());
 
         MicrobatConfig includeAssertionsMutationMicrobatConfig =
                 addAssertionsToMicrobatConfig(updatedMutationMicrobatConfig);
@@ -265,7 +267,8 @@ public class MutationFramework {
                 );
         mutatedProjectExecutor = mutatedProjectExecutor.setMicrobatConfig(includeAssertionsMutationMicrobatConfig);
         TraceCollectionResult mutatedResultWithAssertionsInTrace = mutatedProjectExecutor.exec(testCase,
-                configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout());
+                configuration.isToDeleteTraceFile(), configuration.getInstrumentationTimeout(),
+                configuration.isInstrumentationDebug());
 
         Trace mutatedTrace = mutatedResult.getTrace();
         List<TraceNode> rootCauses = TraceHelper.getMutatedTraceNodes(mutatedTrace, configuration.getMutator().getMutationHistory());

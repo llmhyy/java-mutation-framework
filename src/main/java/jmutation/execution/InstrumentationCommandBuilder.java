@@ -17,6 +17,7 @@ public class InstrumentationCommandBuilder {
     private String workingDirectory = "";
     private Optional<String> testClass = Optional.empty();
     private Optional<String> testMethod = Optional.empty();
+    private boolean isDebugMode = false;
 
 
     public InstrumentationCommandBuilder(MicrobatConfig microbatConfig, String dropInsDir) {
@@ -27,6 +28,10 @@ public class InstrumentationCommandBuilder {
     public void setTestCase(String testClass, String testMethod) {
         this.testClass = Optional.of(testClass);
         this.testMethod = Optional.of(testMethod);
+    }
+
+    public void setDebugMode(boolean debugMode) {
+        this.isDebugMode = debugMode;
     }
 
     public String generateCommand() {
@@ -45,6 +50,9 @@ public class InstrumentationCommandBuilder {
         commandStrBuilder.append("\"" + updatedMicrobatConfig.getJavaHome() + "\"" + File.separator + "bin" + File.separator + "java");
         File instrumentatorFile = new File(dropInsDir + "/instrumentator.jar");
         String instrumentatorFilePath = instrumentatorFile.getAbsolutePath();
+        if (isDebugMode) {
+            addDebugOptions(commandStrBuilder);
+        }
         commandStrBuilder.append(" -Xmx10G -XX:+UseG1GC -ea -noverify -javaagent:" + instrumentatorFilePath + "=");
         commandStrBuilder.append(updatedMicrobatConfig);
         commandStrBuilder.append(" -cp " + updatedMicrobatConfig.getClassPathStr());
@@ -98,5 +106,9 @@ public class InstrumentationCommandBuilder {
     public int hashCode() {
         return Objects.hash(dropInsDir, microbatConfig, classPaths, workingDirectory, testClass,
                 testMethod);
+    }
+
+    private void addDebugOptions(StringBuilder stringBuilder) {
+        stringBuilder.append(" -agentlib:jdwp=transport=dt_socket,address=9001,server=y,suspend=y");
     }
 }

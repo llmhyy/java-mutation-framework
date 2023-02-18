@@ -29,13 +29,14 @@ public class MutationFrameworkConfig {
     private final boolean toDeletePrecheckFile;
     private final DumpFilePathConfig dumpFilePathConfig;
     private final int instrumentationTimeout;
+    private final boolean isInstrumentationDebug;
     private TestCase testCase; // Needs to be set by manager
 
     public MutationFrameworkConfig(Mutator mutator, String projectPath, String dropInsPath,
                                    MicrobatConfig microbatConfig, long startSeed, long endSeed,
                                    boolean isAutoSeed, String mutatedProjectPath, boolean toDeleteTraceFile,
                                    boolean toDeletePrecheckFile, DumpFilePathConfig dumpFilePathConfig,
-                                   int instrumentationTimeout) {
+                                   int instrumentationTimeout, boolean isInstrumentationDebug) {
         this.mutator = mutator;
         this.projectPath = projectPath;
         this.dropInsPath = dropInsPath;
@@ -48,6 +49,7 @@ public class MutationFrameworkConfig {
         this.toDeletePrecheckFile = toDeletePrecheckFile;
         this.dumpFilePathConfig = dumpFilePathConfig;
         this.instrumentationTimeout = instrumentationTimeout;
+        this.isInstrumentationDebug = isInstrumentationDebug;
     }
 
     public Mutator getMutator() {
@@ -107,6 +109,10 @@ public class MutationFrameworkConfig {
         this.testCase = testCase;
     }
 
+    public boolean isInstrumentationDebug() {
+        return isInstrumentationDebug;
+    }
+
     /**
      * Most fields have default values, except projectPath which must be set explicitly
      */
@@ -124,6 +130,7 @@ public class MutationFrameworkConfig {
         private boolean toDeletePrecheckFile = true;
         private DumpFilePathConfig dumpFilePathConfig = new DumpFilePathConfig();
         private int instrumentationTimeout = 0;
+        private boolean isInstrumentationDebugMode = false;
 
 
         public MutationFrameworkConfigBuilder() {
@@ -134,66 +141,85 @@ public class MutationFrameworkConfig {
             }
         }
 
-        public void setDumpFilePathConfig(DumpFilePathConfig dumpFilePathConfig) {
+        public MutationFrameworkConfigBuilder setDumpFilePathConfig(DumpFilePathConfig dumpFilePathConfig) {
             this.dumpFilePathConfig = dumpFilePathConfig;
+            return this;
         }
 
 
-        public void setToDeleteTraceFile(boolean toDeleteTraceFile) {
+        public MutationFrameworkConfigBuilder setToDeleteTraceFile(boolean toDeleteTraceFile) {
             this.toDeleteTraceFile = toDeleteTraceFile;
+            return this;
         }
 
-        public void setToDeletePrecheckFile(boolean toDeletePrecheckFile) {
+        public MutationFrameworkConfigBuilder setToDeletePrecheckFile(boolean toDeletePrecheckFile) {
             this.toDeletePrecheckFile = toDeletePrecheckFile;
+            return this;
         }
 
 
-        public void setMutator(Mutator mutator) {
+        public MutationFrameworkConfigBuilder setMutator(Mutator mutator) {
             this.mutator = mutator;
+            return this;
         }
 
 
-        public void setProjectPath(String projectPath) {
+        public MutationFrameworkConfigBuilder setProjectPath(String projectPath) {
             this.projectPath = projectPath;
             microbatConfig = microbatConfig.setWorkingDir(projectPath);
+            return this;
         }
 
-        public void setDropInsPath(String dropInsPath) {
+        public MutationFrameworkConfigBuilder setDropInsPath(String dropInsPath) {
             this.dropInsPath = dropInsPath;
+            return this;
         }
 
-        public void setMicrobatConfigPath(String microbatConfigPath) {
+        public MutationFrameworkConfigBuilder setMicrobatConfigPath(String microbatConfigPath) {
             microbatConfig = MicrobatConfig.parse(microbatConfigPath);
             microbatConfig.setWorkingDir(projectPath);
+            return this;
         }
 
-        public void setTestCase(TestCase testCase) {
+        public MutationFrameworkConfigBuilder setTestCase(TestCase testCase) {
             this.testCase = testCase;
+            return this;
         }
 
-        public void setMicrobatConfig(MicrobatConfig microbatConfig) {
+        public MutationFrameworkConfigBuilder setMicrobatConfig(MicrobatConfig microbatConfig) {
             this.microbatConfig = microbatConfig;
+            return this;
         }
 
-        public void setStartSeed(long startSeed) {
+        public MutationFrameworkConfigBuilder setStartSeed(long startSeed) {
             this.startSeed = startSeed;
+            return this;
         }
 
 
-        public void setEndSeed(long endSeed) {
+        public MutationFrameworkConfigBuilder setEndSeed(long endSeed) {
             this.endSeed = endSeed;
+            return this;
         }
 
-        public void setAutoSeed(boolean autoSeed) {
+        public MutationFrameworkConfigBuilder setAutoSeed(boolean autoSeed) {
             isAutoSeed = autoSeed;
+            return this;
         }
 
-        public void setMutatedProjectPath(String mutatedProjectPath) {
+        public MutationFrameworkConfigBuilder setMutatedProjectPath(String mutatedProjectPath) {
             this.mutatedProjectPath = mutatedProjectPath;
+            return this;
         }
 
-        public void setInstrumentationTimeout(int instrumentationTimeout) {
+        public MutationFrameworkConfigBuilder setInstrumentationTimeout(int instrumentationTimeout) {
             this.instrumentationTimeout = instrumentationTimeout;
+            return this;
+        }
+
+        public MutationFrameworkConfigBuilder setInstrumentationDebug(boolean isDebugMode) {
+            isInstrumentationDebugMode = isDebugMode;
+            return this;
         }
 
         public MutationFrameworkConfig build() {
@@ -202,7 +228,7 @@ public class MutationFrameworkConfig {
                         microbatConfig, startSeed, endSeed,
                         isAutoSeed, mutatedProjectPath, toDeleteTraceFile,
                         toDeletePrecheckFile, dumpFilePathConfig,
-                        instrumentationTimeout);
+                        instrumentationTimeout, isInstrumentationDebugMode);
             }
             throw new IllegalStateException("Configuration Builder is not in valid state");
         }

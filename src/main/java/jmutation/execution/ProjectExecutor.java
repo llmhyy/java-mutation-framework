@@ -87,14 +87,15 @@ public class ProjectExecutor extends Executor {
 
     public TraceCollectionResult exec(TestCase testCase, boolean shouldDeleteDumpFile) {
         try {
-            return exec(testCase, shouldDeleteDumpFile, 0);
+            return exec(testCase, shouldDeleteDumpFile, 0, false);
         } catch (TimeoutException e) {
             // Should not happen
             return null;
         }
     }
 
-    public TraceCollectionResult exec(TestCase testCase, boolean shouldDeleteDumpFile, int timeout) throws TimeoutException {
+    public TraceCollectionResult exec(TestCase testCase, boolean shouldDeleteDumpFile, int timeout,
+                                      boolean isDebugMode) throws TimeoutException {
         if (!compiled) {
             TraceCollectionResult out = new TraceCollectionResult(compile(), null);
             setupDependencies();
@@ -105,6 +106,7 @@ public class ProjectExecutor extends Executor {
         }
 
         InstrumentationCommandBuilder ib = setUpForInstrumentation(testCase, false);
+        ib.setDebugMode(isDebugMode);
         TraceCollectionResult result = instrumentationExec(ib, timeout);
 
         if (shouldDeleteDumpFile) {
@@ -118,8 +120,9 @@ public class ProjectExecutor extends Executor {
         return walk(projectConfig.getCompiledFolder());
     }
 
-    public PrecheckExecutionResult execPrecheck(TestCase testCase, boolean shouldDeleteDumpFile, int timeout)
-            throws TimeoutException{
+    public PrecheckExecutionResult execPrecheck(TestCase testCase, boolean shouldDeleteDumpFile, int timeout,
+                                                boolean isDebugMode)
+            throws TimeoutException {
         if (!compiled) {
             PrecheckExecutionResult out = new PrecheckExecutionResult(compile(), null);
             setupDependencies();
@@ -129,6 +132,7 @@ public class ProjectExecutor extends Executor {
             compiled = true;
         }
         InstrumentationCommandBuilder ib = setUpForInstrumentation(testCase, true);
+        ib.setDebugMode(isDebugMode);
         PrecheckExecutionResult result = precheckExec(ib, testCase, timeout);
         if (shouldDeleteDumpFile) {
             deleteDumpFile();
