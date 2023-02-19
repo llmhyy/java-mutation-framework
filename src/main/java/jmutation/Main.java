@@ -31,6 +31,9 @@ public class Main {
     @Parameter(names = "-debug", description = "Run Microbat Jar in Debug Mode")
     private boolean microbatDebug = false;
 
+    @Parameter(names = "-timeout", description = "Timeout in Minutes for Microbat Jar")
+    private int timeout = 0;
+
     /**
      * Given a project, we
      * 1. Determine the type of project it is (maven or gradle)
@@ -47,7 +50,7 @@ public class Main {
 
         MutationFrameworkConfigBuilder configurationBuilder = new MutationFrameworkConfigBuilder();
 
-        configurationBuilder.setInstrumentationTimeout(5);
+        configurationBuilder.setInstrumentationTimeout(params.timeout);
         if (params.dropInsDir != null) {
             configurationBuilder.setDropInsPath(params.dropInsDir);
         }
