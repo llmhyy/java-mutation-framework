@@ -74,9 +74,19 @@ public class MicrobatConfig {
                 String value = valuesArray.getString(i);
                 valuesList.add(value);
             }
+            if (key.equals(OPT_JAVA_HOME) && valuesList.isEmpty()) {
+                System.out.println("No Java 8 path specified in %USERPROFILE%\\lib\\resources\\java-mutation-framework\\microbatConfig.json" + System.lineSeparator() +
+                        "JAVA_HOME env var is used instead.");
+            }
+            if (valuesList.isEmpty()) continue;
             newMicrobatConfig = newMicrobatConfig.updateEntry(key, valuesList);
         }
 
+        String javaHome = newMicrobatConfig.getJavaHome();
+        if (javaHome.isEmpty()) {
+            throw new IllegalStateException("No Java 8 path specified." + System.lineSeparator() +
+                    "Please specify it in %USERPROFILE%\\lib\\resources\\java-mutation-framework\\microbatConfig.json");
+        }
         return newMicrobatConfig;
     }
 
@@ -88,8 +98,11 @@ public class MicrobatConfig {
     public static MicrobatConfig defaultConfig() {
         Map<String, List<String>> argMap = new HashMap<>();
         argMap.put(OPT_DUMP_FILE, List.of(DumpFilePathConfig.DEFAULT_DUMP_FILE_DIR + DumpFilePathConfig.DEFAULT_TRACE_FILE));
-        if (System.getenv("JAVA_HOME") != null) {
-            argMap.put(OPT_JAVA_HOME, List.of(System.getenv("JAVA_HOME")));
+        String javaHome = System.getenv("JAVA_HOME");
+        if (javaHome != null) {
+            argMap.put(OPT_JAVA_HOME, List.of(javaHome));
+        } else {
+            argMap.put(OPT_JAVA_HOME, List.of(""));
         }
         argMap.put(OPT_STEP_LIMIT, List.of("400000"));
         argMap.put(OPT_TRACE_RECORDER, List.of("FILE"));
