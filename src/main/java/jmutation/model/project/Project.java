@@ -11,6 +11,10 @@ import java.util.List;
  *
  * @author Yun Lin
  */
+
+/**
+ * TODO: This interface does not consider defects4j, and refactoring is necessary
+ */
 public abstract class Project {
 
     private final String name;
@@ -49,17 +53,9 @@ public abstract class Project {
         return name;
     }
 
-    public abstract File getSrcFolder();
-
-    public abstract File getTestFolder();
-
-    public abstract String singleTestCommand(TestCase testCase);
-
     public abstract ProjectType projectType();
 
     public abstract String compileCommand();
-
-    public abstract String packageCommand();
 
     public abstract String cleanCommand();
 
@@ -71,7 +67,6 @@ public abstract class Project {
 
     public abstract File getCompiledFolder();
 
-    public abstract Project cloneToOtherPath();
 
     public abstract Project cloneToOtherPath(String path);
 }

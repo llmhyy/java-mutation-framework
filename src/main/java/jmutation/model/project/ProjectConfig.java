@@ -51,10 +51,6 @@ public class ProjectConfig {
         return project.cleanCommand();
     }
 
-    public String getPackageCommand() {
-        return project.packageCommand();
-    }
-
     public String getSetupExternalDependenciesCommand() {
         return project.setupDependenciesCommand();
     }

@@ -1,5 +1,5 @@
 package jmutation.constants;
 
 public enum ProjectType {
-    MAVEN, GRADLE
+    MAVEN, GRADLE, DEFECTS4J
 }

@@ -77,10 +77,6 @@ public class ProjectExecutor extends Executor {
         return exec(projectConfig.getCleanCommand());
     }
 
-    public String packageProj() {
-        return exec(projectConfig.getPackageCommand());
-    }
-
     public TraceCollectionResult exec(TestCase testCase) {
         return exec(testCase, true);
     }

@@ -26,18 +26,8 @@ public class MavenProject extends Project {
     }
 
     @Override
-    public String singleTestCommand(TestCase testCase) {
-        return String.format("%s test -Dtest=%s", MVN_CMD, testCase.qualifiedName());
-    }
-
-    @Override
     public String compileCommand() {
         return String.format(COMPILE_ALL_FMT, MVN_CMD);
-    }
-
-    @Override
-    public String packageCommand() {
-        return String.format(PACKAGE_ALL_FMT, MVN_CMD);
     }
 
     @Override
@@ -48,16 +38,6 @@ public class MavenProject extends Project {
     @Override
     public String setupDependenciesCommand() {
         return String.format(COPY_DEPENDENCIES_FMT, MVN_CMD);
-    }
-
-    @Override
-    public File getSrcFolder() {
-        return new File(getRoot(), srcFolderPath);
-    }
-
-    @Override
-    public File getTestFolder() {
-        return new File(getRoot(), testFolderPath);
     }
 
     @Override
@@ -77,12 +57,6 @@ public class MavenProject extends Project {
 
     public File getCompiledFolder() {
         return new File(getRoot(), COMPILATION_FOLDER);
-    }
-
-    @Override
-    public Project cloneToOtherPath() {
-        String tmpdir = System.getProperty("java.io.tmpdir") + File.separator + "mutation";
-        return cloneToOtherPath(tmpdir);
     }
 
     @Override

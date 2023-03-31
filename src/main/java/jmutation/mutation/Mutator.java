@@ -26,7 +26,6 @@ import java.util.List;
  *
  * @author Yun Lin
  */
-
 public abstract class Mutator {
     protected List<MutationCommand> mutationHistory;
 
