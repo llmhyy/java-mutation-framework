@@ -29,4 +29,8 @@ public class Defects4jExecutor extends Executor {
     public String export(String query) {
         return exec(project.exportCommand(query));
     }
+
+    public String test() {
+        return exec(project.testCommand());
+    }
 }

@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * TODO: Don't use singleton as it affects testability/maintainability, pass as an instance instead
+ */
 public class RandomSingleton {
     private static final Random random = new Random();
 

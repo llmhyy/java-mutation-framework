@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 public class Defects4jProject extends Project {
@@ -13,6 +14,7 @@ public class Defects4jProject extends Project {
     private static final String MUTATION_FMT = "%s mutation";
     private static final String EXPORT_FMT = "%s export -p %s";
     private static final String CHECKOUT_FMT = "%s checkout -p %s -v %s -w %s";
+    private static final String TEST_FMT = "%s test";
     private static final String DEFECTS4J_CMD = "defects4j";
 
     public Defects4jProject(String name, File root, List<TestCase> testCases, String srcFolderPath, String testFolderPath, String compiledSrcFolderPath, String compiledTestFolderPath) {
@@ -40,6 +42,10 @@ public class Defects4jProject extends Project {
 
     public String exportCommand(String properties) {
         return String.format(EXPORT_FMT, DEFECTS4J_CMD, properties);
+    }
+
+    public String testCommand() {
+        return String.format(TEST_FMT, DEFECTS4J_CMD);
     }
 
     @Override
@@ -74,5 +80,18 @@ public class Defects4jProject extends Project {
         }
         return new Defects4jProject(getProjectName(), dest, getTestCases(), srcFolderPath, testFolderPath,
                 compileSrcFolderPath, compileTestFolderPath);
+    }
+
+    public String[] getFailingTests() throws IOException {
+        String failingTests = Files.readString(getRoot().toPath().resolve("failing_tests"));
+        return failingTests.split(System.lineSeparator());
+    }
+
+    public double getMutationScore() throws IOException {
+        String failingTests = Files.readString(getRoot().toPath().resolve("failing_tests"));
+        String allTests = Files.readString(getRoot().toPath().resolve("all_tests"));
+        int numberOfFailedTests = failingTests.split(System.lineSeparator()).length;
+        int numberOfTests = allTests.split(System.lineSeparator()).length;
+        return (double) numberOfFailedTests / numberOfTests;
     }
 }
