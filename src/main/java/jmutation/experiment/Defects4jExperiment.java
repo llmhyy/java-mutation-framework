@@ -17,6 +17,7 @@ import java.util.List;
 public class Defects4jExperiment {
     private static final String[] PROJECT_NAMES = {"Chart"};
     private static final int[] BUG_IDS = {26};
+    private static final String PATH_TO_EXP_OUTPUT = Path.of(".", "reports"); // Assume working dir is root
     private ExplainableMutator mutator;
 
     public static void main(String[] args) {
