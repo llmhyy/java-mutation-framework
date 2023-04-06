@@ -87,6 +87,11 @@ public class Defects4jProject extends Project {
         return failingTests.split(System.lineSeparator());
     }
 
+    public String[] getAllTests() throws IOException {
+        String tests = Files.readString(getRoot().toPath().resolve("all_tests"));
+        return tests.split(System.lineSeparator());
+    }
+
     public double getMutationScore() throws IOException {
         String failingTests = Files.readString(getRoot().toPath().resolve("failing_tests"));
         String allTests = Files.readString(getRoot().toPath().resolve("all_tests"));

@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
  * @author knightsong
  */
 public class Executor {
-    public static final int MAX_WIN_CMD_LEN = 8191;
     private static OperatingSystem operatingSystem;
     private final ProcessBuilder pb = new ProcessBuilder();
     private OutputHandlerBuilder outputHandlerBuilder = new OutputHandlerBuilder();

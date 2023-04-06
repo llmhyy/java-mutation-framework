@@ -1,9 +1,9 @@
 /**
  *
  */
-package jmutation.report;
+package jmutation.experiment.report.mutation;
 
-import jmutation.report.excel.ExcelHeader;
+import jmutation.experiment.excel.ExcelHeader;
 
 /**
  * Headers for report on number of mutations and types possible in each test case

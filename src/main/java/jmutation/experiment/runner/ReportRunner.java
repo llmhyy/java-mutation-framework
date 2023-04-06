@@ -1,4 +1,4 @@
-package jmutation.report.runner;
+package jmutation.experiment.runner;
 
 public abstract class ReportRunner {
     abstract public void run() throws Exception;

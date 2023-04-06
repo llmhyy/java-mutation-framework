@@ -1,4 +1,4 @@
-package jmutation.report.runner;
+package jmutation.experiment.runner;
 
 import jmutation.MutationFramework;
 import jmutation.MutationFramework.MutationFrameworkBuilder;
@@ -11,8 +11,8 @@ import jmutation.model.mutation.MutationResult;
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.heuristic.HeuristicMutator;
 import jmutation.mutation.heuristic.parser.StrongMutationParser;
-import jmutation.report.MutationReport;
-import jmutation.report.MutationTrial;
+import jmutation.experiment.report.mutation.MutationReport;
+import jmutation.experiment.report.mutation.MutationTrial;
 
 import java.io.File;
 import java.util.List;

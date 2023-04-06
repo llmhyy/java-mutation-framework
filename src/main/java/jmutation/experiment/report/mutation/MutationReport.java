@@ -1,19 +1,19 @@
-package jmutation.report;
+package jmutation.experiment.report.mutation;
 
 import jmutation.mutation.MutationCommand;
-import jmutation.report.excel.AbstractExcelWriter;
+import jmutation.experiment.excel.AbstractExcelWriter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import java.io.File;
 import java.io.IOException;
 
-import static jmutation.report.MutationTrialHeader.*;
+import static jmutation.experiment.report.mutation.MutationTrialHeader.*;
 
 /**
  * @author LLT
  */
-public class MutationReport extends AbstractExcelWriter {
+public class MutationReport extends AbstractExcelWriter<MutationTrial> {
 
     public MutationReport(File file) throws Exception {
         super(file);

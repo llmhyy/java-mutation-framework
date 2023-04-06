@@ -1,7 +1,7 @@
 /**
  *
  */
-package jmutation.report;
+package jmutation.experiment.report.mutation;
 
 
 import jmutation.model.TestCase;

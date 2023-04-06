@@ -6,7 +6,7 @@
  *  Version:  $Revision: 1 $
  */
 
-package jmutation.report.excel;
+package jmutation.experiment.excel;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -23,7 +23,7 @@ import java.io.InputStream;
 /**
  * @author LLT
  */
-public class AbstractExcelWriter {
+abstract public class AbstractExcelWriter<T> {
     protected Workbook workbook;
     private File file;
 
@@ -96,4 +96,5 @@ public class AbstractExcelWriter {
         }
         return sheet;
     }
+    public abstract void record(T trial) throws IOException;
 }

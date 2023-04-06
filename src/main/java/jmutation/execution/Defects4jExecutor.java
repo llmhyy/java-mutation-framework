@@ -33,4 +33,8 @@ public class Defects4jExecutor extends Executor {
     public String test() {
         return exec(project.testCommand());
     }
+
+    public String checkout(String project, String version, String path) {
+        return exec(Defects4jProject.checkoutCommand(project, version, path));
+    }
 }
