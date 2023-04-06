@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 public class OutputHandler implements Callable<String> {
-    private final StringBuilder stringBuilder = new StringBuilder();
     private BufferedReader bufferedReader;
 
     protected OutputHandler() {
@@ -18,6 +17,7 @@ public class OutputHandler implements Callable<String> {
     @Override
     public String call() {
         String line;
+        StringBuilder stringBuilder = new StringBuilder();
         try {
             while ((line = bufferedReader.readLine()) != null) {
                 output(line);
