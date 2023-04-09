@@ -17,7 +17,8 @@ public class Defects4jProject extends Project {
     private static final String TEST_FMT = "%s test";
     private static final String DEFECTS4J_CMD = "defects4j";
 
-    public Defects4jProject(String name, File root, List<TestCase> testCases, String srcFolderPath, String testFolderPath, String compiledSrcFolderPath, String compiledTestFolderPath) {
+    public Defects4jProject(String name, File root, List<TestCase> testCases, String srcFolderPath,
+                            String testFolderPath, String compiledSrcFolderPath, String compiledTestFolderPath) {
         super(name, root, testCases, srcFolderPath, testFolderPath, compiledSrcFolderPath, compiledTestFolderPath);
     }
 
@@ -84,6 +85,9 @@ public class Defects4jProject extends Project {
 
     public String[] getFailingTests() throws IOException {
         String failingTests = Files.readString(getRoot().toPath().resolve("failing_tests"));
+        if (failingTests.isEmpty()) {
+            return new String[] {};
+        }
         return failingTests.split(System.lineSeparator());
     }
 

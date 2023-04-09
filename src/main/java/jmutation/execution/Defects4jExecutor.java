@@ -2,6 +2,8 @@ package jmutation.execution;
 
 import jmutation.model.project.Defects4jProject;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -10,9 +12,13 @@ import java.util.List;
  */
 public class Defects4jExecutor extends Executor {
     private final Defects4jProject project;
+    // As the executor runs with project's directory as the working directory, if the proj is not yet checkedout (directory does not exist yet), will throw error
+    // executorUtil is to run commands before checkout is executed
+    private final Executor executorUtil;
 
     public Defects4jExecutor(Defects4jProject project) {
         super(project.getRoot());
+        executorUtil = new Executor(new File(System.getProperty("user.dir")));
         this.project = project;
     }
 
@@ -21,9 +27,20 @@ public class Defects4jExecutor extends Executor {
     }
 
     public List<String> getClassDiffs() {
-        String classesModifiedStr = export("classes.modified");
+        String classesModifiedQuery = "classes.modified";
+        String classesModifiedStr = export(classesModifiedQuery);
         String[] classesModified = classesModifiedStr.split(System.lineSeparator());
-        return List.of(classesModified);
+        List<String> result = new ArrayList<>();
+        boolean isClassName = false;
+        for (int idx = 0; idx < classesModified.length; idx++) {
+            if (isClassName) {
+                result.add(classesModified[idx]);
+            }
+            if (classesModified[idx].startsWith("Running ant")) {
+                isClassName = true;
+            }
+        }
+        return result;
     }
 
     public String export(String query) {
@@ -35,6 +52,7 @@ public class Defects4jExecutor extends Executor {
     }
 
     public String checkout(String project, String version, String path) {
+        executorUtil.exec("mkdir -p " + path);
         return exec(Defects4jProject.checkoutCommand(project, version, path));
     }
 }

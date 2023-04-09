@@ -27,11 +27,11 @@ abstract public class AbstractExcelWriter<T> {
     protected Workbook workbook;
     private File file;
 
-    public AbstractExcelWriter(File file) throws Exception {
+    public AbstractExcelWriter(File file) throws IOException {
         reset(file);
     }
 
-    public void reset(File file) throws Exception {
+    public void reset(File file) throws IOException {
         this.file = file;
         if (!file.exists()) {
             initFromNewFile(file);
@@ -41,7 +41,7 @@ abstract public class AbstractExcelWriter<T> {
         }
     }
 
-    protected void initFromExistingFile(File file) throws Exception {
+    protected void initFromExistingFile(File file) throws IOException {
         InputStream inp = new FileInputStream(file);
         workbook = WorkbookFactory.create(inp);
     }

@@ -10,7 +10,8 @@ import java.io.IOException;
 import static jmutation.experiment.report.explainable.ExplainableTrialHeader.*;
 
 public class ExplainableReport extends AbstractExcelWriter<ExplainableTrial> {
-    public ExplainableReport(File file) throws Exception {
+    public static final String FAILING_TESTS_DELIMITER = ", ";
+    public ExplainableReport(File file) throws IOException {
         super(file);
     }
 
@@ -28,14 +29,14 @@ public class ExplainableReport extends AbstractExcelWriter<ExplainableTrial> {
         addCell(row, PROJECT_NAME, trial.getProjectName());
         addCell(row, MUTATION_COMMAND, trial.getCommand());
         addCell(row, VERSION, trial.getVersion());
-        addCell(row, OLD_COMMENT, trial.getOldComment());
-        addCell(row, NEW_COMMENT, trial.getNewComment());
-        addCell(row, OLD_METHOD, trial.getOldMethod());
-        addCell(row, NEW_METHOD, trial.getNewMethod());
+        addCell(row, COMMENT, trial.getComment());
+        addCell(row, MUTATED_COMMENT, trial.getMutatedComment());
+        addCell(row, METHOD, trial.getMethod());
+        addCell(row, MUTATED_METHOD, trial.getMutatedMethod());
         addCell(row, MESSAGE, trial.getMessage());
         StringBuilder builder = new StringBuilder();
         for(String test : trial.getFailingTests()) {
-            builder.append(test + ", ");
+            builder.append(test + FAILING_TESTS_DELIMITER);
         }
         builder.delete(builder.length()-2, builder.length());
         addCell(row, FAILING_TESTS, builder.toString());
