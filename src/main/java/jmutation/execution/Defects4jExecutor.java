@@ -55,4 +55,8 @@ public class Defects4jExecutor extends Executor {
         executorUtil.exec("mkdir -p " + path);
         return exec(Defects4jProject.checkoutCommand(project, version, path));
     }
+
+    public String mutate() {
+        return exec(project.mutationCommand());
+    }
 }

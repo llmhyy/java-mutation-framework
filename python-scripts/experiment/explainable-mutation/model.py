@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch
 from torch.autograd import Variable
 import copy
+import subprocess
+
 class Seq2Seq(nn.Module):
     """
         Build Seqence-to-Sequence.
@@ -21,7 +23,6 @@ class Seq2Seq(nn.Module):
         * `eos_id`- end of symbol ids in target for beam search.
     """
     def __init__(self, encoder,decoder, config, beam_size=None, max_length=None, sos_id=None, eos_id=None):
-        print("Updated!!!")
         super(Seq2Seq, self).__init__()
         self.encoder = encoder
         self.decoder=decoder

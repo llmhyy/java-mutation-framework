@@ -71,6 +71,7 @@ public class ExplainableMutationReportRunner extends ReportRunner {
                 if (!compilationSuccess(compilationResult)) {
                     continue;
                 }
+
                 // Get changed class names -> mutation ranges (here we could extract into a method?)
                 List<String> classes = workingProjectExecutor.getClassDiffs();
                 List<MutationRange> mutationRanges = convertClassesToMutationRanges(classes);

@@ -96,11 +96,34 @@ public class Defects4jProject extends Project {
         return tests.split(System.lineSeparator());
     }
 
-    public double getMutationScore() throws IOException {
-        String failingTests = Files.readString(getRoot().toPath().resolve("failing_tests"));
-        String allTests = Files.readString(getRoot().toPath().resolve("all_tests"));
-        int numberOfFailedTests = failingTests.split(System.lineSeparator()).length;
-        int numberOfTests = allTests.split(System.lineSeparator()).length;
-        return (double) numberOfFailedTests / numberOfTests;
+    public MutationAnalysis getMutationAnalysis() throws IOException {
+        return null;
+    }
+
+    public String mutationCommand() {
+        return String.format(MUTATION_FMT, DEFECTS4J_CMD);
+    }
+    public static class MutationAnalysis {
+        private final int executedMutations;
+        private final int survivedMutations;
+        private final int killedMutations;
+
+        public MutationAnalysis(int executedMutations, int survivedMutations, int killedMutations) {
+            this.executedMutations = executedMutations;
+            this.survivedMutations = survivedMutations;
+            this.killedMutations = killedMutations;
+        }
+
+        public int getExecutedMutations() {
+            return executedMutations;
+        }
+
+        public int getSurvivedMutations() {
+            return survivedMutations;
+        }
+
+        public int getKilledMutations() {
+            return killedMutations;
+        }
     }
 }
