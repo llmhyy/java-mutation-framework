@@ -23,7 +23,7 @@ public class Client {
     /**
      * Sleep time between sending message
      */
-    protected static final int SLEEP_TIME = 25;
+    protected static final int SLEEP_TIME = 100;
 
     /**
      * Buffer size of sending and receiving message

@@ -56,8 +56,8 @@ public class Defects4jExecutor extends Executor {
     public static Defects4jProject checkout(String project, String version, String path) {
         Executor executor = new Executor(new File(System.getProperty("user.dir")));
         executor.exec("java -version");
-        executor.exec("mkdir -p " + path);
         executor.exec(Defects4jProject.checkoutCommand(project, version, path));
+        executor.exec("mkdir -p " + path);
         executor = new Executor(new File(path));
         String srcFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_SRC_DIR)));
         String targetFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_TARGET_DIR)));

@@ -42,15 +42,18 @@ public class ExplainableMutationReportRunner extends ReportRunner {
     }
 
     public static void main(String[] args) throws IOException {
-        String[] projects = {"Chart"};
-        int[] bugs = {26};
-        ExplainableMutationClient explainableMutationClient = new ExplainableMutationClient(
-                new Client("localhost", 8080));
-        Path path = Path.of("C:", "Users", "bchenghi", "Desktop", "mutation-experiment"); // Change based on system
+        String[] projects = {"Chart", "Lang"};
+        int[] bugs = {26, 64};
+        Client client = new Client("localhost", 8080);
+        client.connectServer();
+        ExplainableMutationClient explainableMutationClient = new ExplainableMutationClient(client);
+        Path desktopPath = Path.of(System.getProperty("user.home"), "Desktop");
+        Path pathToCheckoutProjectsTo = desktopPath.resolve("mutation-experiment"); // Change based on system
         ExplainableTrial.ExplainableTrialFactory trialBuilder = new ExplainableTrial.ExplainableTrialFactory();
-        ExplainableReport report = new ExplainableReport(new File("./report.xlsx"));
+        File reportFile = desktopPath.resolve("mutation-score-report.xlsx").toFile();
+        ExplainableReport report = new ExplainableReport(reportFile);
         ExplainableMutationReportRunner experiment = new ExplainableMutationReportRunner(projects, bugs,
-                new ExplainableMutator(explainableMutationClient), path, trialBuilder, report);
+                new ExplainableMutator(explainableMutationClient), pathToCheckoutProjectsTo, trialBuilder, report);
         experiment.run();
     }
 

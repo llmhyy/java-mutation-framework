@@ -47,7 +47,13 @@ abstract public class AbstractExcelWriter<T> {
     }
 
     protected void initFromNewFile(File file) {
-        workbook = new XSSFWorkbook();
+        try {
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+            workbook = new XSSFWorkbook();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Sheet createSheet(String name) {
