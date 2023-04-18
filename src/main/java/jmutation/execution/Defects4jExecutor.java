@@ -30,8 +30,7 @@ public class Defects4jExecutor extends Executor {
     }
 
     public List<String> getClassDiffs() {
-        String classesModifiedQuery = "classes.modified";
-        String classesModifiedStr = export(classesModifiedQuery);
+        String classesModifiedStr = export(PROPERTY_CLASSES_MODIFIED);
         String[] classesModified = classesModifiedStr.split(System.lineSeparator());
         List<String> result = new ArrayList<>();
         boolean isClassName = false;
@@ -54,8 +53,9 @@ public class Defects4jExecutor extends Executor {
         return exec(project.testCommand());
     }
 
-    public static Defects4jExecutor checkout(String project, String version, String path) {
+    public static Defects4jProject checkout(String project, String version, String path) {
         Executor executor = new Executor(new File(System.getProperty("user.dir")));
+        executor.exec("java -version");
         executor.exec("mkdir -p " + path);
         executor.exec(Defects4jProject.checkoutCommand(project, version, path));
         executor = new Executor(new File(path));
@@ -63,8 +63,8 @@ public class Defects4jExecutor extends Executor {
         String targetFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_TARGET_DIR)));
         String testSrcFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_TEST_SRC_DIR)));
         String testTargetFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_TEST_TARGET_DIR)));
-        return new Defects4jExecutor(new Defects4jProject(project + "_" + version, new File(path),
-                null, srcFolder, testSrcFolder, targetFolder, testTargetFolder));
+        return new Defects4jProject(project + "_" + version, new File(path),
+                null, srcFolder, testSrcFolder, targetFolder, testTargetFolder);
     }
 
     public String mutate() {

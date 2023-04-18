@@ -59,13 +59,13 @@ public class ExplainableMutationReportRunner extends ReportRunner {
             String projName = projectNames[i];
             int totalBugs = bugIds[i];
             for (int j = 1; j <= totalBugs; j++) {
+                System.out.println(String.format("Experimenting on %s id: %d", projName, j));
                 String versionStr = j + "f";
                 // Checkout each project
                 // Compile
-                Defects4jProject project = new Defects4jProject(projName, pathToCloneDefects4J.toFile(),
-                        null, null,
-                        null, null, null);
-                Defects4jExecutor workingProjectExecutor = Defects4jExecutor.checkout(projName, versionStr, pathToCloneDefects4J.toString());
+                Defects4jProject project = Defects4jExecutor.checkout(projName, versionStr, pathToCloneDefects4J.toString());
+                Defects4jExecutor workingProjectExecutor = new Defects4jExecutor(project);
+                workingProjectExecutor.test();
                 String compilationResult = workingProjectExecutor.compile();
                 if (!compilationSuccess(compilationResult)) {
                     continue;

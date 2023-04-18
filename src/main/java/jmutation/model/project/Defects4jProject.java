@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Defects4jProject extends Project {
@@ -88,7 +89,20 @@ public class Defects4jProject extends Project {
         if (failingTests.isEmpty()) {
             return new String[] {};
         }
-        return failingTests.split(System.lineSeparator());
+        String[] lines = failingTests.split(System.lineSeparator());
+        String startOfTestName = "--- ";
+        List<String> result = new ArrayList<>();
+        for (String line : lines) {
+            if (line.startsWith(startOfTestName)) {
+                int nameStartIdx = line.indexOf(startOfTestName) + startOfTestName.length();
+                result.add(line.substring(nameStartIdx));
+            }
+        }
+        String[] arrayResult = new String[result.size()];
+        for (int i = 0; i < result.size(); i++) {
+            arrayResult[i] = result.get(i);
+        }
+        return arrayResult;
     }
 
     public String[] getAllTests() throws IOException {

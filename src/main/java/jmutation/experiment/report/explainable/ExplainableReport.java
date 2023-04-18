@@ -38,7 +38,9 @@ public class ExplainableReport extends AbstractExcelWriter<ExplainableTrial> {
         for(String test : trial.getFailingTests()) {
             builder.append(test + FAILING_TESTS_DELIMITER);
         }
-        builder.delete(builder.length()-2, builder.length());
+        if (builder.length() != 0) {
+            builder.delete(builder.length() - 2, builder.length());
+        }
         addCell(row, FAILING_TESTS, builder.toString());
         addCell(row, TOTAL_TEST_COUNT, trial.getTotalTestCount());
     }
