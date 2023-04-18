@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,8 +69,10 @@ public abstract class Mutator {
     }
 
     protected File retrieveFileFromClassName(String className, Project newProject) {
-        File root = newProject.getRoot();
-        return ProjectParser.getFileOfClass(className, root);
+        Path projectRoot = newProject.getRoot().toPath();
+        Path srcFolderPath = projectRoot.resolve(newProject.getSrcFolderPath());
+        File srcFolderDir = srcFolderPath.toFile();
+        return ProjectParser.getFileOfClass(className, srcFolderDir);
     }
 
     /**

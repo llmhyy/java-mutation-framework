@@ -25,15 +25,6 @@ class ExecutorTest {
         executor = new Executor(tempDir);
     }
 
-    @Test
-    void writeCmdToTempBatFile_DummyCmd_CreatesBatFile() throws IOException {
-        String dummyCmd = "dummy cmd";
-        File batFile = executor.writeCmdToTempBatFile(dummyCmd);
-        fileToDelete = batFile;
-        assertTrue(FileUtils.getExtension(batFile.getName()).equals("bat"));
-        assertEquals(dummyCmd, Files.readString(batFile.toPath()));
-    }
-
     @AfterEach
     void tearDown() {
         fileToDelete.delete();

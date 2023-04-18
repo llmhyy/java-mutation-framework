@@ -2,9 +2,11 @@ package jmutation.mutation.explainable;
 
 import jmutation.mutation.MutationCommand;
 import jmutation.mutation.explainable.client.ExplainableMutationClient;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Javadoc;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
+import jmutation.parser.ProjectParser;
+import org.eclipse.jdt.core.dom.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExplainableMutationCommand extends MutationCommand {
     private final ExplainableMutationClient explainableMutationClient;
@@ -20,10 +22,15 @@ public class ExplainableMutationCommand extends MutationCommand {
 
     @Override
     public ASTNode executeMutation() {
+        // Assumes that the method has a javadoc
         MethodDeclaration methodDeclaration = (MethodDeclaration) node;
         Javadoc javadoc = methodDeclaration.getJavadoc();
-        originalComment = javadoc.toString();
-        originalMethod = null;
+        originalComment = getMethodSummary(javadoc);
+
+        methodDeclaration.setJavadoc(null);
+        originalMethod = methodDeclaration.toString();
+        methodDeclaration.setJavadoc(javadoc);
+
         String[] mutationResult = explainableMutationClient.generate(originalComment, originalMethod);
         mutatedComment = mutationResult[0];
         mutatedMethod = mutationResult[1];
@@ -31,8 +38,35 @@ public class ExplainableMutationCommand extends MutationCommand {
         return node;
     }
 
+    public static String getMethodSummary(Javadoc javadoc) {
+        StringBuilder result = new StringBuilder();
+        List<String> strings = new ArrayList<>();
+        List<TagElement> tags = javadoc.tags();
+        for (TagElement tag : tags) {
+            List<IDocElement> fragments = tag.fragments();
+            for (IDocElement fragment : fragments) {
+                if (fragment instanceof TextElement) {
+                    TextElement textElement = (TextElement) fragment;
+                    strings.add(textElement.getText());
+                }
+            }
+        }
+        for (String string : strings) {
+            result.append(string);
+            result.append(" ");
+        }
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
+    }
+
     public MethodDeclaration parseIntoMethodDeclaration(String javadoc, String methodBody) {
-        return null;
+        String methodStr = String.join(System.lineSeparator(), "/**", " * " + javadoc, "*/", methodBody);
+        String classStr = String.join(System.lineSeparator(), "public class Clazz {", methodStr, "}");
+        CompilationUnit compilationUnit = ProjectParser.parseCompilationUnit(classStr);
+        List<AbstractTypeDeclaration> types = compilationUnit.types();
+        TypeDeclaration typeRoot = (TypeDeclaration) types.get(0);
+        List<BodyDeclaration> bodyDeclarations = typeRoot.bodyDeclarations();
+        return (MethodDeclaration) bodyDeclarations.get(0);
     }
 
     public String getOriginalComment() {

@@ -10,10 +10,10 @@ public class ExplainableMutationClient {
 
     public String[] generate(String javadoc, String method) {
         client.sendMsg(javadoc.getBytes());
-        byte[] buggyMethodSummary = client.receiveMsg();
         client.sendMsg(method.getBytes());
-        byte[] fixedMethodSummary = client.receiveMsg();
-        return new String[]{new String(buggyMethodSummary).replace("\0", ""),
-                new String(fixedMethodSummary).replace("\0", "")};
+        byte[] mutatedComment = client.receiveMsg();
+        byte[] mutatedMethod = client.receiveMsg();
+        return new String[]{new String(mutatedComment).replace("\0", ""),
+                new String(mutatedMethod).replace("\0", "")};
     }
 }

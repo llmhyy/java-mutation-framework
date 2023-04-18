@@ -41,8 +41,8 @@ public class Defects4jProject extends Project {
         return null;
     }
 
-    public String exportCommand(String properties) {
-        return String.format(EXPORT_FMT, DEFECTS4J_CMD, properties);
+    public static String exportCommand(String property) {
+        return String.format(EXPORT_FMT, DEFECTS4J_CMD, property);
     }
 
     public String testCommand() {

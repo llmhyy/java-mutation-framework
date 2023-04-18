@@ -69,4 +69,12 @@ public abstract class Project {
 
 
     public abstract Project cloneToOtherPath(String path);
+
+    public String getSrcFolderPath() {
+        return srcFolderPath;
+    }
+
+    public String getTestFolderPath() {
+        return testFolderPath;
+    }
 }

@@ -169,19 +169,4 @@ public class Executor {
         }
         destroyProcessAndChildren(optionalProcessHandle.get());
     }
-
-    File writeCmdToTempBatFile(String cmd) {
-        File tempFile = new File("");
-        try {
-            tempFile = Files.createTempFile("cmd", ".bat").toFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try (FileWriter fileWriter = new FileWriter(tempFile)) {
-            fileWriter.write(cmd);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return tempFile;
-    }
 }

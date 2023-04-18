@@ -8,17 +8,20 @@ import java.util.List;
 
 /**
  * Did not extend ProjectExecutor as it is too tightly coupled to microbat
- * TODO: Make ProjectExecutor interface more generic, so that it can handle Defects4j + Microbat based commands. Or restructure class hierarchy/use composition for Executors.
+ * TODO: Make ProjectExecutor interface more generic, so that it can handle Defects4j + Microbat based commands. Or rename ProjectExecutor to MicrobatExecutor?.
  */
 public class Defects4jExecutor extends Executor {
+    public final static String PROPERTY_CLASSES_MODIFIED = "classes.modified";
+    public final static String PROPERTY_SRC_DIR = "dir.src.classes";
+    public final static String PROPERTY_TARGET_DIR = "dir.bin.classes";
+    public final static String PROPERTY_TEST_SRC_DIR = "dir.src.tests";
+    public final static String PROPERTY_TEST_TARGET_DIR = "dir.bin.tests";
     private final Defects4jProject project;
     // As the executor runs with project's directory as the working directory, if the proj is not yet checkedout (directory does not exist yet), will throw error
     // executorUtil is to run commands before checkout is executed
-    private final Executor executorUtil;
 
     public Defects4jExecutor(Defects4jProject project) {
         super(project.getRoot());
-        executorUtil = new Executor(new File(System.getProperty("user.dir")));
         this.project = project;
     }
 
@@ -51,12 +54,34 @@ public class Defects4jExecutor extends Executor {
         return exec(project.testCommand());
     }
 
-    public String checkout(String project, String version, String path) {
-        executorUtil.exec("mkdir -p " + path);
-        return exec(Defects4jProject.checkoutCommand(project, version, path));
+    public static Defects4jExecutor checkout(String project, String version, String path) {
+        Executor executor = new Executor(new File(System.getProperty("user.dir")));
+        executor.exec("mkdir -p " + path);
+        executor.exec(Defects4jProject.checkoutCommand(project, version, path));
+        executor = new Executor(new File(path));
+        String srcFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_SRC_DIR)));
+        String targetFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_TARGET_DIR)));
+        String testSrcFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_TEST_SRC_DIR)));
+        String testTargetFolder = getLineAfterRunning(executor.exec(Defects4jProject.exportCommand(PROPERTY_TEST_TARGET_DIR)));
+        return new Defects4jExecutor(new Defects4jProject(project + "_" + version, new File(path),
+                null, srcFolder, testSrcFolder, targetFolder, testTargetFolder));
     }
 
     public String mutate() {
         return exec(project.mutationCommand());
+    }
+
+    private static String getLineAfterRunning(String str) {
+        String runningDefects4J = "Running ant";
+        String[] lines = str.split(System.lineSeparator());
+        boolean afterRunning = false;
+        for (String line : lines) {
+            if (afterRunning) {
+               return line;
+            } else if (line.startsWith(runningDefects4J)) {
+               afterRunning = true;
+            }
+        }
+        return "";
     }
 }

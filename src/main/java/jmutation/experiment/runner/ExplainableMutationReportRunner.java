@@ -65,8 +65,7 @@ public class ExplainableMutationReportRunner extends ReportRunner {
                 Defects4jProject project = new Defects4jProject(projName, pathToCloneDefects4J.toFile(),
                         null, null,
                         null, null, null);
-                Defects4jExecutor workingProjectExecutor = new Defects4jExecutor(project);
-                workingProjectExecutor.checkout(projName, versionStr, pathToCloneDefects4J.toString());
+                Defects4jExecutor workingProjectExecutor = Defects4jExecutor.checkout(projName, versionStr, pathToCloneDefects4J.toString());
                 String compilationResult = workingProjectExecutor.compile();
                 if (!compilationSuccess(compilationResult)) {
                     continue;
