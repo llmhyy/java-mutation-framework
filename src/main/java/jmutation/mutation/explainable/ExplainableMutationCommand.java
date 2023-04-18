@@ -33,6 +33,9 @@ public class ExplainableMutationCommand extends MutationCommand {
 
         String[] mutationResult = explainableMutationClient.generate(originalComment, originalMethod);
         mutatedComment = mutationResult[0];
+        if (mutatedComment.equals("FAIL")) {
+            throw new RuntimeException("Error with python server");
+        }
         mutatedMethod = mutationResult[1];
         node = parseIntoMethodDeclaration(mutatedComment, mutatedMethod);
         return node;

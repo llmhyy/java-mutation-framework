@@ -101,9 +101,18 @@ public class ExplainableMutationReportRunner extends ReportRunner {
                                       Defects4jProject projectToMutate,
                                       String projName, String versionStr) throws IOException {
         Defects4jExecutor buggyProjectExecutor = new Defects4jExecutor(projectToMutate);
-        mutator.mutate(command, projectToMutate);
-        String compilationResult = buggyProjectExecutor.compile();
         ExplainableMutationCommand explainableMutationCommand = (ExplainableMutationCommand) command;
+        try {
+            mutator.mutate(command, projectToMutate);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            ExplainableTrial trial = explainableTrialFactory.create(projName,
+                    versionStr, explainableMutationCommand, e.getMessage(),
+                    new String[]{}, 0);
+            report.record(trial);
+            return;
+        }
+        String compilationResult = buggyProjectExecutor.compile();
         if (!compilationSuccess(compilationResult)) {
             ExplainableTrial trial = explainableTrialFactory.create(projName,
                     versionStr, explainableMutationCommand, "COMPILATION_FAILED",
