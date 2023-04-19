@@ -92,10 +92,10 @@ public class ExplainableTrial {
     public static class ExplainableTrialFactory { // For stubbing the explainable trial creation process for testability
         public ExplainableTrial create(String projectName, String version, ExplainableMutationCommand mutationCommand,
                                 String message, String[] failingTests, int totalTestCount) {
-            return new ExplainableTrial(projectName, version, mutationCommand.getMutatedMethod(),
-                    mutationCommand.getOriginalMethod(), mutationCommand.getOriginalComment(),
-                    mutationCommand.getMutatedComment(), mutationCommand.toString(),
-                    message, failingTests, totalTestCount);
+            return new ExplainableTrial(projectName, version, mutationCommand.getOriginalMethod(),
+                    mutationCommand.getMutatedMethod(), mutationCommand.getOriginalComment(),
+                    mutationCommand.getMutatedComment(), message, mutationCommand.toString(),
+                    failingTests, totalTestCount);
         }
     }
 }
