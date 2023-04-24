@@ -1,0 +1,1 @@
+{"metadataPath":"sample-project\\1\\metadata","instructions":[{"pathInTarget":"src\\main\\java\\sample\\Sample.java","instructionType":"ADD","pathInMetadata":"src\\main\\java\\sample\\Sample.java"}],"fixedPath":"sample-project\\fix","buggyPath":"sample-project\\1\\bug"}

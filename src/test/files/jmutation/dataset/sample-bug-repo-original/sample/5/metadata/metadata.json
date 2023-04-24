@@ -1,0 +1,12 @@
+{
+  "metadataPath": "math_70\\5\\metadata",
+  "instructions": [
+    {
+      "pathInTarget": "src\\main\\java\\org\\example\\Sample.java",
+      "instructionType": "ADD",
+      "pathInMetadata": "src\\main\\java\\org\\example\\Sample.java"
+    }
+  ],
+  "fixedPath": "math_70\\fix",
+  "buggyPath": "math_70\\5\\bug"
+}

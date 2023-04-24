@@ -1,8 +1,13 @@
 package jmutation.mutation.heuristic.commands;
 
 import jmutation.mutation.MutationTestHelper;
-import jmutation.mutation.heuristic.commands.MutationMathLibCommand;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
