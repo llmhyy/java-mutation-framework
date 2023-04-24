@@ -47,6 +47,34 @@ public class BugDataset {
         pathConfig = new MutationFrameworkPathConfiguration(repoPath);
     }
 
+    public static void sample() throws IOException {
+        // These 4 variables can be modified based on usage
+        int largestBugId = 17426;
+        String repoPath = "E:\\david";
+        String projName = "math_70";
+        int traceCollectionTimeoutSeconds = 60;
+
+        BugDataset bugdataset = new BugDataset(repoPath + "\\" + projName);
+        for (int i = 1; i <= largestBugId; i++) {
+            ProjectMinimizer minimizer = bugdataset.createMinimizer(i);
+            if (bugdataset.exists(i, true)) { // Check the bug's zip directory exists
+                try {
+                    bugdataset.unzip(i);
+                    minimizer.maximise();
+                    new TraceCollectionHandler(repoPath, projName, i, traceCollectionTimeoutSeconds,
+                            0, 0).handle(new Request(true));
+                    BugData data = bugdataset.getData(i);
+                    System.out.println(data);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    minimizer.minimize();
+                    bugdataset.zip(i);
+                }
+            }
+        }
+    }
+
     public static void main(String[] args) throws IOException {
         // These 4 variables can be modified based on usage
         int largestBugId = 17426;
