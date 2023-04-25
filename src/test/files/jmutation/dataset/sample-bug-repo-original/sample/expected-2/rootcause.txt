@@ -1,0 +1,2 @@
+MutationReturnReplaceArgCommand#org.apache.commons.math.analysis.ComposableFunction#lines 306-306#[return f.value(ComposableFunction.this.value(x));
+]
