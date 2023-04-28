@@ -36,6 +36,11 @@ public class ProjectExecutor extends Executor {
         this.microbatConfig = microbatConfig;
     }
 
+    public ProjectExecutor(MicrobatConfig microbatConfig, ProjectConfig proj, boolean compiled) {
+        this(microbatConfig, proj);
+        this.compiled = compiled;
+    }
+
     private static List<File> walk(File start) {
         File[] list = start.listFiles();
         if (list == null) {
@@ -57,7 +62,7 @@ public class ProjectExecutor extends Executor {
     }
 
     public ProjectExecutor setMicrobatConfig(MicrobatConfig microbatConfig) {
-        return new ProjectExecutor(microbatConfig, projectConfig);
+        return new ProjectExecutor(microbatConfig, projectConfig, compiled);
     }
 
     /**
