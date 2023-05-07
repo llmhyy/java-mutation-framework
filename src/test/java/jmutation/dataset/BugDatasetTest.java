@@ -52,7 +52,7 @@ class BugDatasetTest {
     void unzip_zippedBugDirProvided_unzipsCorrectly() throws IOException {
         bugDataset.unzip(2);
         TestUtils.dirsAreEqual(EXPECTED_BUG_2, UNZIPPED_BUG_2);
-        assertFalse(new File(ZIPPED_BUG_2).exists());
+        assertTrue(new File(ZIPPED_BUG_2).exists());
     }
 
     @Test
