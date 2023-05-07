@@ -154,7 +154,6 @@ public class BugDataset {
     public void unzip(int bugId) throws IOException {
         String pathToBug = pathConfig.getBugPath(projectName, Integer.toString(bugId));
         Zipper.unzip(pathToBug + ".zip", pathConfig.getRepoPath() + File.separator + projectName);
-        new File(pathToBug + ".zip").delete();
     }
 
     public BugData getData(int bugId) throws IOException {
